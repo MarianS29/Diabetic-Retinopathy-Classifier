@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex teza"] 1776149063.84138 "teza.aux" "teza.bbl" "teza" 1776149065.27402 0
+["bibtex teza"] 1776149063.84138 "teza.aux" "teza.bbl" "teza" 1776149127.31869 0
   "./referinte.bib" 1776148935 812 a6dd007e08634473f8865b953d69fd7d ""
   "C:/Users/maria/AppData/Local/Programs/MiKTeX/bibtex/bst/bibtex/unsrt.bst" 1291864736 18030 1376b4b231b50c66211e47e42eda2875 ""
-  "teza.aux" 1776149064 2338 ce155f3078a92f1eedbc13584d8405ef "pdflatex"
+  "teza.aux" 1776149126 2338 ce155f3078a92f1eedbc13584d8405ef "pdflatex"
   (generated)
   "teza.bbl"
   "teza.blg"
   (rewritten before read)
-["pdflatex"] 1776149064.05889 "b:/Projects/Disertatie/Diabetic-Retinopathy-Classifier/Latex/template_teza/teza.tex" "teza.pdf" "teza" 1776149065.27446 0
+["pdflatex"] 1776149126.09688 "b:/Projects/Disertatie/Diabetic-Retinopathy-Classifier/Latex/template_teza/teza.tex" "teza.pdf" "teza" 1776149127.31918 0
   "C:/Users/maria/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1776007948 80909 eab91d9745dd2edfd62a31d53cd5fe15 ""
   "C:/Users/maria/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm1200.pk" 1776008711 14064 5c2d8297be24ab2aa86720af6585ae5a ""
   "C:/Users/maria/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1776007839 13333849 2d1c7bfb15daabd9b4436a6f4abf8cdc ""
@@ -108,16 +108,16 @@
   "C:/Users/maria/AppData/Local/Programs/MiKTeX/tex/latex/ucs/utf8x.def" 1700127473 8944 e3433baec74c4b7b278c6b6a547ff9ec ""
   "C:/Users/maria/AppData/Local/Programs/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "Cod/Cod.m" 1776148935 374 26db57fcd8efa53e0bc78f9670255f7f ""
-  "b:/Projects/Disertatie/Diabetic-Retinopathy-Classifier/Latex/template_teza/teza.tex" 1776149055 20002 8f80ba4d7ed5e9e9a77638cc6a5d949f ""
+  "b:/Projects/Disertatie/Diabetic-Retinopathy-Classifier/Latex/template_teza/teza.tex" 1776149125 20002 6138fee87454854b83ec9f94c92e50f4 ""
   "figuri/punguta.jpg" 1776148935 4990 1016d96e4c7fda8578e8161875b2d0e6 ""
   "teza-upb.cls" 1776148935 25779 de9c5af32ecbfc815def0ddfdb097f3b ""
-  "teza.aux" 1776149064 2338 ce155f3078a92f1eedbc13584d8405ef "pdflatex"
+  "teza.aux" 1776149126 2338 ce155f3078a92f1eedbc13584d8405ef "pdflatex"
   "teza.bbl" 1776149064 353 0d939d358f043fe5ded865400e01a97c "bibtex teza"
-  "teza.lof" 1776149064 147 4b66c02efb58698ad42ca80d3f039d96 "pdflatex"
-  "teza.lot" 1776149064 114 a3366f914ad4a704cbd6c73d8caed661 "pdflatex"
-  "teza.out" 1776149064 1840 b52df1c6f1dce491516cfa17908e0a73 "pdflatex"
-  "teza.tex" 1776149055 20002 8f80ba4d7ed5e9e9a77638cc6a5d949f ""
-  "teza.toc" 1776149064 925 76119b911c37bd391ef426b16884400c "pdflatex"
+  "teza.lof" 1776149126 147 4b66c02efb58698ad42ca80d3f039d96 "pdflatex"
+  "teza.lot" 1776149126 114 a3366f914ad4a704cbd6c73d8caed661 "pdflatex"
+  "teza.out" 1776149126 1840 b52df1c6f1dce491516cfa17908e0a73 "pdflatex"
+  "teza.tex" 1776149125 20002 6138fee87454854b83ec9f94c92e50f4 ""
+  "teza.toc" 1776149126 925 76119b911c37bd391ef426b16884400c "pdflatex"
   (generated)
   "teza.aux"
   "teza.lof"
