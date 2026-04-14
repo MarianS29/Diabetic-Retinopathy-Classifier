@@ -5,47 +5,46 @@ Reallocating 'name_of_file' (item size: 1) to 6 items.
 The style file: unsrt.bst
 Reallocating 'name_of_file' (item size: 1) to 10 items.
 Database file #1: referinte.bib
-Warning--I didn't find a database entry for "TKompressManual"
 Warning--can't use both volume and number fields in 6_wang2021deep
-You've used 11 entries,
+You've used 16 entries,
             1791 wiz_defined-function locations,
-            529 strings with 6373 characters,
-and the built_in function-call counts, 3281 in all, are:
-= -- 265
-> -- 211
-< -- 2
-+ -- 74
-- -- 63
-* -- 291
-:= -- 545
-add.period$ -- 33
-call.type$ -- 11
-change.case$ -- 11
+            561 strings with 7584 characters,
+and the built_in function-call counts, 4821 in all, are:
+= -- 404
+> -- 296
+< -- 3
++ -- 104
+- -- 88
+* -- 419
+:= -- 786
+add.period$ -- 49
+call.type$ -- 16
+change.case$ -- 16
 chr.to.int$ -- 0
-cite$ -- 12
-duplicate$ -- 112
-empty$ -- 276
-format.name$ -- 63
-if$ -- 690
+cite$ -- 17
+duplicate$ -- 169
+empty$ -- 411
+format.name$ -- 88
+if$ -- 1026
 int.to.chr$ -- 0
-int.to.str$ -- 11
-missing$ -- 11
-newline$ -- 58
-num.names$ -- 11
-pop$ -- 14
+int.to.str$ -- 16
+missing$ -- 16
+newline$ -- 83
+num.names$ -- 16
+pop$ -- 24
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 51
+skip$ -- 77
 stack$ -- 0
-substring$ -- 271
-swap$ -- 25
-text.length$ -- 2
+substring$ -- 409
+swap$ -- 40
+text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 1
-while$ -- 29
-width$ -- 13
-write$ -- 124
-(There were 2 warnings)
+while$ -- 45
+width$ -- 18
+write$ -- 180
+(There was 1 warning)

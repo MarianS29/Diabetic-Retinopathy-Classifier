@@ -1,5 +1,20 @@
 \begin{thebibliography}{10}
 
+\bibitem{3_gulshan2016development}
+Varun Gulshan, Lily Peng, Marc Coram, Martin~C Stumpe, Derek Wu, Arunachalam
+  Narayanaswamy, Subhashini Venugopalan, Kasumi Widner, Tom Madams, Jorge
+  Cuadros, et~al.
+\newblock Development and validation of a deep learning algorithm for detection
+  of diabetic retinopathy in retinal fundus photographs.
+\newblock {\em jama}, 316(22):2402--2410, 2016.
+
+\bibitem{10_jabbar2022transfer}
+Muhammad~Kashif Jabbar, Jianzhuo Yan, Hongxia Xu, Zaka Ur~Rehman, and Ayesha
+  Jabbar.
+\newblock Transfer learning-based model for diabetic retinopathy diagnosis
+  using retinal images.
+\newblock {\em Brain Sciences}, 12(5):535, 2022.
+
 \bibitem{6_wang2021deep}
 Xiaofei Wang, Mai Xu, Jicong Zhang, Lai Jiang, and Liu Li.
 \newblock Deep multi-task learning for diabetic retinopathy grading in fundus
@@ -7,12 +22,37 @@ Xiaofei Wang, Mai Xu, Jicong Zhang, Lai Jiang, and Liu Li.
 \newblock In {\em Proceedings of the AAAI conference on artificial
   intelligence}, volume~35, pages 2826--2834, 2021.
 
+\bibitem{12_sambyal2020modified}
+Nitigya Sambyal, Poonam Saini, Rupali Syal, and Varun Gupta.
+\newblock Modified u-net architecture for semantic segmentation of diabetic
+  retinopathy images.
+\newblock {\em Biocybernetics and Biomedical Engineering}, 40(3):1094--1109,
+  2020.
+
+\bibitem{7_huang2022rtnet}
+Shiqi Huang, Jianan Li, Yuze Xiao, Ning Shen, and Tingfa Xu.
+\newblock Rtnet: relation transformer network for diabetic retinopathy
+  multi-lesion segmentation.
+\newblock {\em IEEE Transactions on Medical Imaging}, 41(6):1596--1607, 2022.
+
 \bibitem{11_shakibania2024dual}
 Hossein Shakibania, Sina Raoufi, Behnam Pourafkham, Hassan Khotanlou, and
   Muharram Mansoorizadeh.
 \newblock Dual branch deep learning network for detection and stage grading of
   diabetic retinopathy.
 \newblock {\em Biomedical Signal Processing and Control}, 93:106168, 2024.
+
+\bibitem{9_chetoui2020explainable}
+Mohamed Chetoui and Moulay~A Akhloufi.
+\newblock Explainable end-to-end deep learning for diabetic retinopathy
+  detection across multiple datasets.
+\newblock {\em Journal of Medical Imaging}, 7(4):044503--044503, 2020.
+
+\bibitem{8_zhang2022multi}
+Guanghua Zhang, Bin Sun, Zhaoxia Zhang, Jing Pan, Weihua Yang, and Yunfang Liu.
+\newblock Multi-model domain adaptation for diabetic retinopathy
+  classification.
+\newblock {\em Frontiers in Physiology}, 13:918929, 2022.
 
 \bibitem{13_staal2004ridge}
 Joes Staal, Michael~D Abr{\`a}moff, Meindert Niemeijer, Max~A Viergever, and
@@ -26,44 +66,11 @@ Akara Sopharak, Bunyarit Uyyanonvara, and Sarah Barman.
   retinal images using fuzzy c-means clustering.
 \newblock {\em sensors}, 9(3):2148--2161, 2009.
 
-\bibitem{3_gulshan2016development}
-Varun Gulshan, Lily Peng, Marc Coram, Martin~C Stumpe, Derek Wu, Arunachalam
-  Narayanaswamy, Subhashini Venugopalan, Kasumi Widner, Tom Madams, Jorge
-  Cuadros, et~al.
-\newblock Development and validation of a deep learning algorithm for detection
-  of diabetic retinopathy in retinal fundus photographs.
-\newblock {\em jama}, 316(22):2402--2410, 2016.
-
 \bibitem{4_pratt2016convolutional}
 Harry Pratt, Frans Coenen, Deborah~M Broadbent, Simon~P Harding, and Yalin
   Zheng.
 \newblock Convolutional neural networks for diabetic retinopathy.
 \newblock {\em Procedia computer science}, 90:200--205, 2016.
-
-\bibitem{9_chetoui2020explainable}
-Mohamed Chetoui and Moulay~A Akhloufi.
-\newblock Explainable end-to-end deep learning for diabetic retinopathy
-  detection across multiple datasets.
-\newblock {\em Journal of Medical Imaging}, 7(4):044503--044503, 2020.
-
-\bibitem{7_huang2022rtnet}
-Shiqi Huang, Jianan Li, Yuze Xiao, Ning Shen, and Tingfa Xu.
-\newblock Rtnet: relation transformer network for diabetic retinopathy
-  multi-lesion segmentation.
-\newblock {\em IEEE Transactions on Medical Imaging}, 41(6):1596--1607, 2022.
-
-\bibitem{8_zhang2022multi}
-Guanghua Zhang, Bin Sun, Zhaoxia Zhang, Jing Pan, Weihua Yang, and Yunfang Liu.
-\newblock Multi-model domain adaptation for diabetic retinopathy
-  classification.
-\newblock {\em Frontiers in Physiology}, 13:918929, 2022.
-
-\bibitem{10_jabbar2022transfer}
-Muhammad~Kashif Jabbar, Jianzhuo Yan, Hongxia Xu, Zaka Ur~Rehman, and Ayesha
-  Jabbar.
-\newblock Transfer learning-based model for diabetic retinopathy diagnosis
-  using retinal images.
-\newblock {\em Brain Sciences}, 12(5):535, 2022.
 
 \bibitem{14_liu2022deepdrid}
 Ruhan Liu, Xiangning Wang, Qiang Wu, Ling Dai, Xi~Fang, Tao Yan, Jaemin Son,
@@ -71,5 +78,31 @@ Ruhan Liu, Xiangning Wang, Qiang Wu, Ling Dai, Xi~Fang, Tao Yan, Jaemin Son,
 \newblock Deepdrid: Diabetic retinopathy—grading and image quality estimation
   challenge.
 \newblock {\em Patterns}, 3(6), 2022.
+
+\bibitem{15_li2019diagnostic}
+Tao Li, Yingqi Gao, Kai Wang, Song Guo, Hanruo Liu, and Hong Kang.
+\newblock Diagnostic assessment of deep learning algorithms for diabetic
+  retinopathy screening.
+\newblock {\em Information Sciences}, 501:511--522, 2019.
+
+\bibitem{1_niemeijer2005automatic}
+Meindert Niemeijer, Bram Van~Ginneken, Joes Staal, Maria~SA Suttorp-Schulten,
+  and Michael~D Abr{\`a}moff.
+\newblock Automatic detection of red lesions in digital color fundus
+  photographs.
+\newblock {\em IEEE Transactions on medical imaging}, 24(5):584--592, 2005.
+
+\bibitem{16_giancardo2012exudate}
+Luca Giancardo, Fabrice Meriaudeau, Thomas~P Karnowski, Yaqin Li, Seema Garg,
+  Kenneth~W Tobin~Jr, and Edward Chaum.
+\newblock Exudate-based diabetic macular edema detection in fundus images using
+  publicly available datasets.
+\newblock {\em Medical image analysis}, 16(1):216--226, 2012.
+
+\bibitem{5_ronneberger2015u}
+Olaf Ronneberger, Philipp Fischer, and Thomas Brox.
+\newblock U-net: Convolutional networks for biomedical image segmentation.
+\newblock In {\em International Conference on Medical image computing and
+  computer-assisted intervention}, pages 234--241. Springer, 2015.
 
 \end{thebibliography}

@@ -105,6 +105,9 @@
   SOTA = State of the Art\\
   Deep DRiD = Deep Diabetic Retinopathy Image Dataset\\
   UoA-DR = University of Auckland Diabetic Retinopathy\\
+  IDRiD = Indian Diabetic Retinopathy Image Dataset\\
+  DDR = Dataset of Diabetic Retinopathy\\
+  DRIVE = Digital Retinal Images for Vessel Extraction\\
 }
 %\preface{}
 \afterpreface
@@ -239,221 +242,458 @@ evaluarea obiectivă a algoritmilor.
 \begin{itemize}
   \item \textbf{Seturi de referință pentru clasificarea globală (“Grading”)}
   
-        \begin{itemize}
-            \item \textbf{EyePACS} (Kaggle Diabetic Retinopathy Detection) \cite{3_gulshan2016development}, \cite{9_chetoui2020explainable} rămâne cea mai 
-                  vastă resursă publică disponibilă, conținând aproximativ 88.702 de imagini. Importanța sa strategică constă în eterogenitatea
-                  extremă a imaginilor (variații de expunere, focalizare, artefacte), fiind critic pentru antrenarea unor
-                  rețele backbone robuste capabile să gestioneze fenomenul de “domain shift” \cite{8_zhang2022multi} și să generalizeze pe
-                  imagini de calitate slabă
+      \begin{itemize}
+          \item \textbf{EyePACS} (Kaggle Diabetic Retinopathy Detection) \cite{3_gulshan2016development}, \cite{9_chetoui2020explainable} rămâne cea mai 
+                vastă resursă publică disponibilă, conținând aproximativ 88.702 de imagini. Importanța sa strategică constă în eterogenitatea
+                extremă a imaginilor (variații de expunere, focalizare, artefacte), fiind critic pentru antrenarea unor
+                rețele backbone robuste capabile să gestioneze fenomenul de “domain shift” \cite{8_zhang2022multi} și să generalizeze pe
+                imagini de calitate slabă
 
-            \item \textbf{APTOS 2019} Blindness Detection \cite{9_chetoui2020explainable} reprezintă standardul modern de calitate. Colectat de Aravind Eye
-                  Hospital, acest set de 3.662 de imagini este utilizat frecvent în literatura recentă pentru “fine-tuning”,
-                  oferind o vizibilitate superioară a detaliilor retiniene comparativ cu seturile mai vechi
+          \item \textbf{APTOS 2019} Blindness Detection \cite{9_chetoui2020explainable} reprezintă standardul modern de calitate. Colectat de Aravind Eye
+                Hospital, acest set de 3.662 de imagini este utilizat frecvent în literatura recentă pentru “fine-tuning”,
+                oferind o vizibilitate superioară a detaliilor retiniene comparativ cu seturile mai vechi
 
-            \item \textbf{MESSIDOR-2} \cite{9_chetoui2020explainable} este considerat în prezent „Benchmark-ul de Aur” pentru testarea algoritmilor.
-                  Extinzând setul original Messidor la 1.748 de imagini, acesta se distinge prin consistența diagnostică și
-                  este utilizat ca domeniu țintă (Target Domain) în studiile de adaptare \cite{8_zhang2022multi} și pentru validarea sistemelor
-                  explicabile (XAI) \cite{9_chetoui2020explainable}, oferind o metrică fidelă a performanței reale pe date curate.
+          \item \textbf{MESSIDOR-2} \cite{9_chetoui2020explainable} este considerat în prezent „Benchmark-ul de Aur” pentru testarea algoritmilor.
+                Extinzând setul original Messidor la 1.748 de imagini, acesta se distinge prin consistența diagnostică și
+                este utilizat ca domeniu țintă (Target Domain) în studiile de adaptare \cite{8_zhang2022multi} și pentru validarea sistemelor
+                explicabile (XAI) \cite{9_chetoui2020explainable}, oferind o metrică fidelă a performanței reale pe date curate.
 
-            \item \textbf{DeepDRiD} \cite{14_liu2022deepdrid} aduce o inovație necesară prin structurarea
-                  celor 2.000 de imagini în perechi binoculare și includerea notelor de calitate, simulând fluxul de triaj
-                  clinic.
+          \item \textbf{DeepDRiD} \cite{14_liu2022deepdrid} aduce o inovație necesară prin structurarea
+                celor 2.000 de imagini în perechi binoculare și includerea notelor de calitate, simulând fluxul de triaj
+                clinic.
 
-            \item \textbf{UoA-DR} \cite{9_chetoui2020explainable} este o resursă istorică (~200 imagini), utilizată
-                  complementar în studiile comparative pentru a asigura diversitatea demografică a validării.
-        \end{itemize}
+          \item \textbf{UoA-DR} \cite{9_chetoui2020explainable} este o resursă istorică (~200 imagini), utilizată
+                complementar în studiile comparative pentru a asigura diversitatea demografică a validării.
+      \end{itemize}
 
   \item \textbf{Seturi specializate pentru segmentarea leziunilor și analiza detaliată}
 
-        \begin{itemize}
-          \item 
-        \end{itemize}
+      \begin{itemize}
+        \item \textbf{IDRiD} \cite{9_chetoui2020explainable} este setul critic pentru sarcinile de segmentare
+              semantică fină \cite{7_huang2022rtnet}. Pentru 81 dintre imagini, experții au trasat manual măști binare la nivel de pixel,
+              făcându-l indispensabil pentru antrenarea arhitecturilor complexe de tip Transformer și pentru validarea
+              localizării leziunilor în sistemele end-to-end \cite{9_chetoui2020explainable}.
 
-  \item 
+        \item \textbf{DDR} \cite{15_li2019diagnostic} a revoluționat segmentarea pe scară largă, oferind 13.673 de
+              imagini. Este esențial pentru antrenarea rețelelor adânci de segmentare (precum RTNet) fără a risca
+              “overfitting-ul”, oferind adnotări “pixel-wise” pentru leziuni multiple \cite{7_huang2022rtnet}.
+
+        \item \textbf{E-Ophtha} \cite{9_chetoui2020explainable} este o bază de date vitală pentru reducerea alarmelor false în metodele de detecție a
+              exudatelor \cite{2_sopharak2009automatic}. Valoarea sa unică constă în includerea imaginilor cu patologii non-diabetice care pot fi
+              confundate cu DR
+
+        \item DiaRetDB1 \cite{9_chetoui2020explainable} este standardul istoric pentru calibrarea sensibilității la leziuni roșii (microanevrisme) în
+              lucrările de detecție automată \cite{1_niemeijer2005automatic}. Complementar, HEI-MED \cite{16_giancardo2012exudate} oferă 169 de imagini focalizate exclusiv
+              pe segmentarea zonelor de Edem Macular Diabetic.
+
+        \begin{figure}[h]
+        \centering
+        \includegraphics[width=1\columnwidth]{Figuri/Fig1_Eye-fundus-examples.png}
+        \captionsetup{justification=centering}
+        \caption{Exemple de imagini ale fundului de ochi în seturile de date DIARETDB0 și DIARETDB1 \cite{9_chetoui2020explainable}}
+        \label{fig: Examples-fundus-eyes}
+        \end{figure}
+
+      \end{itemize}
+
+  \item \textbf{Seturi standard pentru preprocesarea vasculară}
+  
+        \begin{itemize}
+          \item \textbf{DRIVE} \cite{13_staal2004ridge} și STARE \cite{9_chetoui2020explainable} sunt pilonii etapei de preprocesare.
+                Deși conțin un număr redus de imagini, ele sunt utilizate obligatoriu pentru validarea algoritmilor de
+                segmentare a vaselor de sânge, cum ar fi arhitecturile U-Net modificate \cite{12_sambyal2020modified} sau metodele clasice de
+                extragere a trăsăturilor \cite{1_niemeijer2005automatic}.
+
+                Tabelul de mai jos sintetizează caracteristicile tehnice esențiale ale seturilor de date analizate,
+                evidențiind diferențele de volum, rezoluție și tipul de adnotare disponibil, elemente care dictează
+                utilizarea lor în diversele etape ale proiectului.
+
+            \begin{figure}[h]
+            \centering
+            \includegraphics[width=0.75\columnwidth]{Figuri/Tabel1_Datasets_diff.png}
+            \caption{Tabel comparativ intre seturile de date disponibile}
+            \label{fig: table-datasets}
+            \end{figure}
+
+        \end{itemize}
 \end{itemize}
 
-\section{Module dedicate}
-\subsection{Timer}
-\subsection{UART}
-\subsection{SPI}
-\subsection{GPIO}
-\subsection{AXI RAM}
-\section{Modulul de top și instanțierea SoC-ului}
-\section{Logica de test și integrarea EDT}
+\section{Metoda bazată pe arhitectura Inception-V3 \cite{3_gulshan2016development}}
 
-\chapter{Metodologie și implementare}
-\section{Sinteza circuitului}
-\subsection{introducerea logicii DFT (lanuturi de SCAN)}
-\subsection{Importarea librariilor si optimizare}
-\section{Generarea vectorilor de test pentru defecte STUCK-AT și TRANSITION}
-\subsection{Cazul fără EDT (fastscan)}
-\subsection{Cazul cu EDT (variante cu 30, 40, 50, 60 de lanturi de SCAN)}
-\section{Regenerarea EDT-ului și crearea netlist-ului pentru modulul de top}
-\section{Simularea vectorilor de test și generarea testbench-ului}
-\section{Etapa de diagnoză}
+\ \ \ \ Studiul realizat de Gulshan et al. \cite{3_gulshan2016development} este considerat un reper major în literatura de specialitate,
+marcând una dintre primele validări clinice riguroase ale utilizării rețelelor neuronale convoluționale
+pentru screening-ul automat al retinopatiei diabetice. Lucrarea demonstrează că un sistem de deep
+learning poate atinge și chiar depăși performanța medie a medicilor oftalmologi în detectarea
+retinopatiei diabetice, contribuind decisiv la acceptarea inteligenței artificiale în aplicații medicale reale
+\cite{3_gulshan2016development}.
+\bigskip
 
-\chapter{Rezultate și discuții (ATPG)}
-\section{Criterii de performanță ale sistemului pentru diferite variante de test (non-EDT vs EDT-30/40/50/60 chains)}
-\ \ \ \ În acest capitol se vor sintetiza toate informațiile discutate la capitolele anterioare, atât despre sinteză cât și pe partea de generare de vectori de test pentru toate cazurile, și se vor analiza și discuta rezultatele obținute, făcându-se o comparație obiectivă.
-Următoarea figură prezintă toate rezultatele comprimate într-un tabel cu metrici de performanță.
+Arhitectura utilizată este Inception-v3, o rețea convoluțională profundă caracterizată prin
+utilizarea modulelor Inception, care combină în paralel convoluții de dimensiuni diferite (1×1, 3×3, 5×5)
+și operații de pooling. Această strategie permite captarea informațiilor la multiple scări spațiale și reduce
+costul computațional prin utilizarea convoluțiilor 1×1 pentru diminuarea dimensionalității. Datorită
+acestei structuri, modelul este capabil să învețe reprezentări vizuale complexe, esențiale pentru
+identificarea leziunilor subtile specifice retinopatiei diabetice.
+\bigskip
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=1\columnwidth]{Figuri/Overview_ATPG.jpeg}
-  \caption{Tabelul cu metrici de evaluare pentru generarea patternurilor de test}
-  \label{fig: Overview_ATPG}
+Modelul a fost antrenat pe un set de date extins, alcătuit din peste 128.000 de imagini fundus
+color, etichetate independent de mai mulți medici oftalmologi certificați în 2015. Utilizarea consensului
+între experți a contribuit la reducerea subiectivității etichetelor și la creșterea fiabilității procesului de
+antrenare. Sarcina principală a rețelei a fost clasificarea imaginilor în funcție de prezența sau absența
+retinopatiei diabetice referabile, conform standardelor clinice acceptate internațional \cite{3_gulshan2016development}.
+\bigskip
+
+Preprocesarea imaginilor a inclus decuparea automată a regiunii retiniene, redimensionarea la o
+rezoluție compatibilă cu Inception-v3 și normalizarea intensității pixelilor. În plus, au fost aplicate tehnici
+extensive de augmentare a datelor, precum rotații, translații și ajustări de luminozitate și contrast, pentru
+a îmbunătăți generalizarea și a reduce supraînvățarea \cite{3_gulshan2016development} \cite{10_jabbar2022transfer}.
+\bigskip
+
+Evaluarea performanței a fost realizată pe seturile de date EyePACS-1 și Messidor-2 \cite{9_chetoui2020explainable}, unde modelul a
+obținut o arie sub curba ROC (AUC) de aproximativ 0.99 pentru detectarea retinopatiei diabetice
+referabile, cu valori ridicate de sensibilitate, comparabile cu performanța medicilor oftalmologi
+experimentați \cite{3_gulshan2016development} \cite{4_pratt2016convolutional}.
+
+\section{“Transfer Learning” pentru diagnosticul retinopatiei diabetice \cite{10_jabbar2022transfer}}
+
+\ \ \ \ Lucrarea propusă de Jabbar et al. \cite{10_jabbar2022transfer} abordează problema diagnosticului automat al
+retinopatiei diabetice dintr-o perspectivă practică, concentrându-se pe utilizarea tehnicilor de “transfer
+learning” pentru a compensa limitările impuse de dimensiunea redusă a seturilor de date medicale
+etichetate. Studiul evidențiază faptul că modelele CNN pre-antrenate pe seturi de date generale de mari
+dimensiuni, precum ImageNet, pot fi adaptate eficient pentru analiza imaginilor fundus, obținând
+performanțe competitive cu un cost de antrenare semnificativ redus \cite{10_jabbar2022transfer}.
+\bigskip
+
+Autorii investighează mai multe arhitecturi consacrate de rețele neuronale convoluționale,
+printre care VGG16, VGG19, ResNet50, Inception-v3 și DenseNet, utilizate ca extractoare de
+caracteristici. Strategia de transfer learning constă în inițializarea rețelelor cu ponderi pre-antrenate,
+urmată de ajustarea straturilor superioare pentru sarcina specifică de clasificare a retinopatiei diabetice.
+În unele experimente, straturile convoluționale inferioare sunt înghețate pentru a preveni
+supraînvățarea, în timp ce în altele este aplicat “fine-tuning” progresiv pentru a îmbunătăți adaptarea la
+domeniul imagisticii medicale. Una din abordările propuse poate fi observată în figura următoare.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\columnwidth]{Figuri/Recommended_framework.png}
+\captionsetup{justification=centering}
+\caption{Framework propus pentru detectarea și clasificarea retinopatiei diabetice \cite{10_jabbar2022transfer}}
+\label{fig: recommended-framework}
 \end{figure}
 
-Rezultatele s-au obținut pe urma simulărilor de generare de vectori de test pentru ATPG normal, respectiv pentru ATPG folosindu-se EDT cu 30,40,50 sau 60 de lanțuri de scan, aceste simulări realizându-se pentru a detecta defecte de tip stuck-at și transition.
+\bigskip
 
-În continuare se va lua pe rând fiecare metrică și se va explica utilitatea acesteia și rezultatele ei.
+Seturile de date utilizate includ imagini fundus publice din Kaggle EyePACS \cite{9_chetoui2020explainable}, preprocesate prin
+redimensionare, normalizare și augmentare extensivă a datelor. Tehnicile de augmentare, precum
+rotațiile, flip-urile orizontale și ajustările de luminozitate, joacă un rol central în creșterea diversității
+artificiale a datelor și în îmbunătățirea capacității de generalizare a modelelor. Această etapă este
+esențială în contextul “transfer learning-ului”, unde diferențele de distribuție dintre datele naturale și
+imaginile medicale pot afecta performanța rețelelor \cite{10_jabbar2022transfer}.
+\bigskip
 
-\subsection{Patternuri de test}
-\ \ \ \ După cum se poate observa, în cazul ATPG-ului normal s-au generat 883 de vectori de test (acest număr nu se poate anticipa), în timp ce, integrând modulul de EDT, crește considerabil numărul de vectori de test generați. Acest lucru se întâmplă din următoarele cauze:
-\begin{itemize}
+Evaluarea performanței este realizată folosind metrici standard, precum acuratețea,
+sensibilitatea, specificitatea și scorul F1, permițând o comparație riguroasă între diferitele arhitecturi
+analizate. Rezultatele experimentale indică faptul că modelele bazate pe DenseNet și ResNet obțin
+performanțe superioare față de arhitecturile mai vechi, confirmând avantajele reutilizării caracteristicilor
+vizuale generale în sarcini medicale specializate. Studiul subliniază că transfer learning-ul reprezintă o
+soluție viabilă și eficientă pentru implementarea rapidă a sistemelor automate de screening în contexte
+cu resurse limitate \cite{10_jabbar2022transfer}.
 
-  \item EDT-ul, așa cum se specifică și în denumirea acestuia, se concentrează pe metode deterministice de generare de vectori de test care vizează defecte și modele de defecte specifice. Acestea sunt mai eficiente decât metodele aleatoare, dar tind să genereze un număr mai mare de vectori de test.
-  \item EDT-ul este conceput să detecteze defecte greu de detectat cu medote de ATPG tradiționale, realizând acest lucru prin adăugarea de logică de test suplimentară în circuit pentru a crește observabilitatea și controlabilitatea nodurilor interne. Acest lucru necesită mai multe patternuri de test pentru un test-coverage cât mai mare.
-  \item Diferența în numărul de lanțuri de scan.
+\section{“Multi-task Learning” pentru gradarea retinopatiei diabetice \cite{6_wang2021deep}}
 
-        În cazul fără EDT există un singur lanț de scan, în timp ce, adăugând modulul de EDT, se pot configura mai multe lanțuri de scan prin care datele se deplasează în paralel, ajungând la mai multe patternuri de test.
+\ \ \ \ Lucrarea propusă de Wang et al. \cite{6_wang2021deep} introduce o abordare de tip “deep multi-task learning”
+pentru gradarea automată a retinopatiei diabetice, având ca obiectiv principal exploatarea relației clinice
+dintre severitatea bolii și prezența leziunilor retiniene specifice. Spre deosebire de metodele clasice de
+clasificare “single-task”, autorii demonstrează că învățarea simultană a mai multor sarcini corelate clinic
+conduce la reprezentări vizuale mai discriminative și la performanțe superioare în sarcina principală de
+gradare \cite{6_wang2021deep}.
+\bigskip
 
-\end{itemize}
+Arhitectura propusă este alcătuită dintr-un backbone convoluțional comun, bazat pe o rețea CNN
+profundă (ResNet18), utilizat pentru extracția caracteristicilor globale din imaginile fundus. Peste acest
+extractor comun sunt construite mai multe ramuri specializate (task-specific branches), fiecare 
+corespunzătoare unei sarcini distincte. Sarcina principală constă în clasificarea severității retinopatiei
+diabetice în mai multe stadii, în timp ce sarcinile auxiliare vizează detectarea prezenței diferitelor tipuri
+de leziuni, precum microanevrismele, exudatele dure, exudatele moi și hemoragiile, considerate
+“markeri” clinici relevanți ai progresiei bolii \cite{6_wang2021deep}.
+\bigskip
 
-De asemenea, numărul de vectori de test se mărește și în cazul în care se crește numărul lanțurilor de scan pentru EDT. Cu cât numărul acestora este mai mare, cu atât scade gradual lungimea fiecărui lanț de scan și numărul de flip-flopi prin care circulă datele este distribuit mai multor lanțuri, ceea ce produce efectulul descris.
+Un element central al arhitecturii îl reprezintă mecanismul de partajare controlată a
+caracteristicilor între sarcini. În locul unei separări rigide între ramuri, modelul permite propagarea
+informației relevante între sarcina de gradare și cele de detecție a leziunilor, încurajând învățarea unor
+reprezentări comune sensibile la semnalele patologice fine. Funcția de pierdere globală este definită ca o
+combinație ponderată a pierderilor individuale asociate fiecărei sarcini:
 
-Cât despre tipul de defect, există câteva motive principale de ce este nevoie de un număr mult mai mare de vectori de test pentru a detecta defecte de tip transition decât cele de tip stuck-at:
-\begin{itemize}
-  \item \textbf{Propagarea defectului}: Defectele de tranziție au nevoie ca vectorul de test respectiv să poată propaga efectul până într-un punct observabil din circuit fără a se pierde între timp, în comparație cu defectele stuck-at care doar blochează intrarea sau ieșirea unei porți la o valoare fixă.
-  \item \textbf{Considerente de sincronizare}: Defectele transition sunt mult mai sensibile la sincronizarea tranziției semnalelor de la o valoare în alta, ceea ce conduce la mai mulți vectori de test pentru a putea capta timpii necesari detectării defectului.
-\end{itemize}
+$$L_{isr} = \lambda_{img} \cdot L_{img\_isr} + \lambda_{tv} \cdot L_{tv\_isr} + \lambda_{sa} \cdot L_{seg\text{-}aware} + \lambda_{ca} \cdot L_{cls\text{-}aware}$$
+\bigskip
 
-\subsection{Ciclii de shiftare}
-\ \ \ \ Un ciclu de shiftare reprezintă o deplasare a datelor cu o poziție în lanțul de scan corespunzător. Cum în cazul ATPG normal este prezent un singur lanț de scan, numărul cicliilor este egal cu dimensiunea lanțului respectiv deoarece datele circulă prin toți flip-flopii de scan înainte să fie măsurați la ieșire.
+,unde $\lambda_{img}$, $\lambda_{tv}$, $\lambda_{sa}$ și $\lambda_{ca}$ sunt hiperparametri care controlează 
+contribuția pierderilor ``intra-task'', ``segmentation-aware'' și ``classification-aware''. Această formulare permite echilibrarea
+influenței fiecărei sarcini și stabilizează procesul de optimizare \cite{6_wang2021deep}.
 
-În restul cazurilor (EDT), numărul total de celule de scan se împarte la numărul scan chain-urilor și se obține numărul de ciclii de ceas pentru un lanț de scan, datele circulând în paralel.
-Exemplu pentru EDT cu 30 de lanțuri de scan:
-\[ \text{ciclii shiftare} = \frac{\text{număr total de celule de scan}}{\text{număr lanțuri de scan}} = \frac{5548}{30} = 185 \]
+Modelul este antrenat și evaluat pe seturi de date publice de imagini fundus etichetate (DDR
+\cite{15_li2019diagnostic} si EyePACS \cite{9_chetoui2020explainable}) atât cu stadiul retinopatiei diabetice, cât și cu adnotări la nivel de imagine privind
+prezența leziunilor. Imaginile sunt supuse unor etape standard de preprocesare, incluzând decuparea
+regiunii retiniene, redimensionarea și augmentarea datelor, pentru a reduce variațiile de iluminare și
+pentru a îmbunătăți capacitatea de generalizare. Prin includerea sarcinilor auxiliare, modelul beneficiază
+de un efect de regularizare implicită, reducând riscul de supraînvățare, aspect observat și în lucrările
+anterioare bazate pe CNN-uri “single-task” \cite{3_gulshan2016development}, \cite{4_pratt2016convolutional}.
+\bigskip
 
-Tipul de defect nu afectează acest număr deoarece logica de testare din interiorul modulului principal nu se modifică.
+Rezultatele experimentale raportate în articol indică îmbunătățiri consistente ale performanței
+față de modelele “single-task”, atât în termeni de acuratețe, cât și de scor F1 pentru sarcina de gradare a
+retinopatiei diabetice. În plus, autorii evidențiază o creștere a stabilității predicțiilor și o sensibilitate mai
+bună la stadiile intermediare ale bolii, considerate dificil de clasificat. Aceste rezultate confirmă faptul că
+integrarea informațiilor despre leziuni în procesul de antrenare contribuie direct la o evaluare mai
+precisă a severității retinopatiei diabetice și validează eficiența paradigmei “multi-task learning” în
+context clinic \cite{6_wang2021deep}.
+\bigskip
 
-\subsection{EDT Offset}
-\ \ \ \ Din perspectiva ATE-ului, design-ul prezintă un singur lanț de scan care circulă prin intrarea edt\_channels\_in înainte să intre în decompresor.
+\section{Analiza arhitecturii “Modified U-Net” pentru segmentarea semantică \cite{12_sambyal2020modified}}
 
-Acest aspect se întamplă doar în cazul EDT-ului, iar fiecare pattern necesită un număr de ciclii de shiftare adiționali care se adună la numărul de patternuri din fiecare lanț calculat la punctul anterior.
+\ \ \ \ Segmentarea semantică a structurilor retiniene, în special a rețelei vasculare și a leziunilor
+asociate retinopatiei diabetice, reprezintă o etapă critică în diagnosticarea automată, deoarece
+modificările morfologice ale vaselor de sânge sunt adesea primii indicatori ai bolii. Deși arhitectura UNet, introdusă inițial de Ronneberger 
+et al. \cite{5_ronneberger2015u} pentru segmentarea biomedicală, a devenit standardul de
+aur în domeniu datorită structurii sale simetrice de tip “encoder-decoder”, aceasta prezintă limitări în
+detectarea vaselor capilare foarte fine, pierzând informații spațiale esențiale în procesul de subeșantionare.
+\bigskip
 
-Acesti ciclii adiționali provin din modul de funcționare și structura EDT-ului, mai exact din \cite{TKompressManual}:
-\begin{itemize}
-  \item ciclii de initializare
-  \item biții de mascare (dacă se folosește o tehnologie specializată numită Xpress)
-  \item biți de low-power (când se folosește un decompresor de putere scăzută)
-  \item biții de pipeline definiți de utilizator
-\end{itemize}
+În studiul "Modified U-Net architecture for semantic segmentation of diabetic retinopathy
+images", Sambyal et al \cite{12_sambyal2020modified}. propun o optimizare arhitecturală semnificativă pentru a contracara aceste
+deficiențe. Modelul propus, denumit Modified U-Net, păstrează structura în formă de „U” a rețelei
+originale, dar inovează fundamental la nivelul blocurilor de procesare.
+\bigskip
 
-Numărul de ciclii de inițializare se poate calcula cu ajutorul următoarei formule \cite{TKompressManual} :
-\[ \text{număr ciclii de inițializare} =  \ceil{\frac{\text{dimensiunea decompresorului}}{\text{numărul de canale}}}\], unde fracția se rotunjește la valoarea sa superioară.
-De exemplu, dacă avem un design în care decompresorul are dimensiunea de 32 de biți și există 6 canale de scan, iar numărul de celule de scan din fiecare lanț este 870, atunci este nevoie de 6 ciclii de inițializare. Fiecare lanț având 870 de celule și fiecare vector comprimat având nevoie de 6 ciclii de inițializare, rezultă că este nevoie de 876 de deplasări per pattern (nefolosind ceilalți biți).
+Autorii au înlocuit blocurile convoluționale standard cu blocuri reziduale (residual blocks),
+inspirate din arhitecturile de tip ResNet. Această modificare este crucială din punct de vedere tehnic: în
+rețelele adânci, apare frecvent problema dispariției gradientului (vanishing gradient), ceea ce face
+antrenarea dificilă și duce la pierderea detaliilor fine. Prin introducerea conexiunilor reziduale (“skip
+connections” la nivel de bloc), informația originală este propagată mai eficient prin straturi, permițând
+rețelei să învețe caracteristici complexe fără a degrada performanța pe detaliile de finețe, precum
+microanevrismele sau vasele subțiri. Aceste detalii se pot observa și în figura următoare.
 
-Acest număr se adună în continuare celorlalte elemente din lista de mai sus, rezultând astfel numărul total de ciclii de shiftare suplimentari:
-\[\text{ciclii suplimentari} = \text{ciclii de inițializare} + \text{biți de mascare} +\text{biți de low-power} + \text{biți de pipeline}\]
-În cazul nostru, din rapoartele de simulare reiese că exista 26 de ciclii suplimentari, care se vor aduna la lungimea lanțului de scan, rezultând numărul total de ciclii de shiftare.
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\columnwidth]{Figuri/modified-u-net.png}
+\captionsetup{justification=centering}
+\caption{Arhitectura U-net modificată \cite{12_sambyal2020modified}}
+\label{fig: modified-u-net}
+\end{figure}
 
-\subsection{Ciclii totali de shiftare (per pattern)}
-\ \ \ \ Așa cum s-a specificat anterior, numărul de ciclii totali de shiftare reprezintă suma dintre numărul de ciclii propriu-zis și offset-ul de EDT, în cazul ATPG-ului obișnuit acesta este 0.
+\bigskip
 
-\subsection{Ciclii totali de shiftare}
-\ \ \ \ Folosind numărul de ciclii de shift per pattern și numărul total de patternuri de test, putem calcula numărul total de ciclii de shift pentru întreg modulul cu ajutorul următoarei formule:
-\[\textbf{\text{ciclii totali de shift} = \text{ciclii de shift per pattern}}\times \textbf{\text{număr de patternuri}}\]
+Importanța acestei abordări constă în capacitatea de generalizare comparativ cu metodele
+clasice de procesare a imaginii, precum cele bazate pe “clustering fuzzy” propuse anterior de Sopharak et
+al. \cite{2_sopharak2009automatic}. În timp ce metodele de tip “clustering” sunt sensibile la zgomot și la variațiile de iluminare
+(frecvente în imaginile de fund de ochi), arhitectura Modified U-Net demonstrează o robustețe sporită
+prin învățarea contextuală a trăsăturilor
+\bigskip
 
-Cu ajutorul acestei metrici se poate determina dimensiunea memoriei necesare pentru efectuarea simulărilor de generare de patternuri.
+Pentru validarea performanței, metoda a fost testată pe seturile de date publice standardizate
+DRIVE \cite{13_staal2004ridge} și STARE \cite{9_chetoui2020explainable}, recunoscute pentru dificultatea lor în segmentarea vaselor.
 
-\subsection{Timp de testare}
-\ \ \ \ Cum fiecare element din lanțurile de scan reprezintă flip-flipi de scan care sunt celule secvențiale de memorie, acestea functionează în mod sincron cu ceasul sistemului.
-Prin urmare, folosindu-ne de frecvența sistemului putem calcula timpul necesar deplasării datelor prin lanțurile de scan folosind toate patternurile generate.
-Acesta se calculează cu formula:
-\[ \text{timp de testare} = \text{număr total de ciclii} \times \frac{1}{\text{frecvența ceasului de sistem}} \]
+Rezultatele experimentale raportate de Sambyal et al. \cite{12_sambyal2020modified} au indicat o îmbunătățire clară față de
+U-Net-ul standard. Pe setul de date DRIVE, autorii au obținut o acuratețe maximă de 96.94% și o arie de
+sub curba ROC (AUC) de 0.98, valori care plasează metoda în topul soluțiilor de segmentare. Mai mult,
+analiza vizuală a rezultatelor arată o continuitate mult mai bună a vaselor de sânge segmentate și o
+reducere a alarmelor false în zonele cu patologii, demonstrând că integrarea învățării reziduale în
+arhitectura de segmentare este o direcție esențială pentru analiza detaliată a retinopatiei diabetice.
 
-În cazul de față frecvența ceasului de sistem este 100MHz, ceea ce înseamnă că o perioadă de ceas are 0.01 $\mu$s, adică 10 ns.
-De exemplu, pentru cazul cu 30 lanțuri de scan, avem 236.742 ciclii totali, ceea ce înseamnă că timpul total de testare este 2.367.420 ns, aproximativ 2,36 secunde.
+\section{Tranziția către arhitecturi globale: RTNet (Relation Transformer Network) \cite{7_huang2022rtnet}}
 
-De asemenea, având în vedere că datele circulă în paralel prin lanțuri, timpul de testare este mult mai mic în cazul utilizării EDT-ului în comparație cu ATPG normal (20 ori mai mic).
+\ \ \ \ Dacă modelele bazate pe U-Net, precum cel discutat anterior \cite{12_sambyal2020modified}, excelează în capturarea
+detaliilor locale, ele suferă totuși de o limitare inerentă a rețelelor convoluționale: incapacitatea de a
+modela dependențe la distanță mare (long-range dependencies). În patologia retiniană, leziunile nu apar
+izolat; există adesea o corelație spațială între poziția vaselor de sânge și apariția microanevrismelor sau a
+exudatelor. Pentru a adresa această lipsă de „context global”, Huang et al. \cite{7_huang2022rtnet} au propus în 2022 o
+schimbare de paradigmă prin introducerea RTNet (Relation Transformer Network), o arhitectură care
+marchează trecerea către mecanismele de atenție.
+\bigskip
 
-\subsection{Test Coverage}
-\ \ \ \ În contextul design-for-testing (DFT), noțiunea de "test-coverage" se referă la măsura în care un set de teste aplicate unui sistem sau circuit electronic acoperă sau verifică toate părțile și funcționalitățile prevăzute.
-Acoperirea testelor este o metrică importantă a calității procesului de testare și al nivelului de încredere pe care ne putem baza ca sa știm dacă produsul nu mai prezintă defecte dupa ce a fost testat.
-\vspace{0.4cm}
+Inovația centrală a RTNet constă în înlocuirea parțială a operațiilor convoluționale standard cu
+blocuri de tip “Transformer”, denumite Relation Transformer Blocks (RTB). Spre deosebire de CNN-uri
+care „văd” doar o fereastră mică de pixeli la un moment dat, RTB-ul utilizează două mecanisme de
+atenție complementare:
 
-După cum se poate observa din tabel, cu cât numărul de lanțuri de test este mai mare, cu atât test-coverage-ul este mai mic (putem spune că sunt mărimi invers proporționale), deoarece circuitul devine mai puțin controlabil din punct de vedere al testării.
-Cu alte cuvinte, un raport de compresie mai mare duce la mărirea compresiei pentru fiecare pattern de test, dar de asemenea crește și posibilitatea generării de patternuri care nu pot fi comprimate și care duc în final la un test-coverage mai mic.
+\begin{enumerate}
+  \item “Self-Attention” (Atenție proprie): Permite modelului să înțeleagă relațiile dintre leziunile
+        dispersate pe toată suprafața retinei (de exemplu, grupuri de exudate dure care semnalează o
+        zonă de edem).
 
-\subsection{Arie}
-\ \ \ \ Deși nu este o metrică atat de importantă pentru testare precum test-coverage-ul, am vrut să evidențiez 2 aspecte:
-\begin{itemize}
-  \item Logica EDT adaugă o porțiune foarte mică de hardware suplimentar în circuit.
+\item “Cross-Attention” (Atenție încrucișată): Autorii au observat că leziunile vasculare sunt strâns
+      legate de structura vaselor de sânge. Astfel, mecanismul de “cross-attention” folosește harta
+      vaselor de sânge ca un „ghid” pentru a localiza mai precis leziunile fine, transferând informație
+      structurală dinspre ramura vasculară către ramura de detectare a leziunilor.
+\end{enumerate}
+\bigskip
 
-        În acest caz având un modul cu doar 64000 de porți logice, logica suplimentară introdusă este de aproximativ 1\%, însă pentru un chip în curs de testare care prezintă milioane de porți, logica introdusă pentru EDT ajunge undeva la 0,35\% din arie, ceea ce este o adiție infimă în comparație cu timpul de test câștigat.
+Pentru validare, metoda a fost testată pe seturile de date IDRiD \cite{9_chetoui2020explainable} și DDR \cite{15_li2019diagnostic}, care conțin adnotări
+la nivel de pixel pentru multiple tipuri de leziuni. Rezultatele cantitative au demonstrat că RTNet
+depășește metodele existente anterioare (inclusiv diverse variante de U-Net și DeepLab), obținând cele
+mai bune scoruri de segmentare pentru Exudate (EX), Microanevrisme (MA) și Exudate Moi (SE).
+\bigskip
 
-  \item Cu cât creștem numărul de lanțuri de scan, cu atât crește aria folosită, însă foarte puțin în comparație cu aria totală, coverage-ul scăzând și el deoarece circuitul este din ce în ce mai greu de testat.
+Deși inovația teoretică a arhitecturii RTNet (Relation Transformer Network) propusă de Huang et al.
+\cite{7_huang2022rtnet} este evidentă prin integrarea mecanismelor de atenție, validarea practică a acesteia necesită o
+demonstrație riguroasă a faptului că fiecare modul propus contribuie activ la îmbunătățirea segmentării.
+În acest sens, autorii au realizat un studiu extensiv de ablație (ablation study), analizând impactul
+incremental al componentelor arhitecturale asupra capacității de învățare și generalizare a rețelei.
+\bigskip
 
-\end{itemize}
+Această analiză comparativă este sintetizată în graficele de performanță care monitorizează evoluția
+funcției de pierdere (Loss) și curbele Precision-Recall (PR) pentru cele patru tipuri principale de leziuni
+asociate retinopatiei diabetice: microanevrisme (MA), exudate (EX), hemoragii (HE) și exudate moi (SE).
+\bigskip
 
-\chapter{Concluzii}
+Comparatia pornește de la un model “Baseline” (o rețea convoluțională standard de tip U-Net fără
+mecanisme de atenție) și adaugă progresiv componentele specifice RTNet, regasite în figura de mai jos:
 
-\section{Direcții viitoare de cercetare și dezvoltare}
-\ \ \ \ Cu toate ca această lucrare reprezintă un pas important în implementarea și testarea circuitelor digitale pentru detectarea defectelor de fabricație folosind vectori de test generați automat, există multiple direcții viitoare de cercetare și dezvoltare care pot îmbunătăți și extinde rezultatele obținute.
-Acestea includ următoarele, dar nu se limitează la acestea:
-\begin{itemize}
-  \item \textbf{\textit{Optimizarea performanței sistemului de testare}}: Un aspect esențial care poate fi explorat este optimizarea performanței sistemului de testare. În mod specific, se pot studia metode avansate de reducere a timpului de testare fără a compromite acuratețea și acoperirea testelor. Algoritmi noi și tehnici de optimizare a scan chain-urilor și a vectorilor de test pot contribui semnificativ la îmbunătățirea eficienței procesului de testare.
+\begin{enumerate}
+  \item GTB (Global Transformer Block): Adăugarea capacității de procesare globală.
+  \item SAH (Self-Attention Head): Introducerea atenției proprii pentru corelarea leziunilor similare.
+  \item RAH (Relation Attention Head / Cross-Attention): Modulul critic care leagă leziunile de structura
+vaselor de sânge.
+  \item RTB (Relation Transformer Block): Arhitectura completă propusă.
+\end{enumerate}
 
-  \item \textbf{\textit{Integrarea noilor tehnologii de testare}}: Pe măsură ce tehnologia avansează, noi metode și instrumente de testare devin disponibile. Integrarea acestor tehnologii, precum tehnici avansate de Built-In Self-Test (BIST) sau utilizarea inteligenței artificiale pentru generarea și analiza vectorilor de test, poate îmbunătăți semnificativ capacitatea de detectare a defectelor și eficiența procesului de testare.
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\columnwidth]{Figuri/loss-curves-ablations.png}
+\captionsetup{justification=centering}
+\caption{Curbele de Loss (stânga) și curbele Precision-Recall (dreapta) pentru studiile de ablație asupra celor patru leziuni DR. \cite{7_huang2022rtnet}}
+\label{fig: loss-curves}
+\end{figure}
+\bigskip
 
-  \item \textbf{\textit{Extinderea scalabilității}}: Un alt domeniu de cercetare este extinderea scalabilității sistemului de testare pentru circuite mai complexe și mari. Explorarea modului în care tehnologiile actuale de SCAN și EDT pot fi adaptate și extinse pentru system-on-chips (SoC) de dimensiuni mai mari și cu complexitate sporită poate duce la îmbunătățiri importante în detectarea defectelor.
+Lucrarea lui Huang et al. \cite{7_huang2022rtnet} validează ipoteza că integrarea informației globale prin Transformere
+este pasul necesar pentru a depăși plafonul de performanță atins de rețelele convoluționale pure în
+segmentarea medicală complexă.
 
-  \item \textbf{\textit{Dezvoltarea de metode de testare pentru noi tipuri de defecte}}: În timp ce lucrarea de față se concentrează pe detectarea defectelor de tip STUCKAT și TRANSITION, există și alte tipuri de defecte care pot afecta performanța circuitelor digitale. Cercetarea și dezvoltarea unor metode de testare pentru detectarea defectelor de tip delay, crosstalk și defecte intermitente poate asigura o acoperire mai completă și o fiabilitate crescută a circuitelor testate.
+\section{Arhitectura “Dual Branch” \cite{11_shakibania2024dual}}
 
-  \item \textbf{\textit{Implementarea și validarea în cazuri practice}}: O direcție importantă de dezvoltare este aplicarea și validarea metodologiilor propuse în contexte industriale reale. Colaborarea cu industria semiconductorilor pentru implementarea soluțiilor dezvoltate în cadrul unor proiecte pilot poate oferi feedback valoros și poate ajuta la rafinarea tehnicilor de testare.
+\ \ \ \ Deși progresele în segmentarea semantică, ilustrate prin metodele bazate pe U-Net \cite{12_sambyal2020modified} sau pe
+Transformere \cite{7_huang2022rtnet}, au permis o delimitare precisă a leziunilor, translatarea acestor detalii într-un
+diagnostic global (grading) rămâne o provocare majoră din cauza naturii subtile a diferențelor dintre
+stadiile retinopatiei diabetice. Rețelele convoluționale standard utilizate în studiile fundamentale,
+precum cel al lui Gulshan et al. \cite{3_gulshan2016development}, tind să piardă detaliile fine, cum ar fi microanevrismele incipiente, în
+procesul de redimensionare a imaginii necesar pentru analiza globală. Pentru a depăși acest compromis
+inerent între contextul vizual și rezoluția detaliilor, Shakibania et al. \cite{11_shakibania2024dual} au propus o arhitectură
+inovatoare de tip “Dual Branch Deep Learning Network”, care restructurează procesul de învățare prin
+decuplarea extragerii trăsăturilor în două fluxuri paralele distincte.
 
-  \item \textbf{\textit{Automatizarea procesului de diagnoză}}: Deși lucrarea a abordat deja etapa de diagnoză, există loc pentru automatizarea completă a acestui proces. Dezvoltarea unor instrumente de diagnoză automată, care pot identifica rapid și precis locația defectelor în circuit, ar contribui semnificativ la reducerea timpului de depanare și la îmbunătățirea eficienței generale a procesului de testare.
+Conceptul central al acestei abordări constă în imitarea procesului cognitiv uman de
+diagnosticare, procesând imaginea simultan pe o „ramură globală” și o „ramură locală”. Ramura globală
+analizează imaginea completă a fundului de ochi pentru a captura structura generală a vaselor și
+geometria retinei, o strategie similară cu metodele clasice de “Transfer Learning” \cite{10_jabbar2022transfer}. În paralel, ramura
+locală operează pe decupaje de înaltă rezoluție, fiind specializată în identificarea leziunilor microscopice 
+care ar fi invizibile pentru rețeaua globală. Elementul de noutate adus de această lucrare față de
+abordările “multi-task” anterioare \cite{6_wang2021deep}, este mecanismul de fuziune a celor două fluxuri, care utilizează
+tehnici de atenție pentru a pondera importanța trăsăturilor locale în decizia finală, asigurând că un
+detaliu critic nu este ignorat în favoarea unei imagini de ansamblu aparent sănătoase.
 
-  \item \textbf{\textit{Studii comparative asupra metodelor de testare și posibilitatea combinării acestora}}: Realizarea unor studii comparative între diferitele tehnologii și metode de testare disponibile poate oferi o înțelegere mai profundă a avantajelor și dezavantajelor fiecărei abordări. Aceste studii pot ghida alegerea metodologiilor optime pentru diferite tipuri de circuite și aplicații.
+Eficiența acestei arhitecturi hibride este validată prin rezultatele experimentale obținute pe
+seturile de date standard, unde modelul “Dual Branch” a demonstrat o superioritate clară în clasificarea
+stadiilor intermediare ale bolii (ușor și moderat). Analiza performanței indică faptul că integrarea
+informației locale crește semnificativ sensibilitatea modelului și reduce confuzia între clasele adiacente,
+oferind o robustețe superioară la variațiile de calitate a imaginii comparativ cu arhitecturile “singlestream”. Astfel, lucrarea confirmă faptul că performanța actuală în 2024 nu derivă doar din adâncimea
+rețelei, ci din capacitatea arhitecturală de a reuni viziunea macroscopică cu cea microscopică într-un
+diagnostic coerent.
 
-        De asemenea, se poate aborda în viitor o posibilă combinare a acestor metode pentru o automatizare și o eficientizare mai puternică, extrăgând punctele forte din fiecare metodă de testare.
-\end{itemize}
+\section{Abordarea “Explainable AI” \cite{9_chetoui2020explainable}}
 
-Deci, deși s-au atins obiective importante în domeniul detectării defectelor de fabricație în circuitele digitale, există multiple direcții viitoare de cercetare și dezvoltare care pot contribui la avansarea cunoștințelor și tehnologiilor în acest domeniu. Explorarea acestor direcții poate duce la sisteme de testare mai eficiente, fiabile și scalabile, asigurând astfel calitatea și performanța superioară a circuitelor digitale.
+\ \ \ \ În timp ce arhitecturile precum “Dual Branch Network” \cite{11_shakibania2024dual} sau Transformer-ele relaționale \cite{7_huang2022rtnet}
+au reușit să împingă limitele acurateței și ale segmentării fine, integrarea acestor sisteme în fluxul clinic
+real se lovește de o barieră fundamentală: lipsa de încredere a medicilor în algoritmii de tip „black-box”.
+Validarea clinică inițiată de Gulshan et al. \cite{3_gulshan2016development} a demonstrat potențialul diagnostic, însă pentru ca un
+sistem de inteligență artificială să fie acceptat ca asistent de încredere, acesta trebuie să își poată
+justifica deciziile. În acest context, lucrarea publicată de Chetoui și Akhloufi \cite{9_chetoui2020explainable}, reprezintă un pilon
+esențial al stadiului actual al cunoașterii, adresând simultan două probleme critice: interpretabilitatea
+(Explainable AI - XAI) și robustețea pe seturi de date eterogene.
+\bigskip
 
+Metodologia propusă de autori se bazează pe o arhitectură de tip CNN modificată (utilizând
+backbone-uri precum DenseNet121 sau ResNet50), în care straturile clasice complet conectate sunt
+înlocuite cu Global Average Pooling (GAP). Această modificare tehnică permite generarea Hărților de
+Activare a Claselor (CAM), oferind medicului o confirmare vizuală a regiunilor patologice care au
+determinat diagnosticul.
+\bigskip
 
-\section{Contribuții principale si concluzii}
-\ \ \ \ Lucrarea de față, intitulată "Detectia defectelor de fabricație într-un circuit digital cu ajutorul vectorilor de test generați automat", a avut ca scop implementarea unui set de teste pentru un circuit digital, pentru depistarea defectelor de fabricație (DFT). Circuitul digital, descris in limbaj Verilog, a constat dintr-un SoC bazat pe tehnologie RISC-V, cu module dedicate de Timer, UART, SPI și periferice GPIO. În acest capitol se vor sintetiza concluziile principale obținute în urma cercetării și implementării efectuate.
-\vspace{0.4cm}
+Relevanța clinică a acestei abordări extensive este evidențiată în rezultatele vizuale, unde hărțile
+de saliență generate de algoritm se suprapun cu precizie peste semnele patologice reale, indiferent de
+setul de date din care provine imaginea. Zonele marcate cu roșu intens pe hărțile CAM corespund
+anatomic cu microanevrismele și exudatele, confirmând că rețeaua neuronală a învățat trăsăturile
+intrinseci ale bolii și nu caracteristicile specifice ale camerei foto (bias-ul echipamentului). Prin urmare,
+modelul propus \cite{9_chetoui2020explainable} validează faptul că un sistem trebuie să fie nu doar precis, ci și independent de sursa
+datelor și transparent în decizii.
 
-În cadrul acestei lucrări am utilizat tehnologii complexe de testare precum tehnologia SCAN (introducerea lanțurilor de scan în circuit + transformarea flip-flopilor în celule de scan), ATPG (generarea automata a vectorilor de test cu ajutorul constrângerilor), DFT (concept care reunește noțiunile de SCAN, ATPG, EDT) și EDT (compresia vectorilor de test pentru îmbunatățirea performanțelor).
-Fiecare din aceste tehnologii a prezentat un rol esențial în îmbunătățirea detectării defectelor și optimizarea procesului de testare.
+\section{Generalizarea în scenarii reale: “Multi-Model Domain Adaptation” \cite{8_zhang2022multi}}
 
-Introducerea logicii de scan în circuit, generarea vectorilor (patternurilor) de test, compresia acestora, procesul de simulare și diagnoză, pentru defecte de tip STUCKAT și TRANSITION au reprezentat exemple și aspecte esențiale în asigurarea acurateții și eficienței testării.
-\vspace{0.4cm}
+\ \ \ \ Ultima frontieră în dezvoltarea sistemelor de diagnostic asistat de calculator (CAD) pentru
+retinopatia diabetică nu mai este legată strict de acuratețea obținută pe un singur set de date de
+antrenament, ci de capacitatea algoritmului de a funcționa corect într-un mediu clinic eterogen. În
+realitate, imaginile de fund de ochi variază drastic în funcție de modelul camerei, setările de iluminare,
+etnia pacientului sau protocolul de achiziție, fenomen cunoscut sub numele de “domain shift”. Modelele
+antrenate pe un „domeniu sursă” (de exemplu, imagini de înaltă calitate de la EyePACS \cite{9_chetoui2020explainable}) tind să aibă
+performanțe scăzute atunci când sunt aplicate pe un „domeniu țintă” (imagini clinice noi, cu
+caracteristici vizuale diferite), ceea ce limitează sever aplicabilitatea lor universală.
+\bigskip
 
-Unul dintre principalele obiective majore ale lucrării a fost verificarea performanțelor sistemului, în special timpul de testare și test-coverage-ul utilizând diverse structuri de test folosind generarea automată de vectori de test. În acest context, s-au analizat performanțele testării modulului atât în cazul utilizării unui singur lanț de scan, cât și în cazul utilizării multiplelor lanțuri de scan cu ajutorul tehnologiei EDT.
+Pentru a soluționa această problemă critică de implementare, Zhang et al. \cite{8_zhang2022multi} au propus în 2022
+o metodă inovatoare denumită “Multi-Model Domain Adaptation” (MMDA). Spre deosebire de
+abordările anterioare care încearcă să alinieze domeniile folosind un singur model, autorii introduc o
+arhitectură complexă bazată pe o rețea siameză, utilizând două modele distincte pentru a extrage
+trăsături complementare și pentru a crește robustețea deciziei.
+\bigskip
 
-Rezultatele au demonstrat că utilizarea EDT a redus semnificativ timpul de testare, păstrând în același timp test-coverge-ul aproape de valoarea rezultată testarii cu un singur lanț de scan, iar testele realizate cu 30, 40, 50, respectiv 60 de lanțuri de scan au arătat că este nevoie de atenție atunci când se alege acest număr, păstrând raportul dintre timpul de testare și test coverage în balanță.
-\vspace{0.4cm}
+Inovația tehnică centrală a lucrării constă în integrarea simultană a trei mecanisme de optimizare
+care lucrează concertat pentru a forța modelul să ignore diferențele stilistice dintre seturile de date și să
+se concentreze exclusiv pe patologie. Astfel, arhitectura combină o pierdere de clasificare pentru a
+asigura acuratețea diagnostică pe domeniul sursă etichetat, cu o pierdere de discrepanță care
+maximizează diferența dintre predicțiile celor două clasificatore pe domeniul țintă pentru a detecta
+exemplele aflate la granița de decizie. În plus, se utilizează o pierdere de adaptare adversarială care, prin
+intermediul unui discriminator, minimizează distanța dintre distribuția trăsăturilor din sursă și cea din
+țintă, făcând ca imaginile provenite din spitale diferite să fie reprezentate similar de către rețeaua
+neuronală.
+\bigskip
 
-Procesul de sinteză a inclus nu doar interpretarea și importarea librăriilor pentru celulele de bază ale circuitului (porți logice, bistabile etc), cât și inserarea logicii de scan în circuit. Acesta s-a realizat prin scripturi bine definite și cu ajutorul makefile-urilor pentru a păstra ordinea și automatizarea în execuția scripturilor.
+Validarea experimentală a metodei a fost realizată folosind setul de date EyePACS \cite{9_chetoui2020explainable} ca domeniu
+sursă și Messidor-2 \cite{9_chetoui2020explainable} ca domeniu țintă, simulând un scenariu realist de transfer tehnologic de la imagini
+de screening la imagini clinice de referință. Rezultatele au demonstrat că abordarea MMDA depășește
+semnificativ metodele standard de antrenare și alte tehnici de adaptare cunoscute, obținând o
+îmbunătățire substanțială a metricilor de performanță pe domeniul țintă fără a necesita etichete pentru
+acesta. Această lucrare încheie logic analiza stadiului actual al cunoașterii, subliniind faptul că un sistem
+complet nu trebuie doar să segmenteze leziuni fine sau să fie explicabil, ci trebuie să fie capabil să iasă
+din mediul controlat al laboratorului și să ofere o performanță robustă și generalizabilă în diversele
+condiții întâlnite în practica medicală globală.
 
-S-a efectuat analiza codului sursă HDL și al librăriilor (pentru verificarea erorilor de sintaxă și semantică din codul realizat), elaborarea design-ului (transformarea acestuia într-un format inteligibil pentru tool-ul Design Compiler), compilarea design-ului (transformarea design-ului într-o reprezentare structurală), inserția logicii de scan, cât și generarea netlist-ului sintetizat gata pentru etapa de ATPG, pe care am discutat-o anterior, în care am generat vectorii de test pentru structuri de test cu și fără EDT cu ajutorul tool-ului Tessent - Mentor Graphics.
-\vspace{0.4cm}
+\section{Concluzii}
 
-Simularea patternurilor de test folosind SimVision a permis vizualizarea semnalelor de scan (scan\_enable, scan\_mode, cât și edt\_channels\_in, edt\_channels\_out, edt\_reset și edt\_update), și a flip-flopilor de scan interconectate în lanțuri de scan (propagarea datelor în mod secvențial prin acestea).
+\ \ \ \ Analiza literaturii de specialitate relevă faptul că detectarea automată a retinopatiei diabetice a
+depășit stadiul de experiment teoretic, devenind o direcție de cercetare matură, cu rezultate clinice
+valide. Totuși, problema rămâne una de o complexitate ridicată, care depășește simpla clasificare a
+imaginilor. Dificultatea majoră nu constă doar în volumul masiv de date necesar, ci în subtilitatea
+semnelor patologice incipiente, precum microanevrismele, care pot ocupa doar câțiva pixeli dintr-o
+imagine de înaltă rezoluție, fiind ușor de confundat cu artefactele sau zgomotul de fond. Această
+granularitate fină impune algoritmilor o capacitate de discriminare vizuală care, în anumite scenarii
+limită, trebuie să depășească acuitatea ochiului uman.
+\bigskip
 
-Acest pas a fost crucial pentru a asigura că toți vectorii de test generați detectează toate defectele vizate în mod corect și într-un timp cât mai scurt.
-\vspace{0.4cm}
+În ciuda acestor obstacole, soluțiile algoritmice existente demonstrează o evoluție remarcabilă.
+Trecerea de la rețelele convoluționale standard la arhitecturi sofisticate, capabile să integreze informația
+globală cu cea locală prin mecanisme de tip “dual-branch” \cite{11_shakibania2024dual}, a permis o creștere semnificativă a
+sensibilității în detectarea stadiilor intermediare ale bolii. Mai mult, rezultatele obținute prin tehnici de
+adaptare la domeniu \cite{8_zhang2022multi} sugerează că bariera variabilității echipamentelor medicale începe să fie
+depășită, deschizând calea pentru sisteme robuste, capabile să funcționeze corect indiferent de spitalul
+în care sunt implementate.
+\bigskip
 
-În etapa de diagnoză, introducerea unui defect în mod intenționat în circuit a permis testarea capacității sistemului de a identifica exact poarta logică unde se regasește defectul. Aceasta s-a depistat cu succes cu o precizie și un indice de încredere de 100\%.
-
-Această etapă a demonstrat că metodologia de testare utilizată este robustă și capabilă să localizeze cu acuratețe defectele din circuit, confirmând astfel validitatea și eficiența abordării propuse.
-\vspace{0.4cm}
-
-Lucrarea a demonstrat că utilizarea vectorilor de test generați automat și a tehnologiilor avansate de testare, precum EDT, poate îmbunătăți semnificativ detectarea defectelor de fabricație în circuitele digitale. Implementarea și testarea efectuate au arătat că abordarea propusă nu doar că reduce timpul de testare, dar și poate păstra test-coverage-ul la o valoare acceptabilă în același timp. În concluzie, metodologia aplicată în această lucrare oferă o soluție eficientă și scalabilă pentru detectarea defectelor în circuitele digitale complexe, fiind relevantă și aplicabilă în industria semiconductoarelor.
+Un alt aspect promițător este schimbarea de paradigmă de la modelele de tip „cutie neagră” la
+sistemele explicabile (Explainable AI). Așa cum evidențiază studiile recente \cite{9_chetoui2020explainable}, capacitatea modelelor de
+a genera hărți de activare precise transformă inteligența artificială dintr-un simplu clasificator statistic
+într-un partener transparent pentru medic, facilitând validarea rapidă a deciziei. Deși provocările legate
+de dezechilibrul claselor și de generalizarea pe populații diverse persistă, performanțele atinse de
+metodele actuale, validate pe seturi de date riguroase precum MESSIDOR-2 \cite{9_chetoui2020explainable}, confirmă potențialul
+acestor tehnologii de a eficientiza screening-ul în masă și de a preveni orbirea la scară globală.
 
 \newpage
 \mbox{}
@@ -465,12 +705,10 @@ Lucrarea a demonstrat că utilizarea vectorilor de test generați automat și a 
 
 \chapter {Cod}
 
-\lstinputlisting[language = tcl, caption = dummy\_design.dofile]{Cod/edt_ip/dummy_design.dofile}
+\lstinputlisting[language=python, caption=Main code with more experiments]{Cod/main-kaggle-multiple-configs-lenovo.py}
 \vspace{1cm}
 
-\lstinputlisting[language=bash, caption = Bash Script for generating EDT]{Cod/edt_ip/my_script_gen_edt.sh}
+\lstinputlisting[language=python, caption=Second try]{Cod/Second_Try.py}
 \vspace{1cm}
-
-
 
 \end{document}
