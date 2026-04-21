@@ -28,8 +28,8 @@ def main():
     args = parse_args()
     
     # Creăm folderele pentru salvări dacă nu există
-    os.makedirs("../../Rezultate/Detectie/salvari_modele_binar", exist_ok=True)
-    os.makedirs("../../Rezultate/Detectie/salvari_grafice_binar", exist_ok=True)
+    os.makedirs("Rezultate/Detectie/salvari_modele_binar", exist_ok=True)
+    os.makedirs("Rezultate/Detectie/salvari_grafice_binar", exist_ok=True)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"🔥 Rulăm pe device: {device} | Model: {args.model} | Dataset: {args.dataset}")
@@ -71,7 +71,7 @@ def main():
     best_val_loss = float('inf')
     
     # Calea de salvare personalizată automat în funcție de argumente
-    nume_salvare_model = f"../../Rezultate/Detectie/salvari_modele_binar/best_{args.model}_{args.dataset}.pth"
+    nume_salvare_model = f"Rezultate/salvari_modele_binar/best_{args.model}_{args.dataset}.pth"
 
     print("\nÎncepe antrenamentul...")
     for epoch in range(num_epochs):
@@ -154,7 +154,7 @@ def main():
     plt.legend(fontsize=12)
     plt.grid(True, linestyle=':', alpha=0.7)
     
-    cale_grafic = f"../../Rezultate/Detectie/salvari_grafice_binar/grafic_{args.model}_{args.dataset}.png"
+    cale_grafic = f"Rezultate/salvari_grafice_binar/grafic_{args.model}_{args.dataset}.png"
     plt.savefig(cale_grafic, dpi=300, bbox_inches='tight')
     plt.close()
     

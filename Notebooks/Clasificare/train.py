@@ -22,6 +22,7 @@ def parse_args():
     parser.add_argument('--img_size', type=int, default=224)
     parser.add_argument('--num_workers', type=int, default=0)
     parser.add_argument('--root_dir', type=str, default=r'B:\Projects\Disertatie\Diabetic-Retinopathy-Classifier')
+    parser.add_argument('--use_weights', action='store_true', help='Folosește Weighted CrossEntropy')
     return parser.parse_args()
 
 def main():
@@ -48,14 +49,28 @@ def main():
     # ==========================================
     # 2. Construirea Modelului, Funcției de Cost și Optimizatorului
     # ==========================================
-    # num_classes = 5 (Stadiile 0, 1, 2, 3, 4)
     model = get_model(args.model, num_classes=5).to(device)
     
     if torch.cuda.device_count() > 1:
-        print(f"Folosim {torch.cuda.device_count()} GPU-uri în paralel cu DataParallel!")
+        print(f"Folosim {torch.cuda.device_count()} GPU-uri în paralel!")
         model = nn.DataParallel(model)
 
-    criterion = get_loss_function(args.loss)
+    # --- CONFIGURARE CLASS WEIGHTS ---
+    ponderi_clase = None
+    
+    if args.use_weights: # Dacă ai rulat cu --use_weights în consolă
+        # Aceste valori trebuie calculate în funcție de dataset-ul tău.
+        # Regula: Clasa cu multe imagini primește pondere mică, clasa cu puține primește pondere mare.
+        # Exemplu ipotetic pentru Retinopatie (0: foarte mulți, 4: foarte puțini):
+        valori_ponderi = [0.1, 0.8, 1.2, 2.5, 5.0]
+        
+        # PyTorch cere obligatoriu ca ponderile să fie Tensor Float și să fie pe același device cu modelul!
+        ponderi_clase = torch.tensor(valori_ponderi, dtype=torch.float32).to(device)
+        print(f"⚖️ Folosim Weighted CrossEntropy cu ponderile: {valori_ponderi}")
+
+    # Trimitem ponderile către fabrica noastră din builder.py
+    criterion = get_loss_function(args.loss, class_weights=ponderi_clase)
+    
     optimizer = get_optimizer(model, lr=args.lr)
 
     # ==========================================
