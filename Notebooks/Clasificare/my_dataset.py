@@ -18,10 +18,10 @@ class DRDataset(Dataset):
         # Dicționar simplificat: DOAR Train și Test
         paths_config = {
             'aptos': {
-                'train': {'csv': 'datasets/aptos2019/versions/3/train_1.csv', 
-                          'img': 'datasets/aptos2019/versions/3/train_images/train_images'},
-                'test':  {'csv': 'datasets/aptos2019/versions/3/test.csv',  
-                          'img': 'datasets/aptos2019/versions/3/test_images/test_images'}
+                'train': {'csv': 'datasets_augmented/aptos/train/aptos_train_balanced.csv', 
+                          'img': 'datasets_augmented/aptos/train//images'},
+                'test':  {'csv': 'datasets_augmented/aptos/test/aptos_test_processed.csv',  
+                          'img': 'datasets_augmented/aptos/test/images'}
             },
             'eyepacs': {
                 'train': {'csv': 'datasets/resized-2015-2019-diabetic-retinopathy-detection/versions/4/labels/trainLabels15.csv', 

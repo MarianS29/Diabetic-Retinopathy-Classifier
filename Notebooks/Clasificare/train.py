@@ -9,7 +9,12 @@ import torch.nn.functional as F
 
 # Importăm clasele noastre de MULTI-CLASĂ
 from my_dataset import DRDataset
+from my_dataset_augmented import DRDatasetAugmented
+from my_dataset_bengraham import DRDatasetBenGraham
 from builder import get_model, get_optimizer, get_loss_function
+
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Antrenare Clasificare Multi-Clasă (Stadii 0-4)")
@@ -38,8 +43,8 @@ def main():
     # ==========================================
     # 1. Încărcarea Datelor
     # ==========================================
-    train_dataset = DRDataset(args.root_dir, args.dataset, split='train', image_size=args.img_size)
-    test_dataset = DRDataset(args.root_dir, args.dataset, split='test', image_size=args.img_size)
+    train_dataset = DRDatasetBenGraham(args.root_dir, args.dataset, split='train', image_size=args.img_size)
+    test_dataset = DRDatasetBenGraham(args.root_dir, args.dataset, split='test', image_size=args.img_size)
 
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
@@ -247,6 +252,55 @@ def main():
     plt.close()
     
     print(f"Graficul combinat a fost salvat ca: {cale_grafic}")
+
+    # ==========================================
+    # 4. GENERARE MATRICE DE CONFUZIE
+    # ==========================================
+    print("\n📊 Antrenament finalizat! Generăm Matricea de Confuzie...")
+    
+    # Încărcăm modelul care a obținut cel mai mic Loss
+    model_eval = get_model(args.model, num_classes=5).to(device)
+    model_eval.load_state_dict(torch.load(nume_salvare_model))
+    model_eval.eval()
+
+    toate_predictiile = []
+    toate_etichetele = []
+
+    # Trecem din nou prin setul de test cu cel mai bun model
+    with torch.no_grad():
+        for imgs, labels in test_loader:
+            imgs = imgs.to(device)
+            outputs = model_eval(imgs)
+            
+            # Logică adaptată pentru tipul de Loss
+            if args.loss in ['bce_ordinal', 'ordinal']:
+                preds = (outputs > 0.0).sum(dim=1) - 1
+                preds = torch.clamp(preds, min=0)
+            else:
+                preds = torch.argmax(outputs, dim=1)
+                
+            toate_predictiile.extend(preds.cpu().numpy())
+            toate_etichetele.extend(labels.numpy())
+
+    # Calculăm Matricea folosind scikit-learn
+    cm = confusion_matrix(toate_etichetele, toate_predictiile, labels=[0, 1, 2, 3, 4])
+    
+    # Desenăm Matricea folosind Seaborn
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
+                xticklabels=['0 (Sănătos)', '1 (Ușor)', '2 (Moderat)', '3 (Sever)', '4 (Proliferativ)'],
+                yticklabels=['0 (Sănătos)', '1 (Ușor)', '2 (Moderat)', '3 (Sever)', '4 (Proliferativ)'])
+    
+    plt.xlabel('Predicția Modelului', fontsize=12, fontweight='bold')
+    plt.ylabel('Diagnosticul Real (Doctor)', fontsize=12, fontweight='bold')
+    plt.title(f'Matrice de Confuzie - {args.model} pe dataset {args.dataset.upper()}', fontsize=14)
+    
+    # Salvăm
+    cale_matrice = f"Rezultate/matricie_confuzie/CM_{args.model}_{args.dataset}_{args.loss}.png"
+    plt.savefig(cale_matrice, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"✅ Matricea de confuzie a fost salvată ca: {cale_matrice}")
 
 if __name__ == '__main__':
     import sys

@@ -73,43 +73,18 @@ def get_model(model_name, num_classes=1, pretrained=True):
     """
     model_name = model_name.lower()
 
-    if model_name == 'resnet34':
-        weights = models.ResNet34_Weights.DEFAULT if pretrained else None
-        model = models.resnet34(weights=weights)
-        for param in model.parameters(): param.requires_grad = False
-        num_ftrs = model.fc.in_features
-        model.fc = nn.Sequential(nn.Dropout(0.5), nn.Linear(num_ftrs, num_classes))
-
-    elif model_name == 'resnet50':
+    if model_name == 'resnet50':
         weights = models.ResNet50_Weights.DEFAULT if pretrained else None
         model = models.resnet50(weights=weights)
         for param in model.parameters(): param.requires_grad = False
         num_ftrs = model.fc.in_features
         model.fc = nn.Sequential(nn.Dropout(0.5), nn.Linear(num_ftrs, num_classes))
 
-    elif model_name == 'efficientnet_b0':
-        weights = models.EfficientNet_B0_Weights.DEFAULT if pretrained else None
-        model = models.efficientnet_b0(weights=weights)
-        in_features = model.classifier[1].in_features
-        model.classifier[1] = nn.Linear(in_features, num_classes)
-
     elif model_name == 'efficientnet_b3':
         weights = models.EfficientNet_B3_Weights.DEFAULT if pretrained else None
         model = models.efficientnet_b3(weights=weights)
         in_features = model.classifier[1].in_features
         model.classifier[1] = nn.Linear(in_features, num_classes)
-
-    elif model_name == 'densenet121':
-        weights = models.DenseNet121_Weights.DEFAULT if pretrained else None
-        model = models.densenet121(weights=weights)
-        in_features = model.classifier.in_features
-        model.classifier = nn.Linear(in_features, num_classes)
-
-    elif model_name == 'vgg16':
-        weights = models.VGG16_Weights.DEFAULT if pretrained else None
-        model = models.vgg16(weights=weights)
-        in_features = model.classifier[6].in_features
-        model.classifier[6] = nn.Linear(in_features, num_classes)
 
     elif model_name == 'inception_v3':
         model = InceptionWrapper(num_classes=num_classes, pretrained=pretrained)
