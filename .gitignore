@@ -1,5 +1,7 @@
-/Dataset/test_images
-/Dataset/test_images/test_images
-/Dataset/test_images
-/Dataset/train_images
-/Dataset/val_images
+/datasets
+/datasets
+/datasets/aptos
+/datasets
+/datasets/aptos
+/datasets/aptos/aptos_augmented_balanced
+/datasets
