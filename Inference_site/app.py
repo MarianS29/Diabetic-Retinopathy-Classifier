@@ -9,7 +9,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 # Adăugăm calea către notebook-uri pentru a putea importa get_model din builder.py
-BASE_DIR = r"B:\Projects\Disertatie\Diabetic-Retinopathy-Classifier"
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SYS_PATH_TO_BUILDER = os.path.join(BASE_DIR, "Notebooks")
 if SYS_PATH_TO_BUILDER not in sys.path:
     sys.path.insert(0, SYS_PATH_TO_BUILDER)
@@ -96,6 +96,10 @@ def predict():
         # Încarcă modelul potrivit
         base_arch = get_base_model_name(model_name)
         model = get_model(base_arch, num_classes=5, pretrained=False)
+
+        if model is None:
+            return jsonify({"error": f"Eroare: get_model a returnat None pentru arhitectura '{base_arch}'. Verifica importurile in builder.py!"}), 500
+
         model.load_state_dict(torch.load(model_path, map_location=DEVICE))
         model = model.to(DEVICE)
         model.eval()
