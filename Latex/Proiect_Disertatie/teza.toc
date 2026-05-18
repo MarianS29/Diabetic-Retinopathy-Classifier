@@ -1,0 +1,66 @@
+\babel@toc {romanian}{}\relax 
+\contentsline {chapter}{Lista figurilor}{iv}{chapter*.2}%
+\contentsline {chapter}{Lista tabelelor}{v}{chapter*.3}%
+\contentsline {unnumberedsection}{Lista acronimelor}{vii}{chapter*.4}%
+\contentsline {chapter}{\numberline {1}Introducere}{1}{chapter.1}%
+\contentsline {chapter}{\numberline {2}Fundamente teoretice}{4}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Diabetul zaharat și complicațiile sale oculare}{4}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Anatomia ochiului și retina}{5}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Retinopatia diabetică -- definiție, stadii de evoluție și simptome}{7}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Imagistica de fund de ochi ("fundus photography")}{8}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Diagnosticul clinic -- procesul actual și limitările sale}{10}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Învățarea automată și învățarea profundă în analiza imaginilor medicale}{11}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Rețele neuronale convoluționale}{13}{section.2.7}%
+\contentsline {section}{\numberline {2.8}Transfer learning și modele pre-antrenate}{14}{section.2.8}%
+\contentsline {chapter}{\numberline {3}Stadiul actual al cercetării}{16}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Analiza seturilor de date disponibile}{16}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Metoda bazată pe arhitectura Inception-V3 \cite {3_gulshan2016development}}{18}{section.3.2}%
+\contentsline {section}{\numberline {3.3}“Transfer Learning” pentru diagnosticul retinopatiei diabetice \cite {10_jabbar2022transfer}}{19}{section.3.3}%
+\contentsline {section}{\numberline {3.4}“Multi-task Learning” pentru gradarea retinopatiei diabetice \cite {6_wang2021deep}}{20}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Analiza arhitecturii “Modified U-Net” pentru segmentarea semantică \cite {12_sambyal2020modified}}{21}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Tranziția către arhitecturi globale: RTNet (Relation Transformer Network) \cite {7_huang2022rtnet}}{22}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Arhitectura “Dual Branch” \cite {11_shakibania2024dual}}{24}{section.3.7}%
+\contentsline {section}{\numberline {3.8}Abordarea “Explainable AI” \cite {9_chetoui2020explainable}}{24}{section.3.8}%
+\contentsline {section}{\numberline {3.9}Generalizarea în scenarii reale: “Multi-Model Domain Adaptation” \cite {8_zhang2022multi}}{25}{section.3.9}%
+\contentsline {section}{\numberline {3.10}Concluzii}{26}{section.3.10}%
+\contentsline {chapter}{\numberline {4}Setul de date și preprocesarea imaginilor}{27}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Descrierea setului de date utilizat}{27}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Distribuția claselor}{28}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Probleme specifice imaginilor medicale}{29}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Etapele de preprocesare}{30}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Augmentarea datelor}{31}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Împărțirea datelor în seturi de antrenare, validare și testare}{31}{section.4.6}%
+\contentsline {chapter}{\numberline {5}Metodologia propusă}{33}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Fluxul general al sistemului}{33}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Modelele analizate}{33}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Arhitectura ResNet50}{33}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Arhitectura InceptionV3}{34}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Arhitectura Inception-ResNet-V2}{34}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Funcții de pierdere utilizate}{34}{section.5.6}%
+\contentsline {section}{\numberline {5.7}Optimizatorul și hiperparametrii de antrenare}{35}{section.5.7}%
+\contentsline {section}{\numberline {5.8}Strategia de evaluare}{35}{section.5.8}%
+\contentsline {section}{\numberline {5.9}Implementarea procesului de antrenare}{35}{section.5.9}%
+\contentsline {chapter}{\numberline {6}Rezultate experimentale}{36}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Configurația experimentală}{36}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Evoluția funcției de pierdere}{36}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Evoluția acurateții pe setul de validare}{36}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Analiza scorului AUC}{37}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Analiza curbelor ROC multiclasă}{37}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Analiza matricelor de confuzie}{37}{section.6.6}%
+\contentsline {section}{\numberline {6.7}Comparație între modelele testate}{37}{section.6.7}%
+\contentsline {section}{\numberline {6.8}Interpretarea erorilor de clasificare}{38}{section.6.8}%
+\contentsline {chapter}{\numberline {7}Aplicația de inferență}{39}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Scopul aplicației dezvoltate}{39}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Arhitectura aplicației}{39}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Componenta backend}{39}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Componenta frontend}{39}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Fluxul de utilizare}{40}{section.7.5}%
+\contentsline {section}{\numberline {7.6}Integrarea modelului antrenat}{40}{section.7.6}%
+\contentsline {section}{\numberline {7.7}Limitări practice ale aplicației}{40}{section.7.7}%
+\contentsline {chapter}{\numberline {8}Concluzii și direcții viitoare}{41}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Concluzii generale}{41}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Rezultatele obținute față de obiectivele inițiale}{41}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Limitările lucrării}{41}{section.8.3}%
+\contentsline {section}{\numberline {8.4}Direcții viitoare}{42}{section.8.4}%
+\contentsline {unnumberedsection}{Bibliografie}{44}{appendix*.19}%
+\contentsline {chapter}{\appnumberline {A}Cod}{46}{appendix.A}%

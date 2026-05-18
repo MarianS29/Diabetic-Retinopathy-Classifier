@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99e
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: teza.aux
+Reallocating 'name_of_file' (item size: 1) to 6 items.
+The style file: unsrt.bst
+Reallocating 'name_of_file' (item size: 1) to 10 items.
+Database file #1: referinte.bib
+Warning--can't use both volume and number fields in 6_wang2021deep
+You've used 24 entries,
+            1791 wiz_defined-function locations,
+            607 strings with 9030 characters,
+and the built_in function-call counts, 7078 in all, are:
+= -- 612
+> -- 388
+< -- 6
++ -- 138
+- -- 114
+* -- 558
+:= -- 1111
+add.period$ -- 74
+call.type$ -- 24
+change.case$ -- 24
+chr.to.int$ -- 0
+cite$ -- 25
+duplicate$ -- 276
+empty$ -- 632
+format.name$ -- 114
+if$ -- 1550
+int.to.chr$ -- 0
+int.to.str$ -- 24
+missing$ -- 23
+newline$ -- 124
+num.names$ -- 24
+pop$ -- 54
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 146
+stack$ -- 0
+substring$ -- 586
+swap$ -- 82
+text.length$ -- 6
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 1
+while$ -- 67
+width$ -- 26
+write$ -- 268
+(There was 1 warning)

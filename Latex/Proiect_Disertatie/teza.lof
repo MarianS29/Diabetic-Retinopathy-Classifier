@@ -1,0 +1,9 @@
+\babel@toc {romanian}{}\relax 
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Exemple de imagini de fund de ochi utilizate în evaluarea retinopatiei diabetice \cite {9_chetoui2020explainable}}}{6}{figure.caption.8}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Reprezentare schematică a progresiei claselor de severitate pentru retinopatia diabetică}}{8}{figure.caption.10}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Flux conceptual pentru clasificarea imaginilor de fund de ochi cu o rețea neuronală convoluțională}}{12}{figure.caption.11}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Exemple de imagini ale fundului de ochi în seturile de date DIARETDB0 și DIARETDB1 \cite {9_chetoui2020explainable}}}{17}{figure.caption.12}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Framework propus pentru detectarea și clasificarea retinopatiei diabetice \cite {10_jabbar2022transfer}}}{19}{figure.caption.14}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Arhitectura U-net modificată \cite {12_sambyal2020modified}}}{22}{figure.caption.15}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Curbele de Loss (stânga) și curbele Precision-Recall (dreapta) pentru studiile de ablație asupra celor patru leziuni DR. \cite {7_huang2022rtnet}}}{23}{figure.caption.16}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Distribuția imaginilor pe clase și subseturi în \textit {Diabetic\_Balanced\_Data}}}{28}{figure.caption.18}%
