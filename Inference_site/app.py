@@ -54,13 +54,18 @@ RECOMMENDATIONS = {
 def get_base_model_name(filename):
     # Extrage tipul de retea din numele modelului salvat (ex: 'best_resnet50_ce_adam_LR_0.0001.pth' -> 'resnet50')
     name = filename.lower()
+    if 'incres_v2' in name or 'inception_resnet_v2' in name: return 'incres_v2'
     if 'resnet50' in name: return 'resnet50'
     if 'efficientnet_b3' in name: return 'efficientnet_b3'
     if 'efficientnet_b0' in name: return 'efficientnet_b0'
     if 'densenet121' in name: return 'densenet121'
     if 'inception_v3' in name: return 'inception_v3'
-    if 'incres_v2' in name: return 'incres_v2'
     return 'resnet50' # Default fallback
+
+def get_input_size(base_arch):
+    if base_arch in ('inception_v3', 'incres_v2'):
+        return 299
+    return 224
 
 @app.route('/api/models', methods=['GET'])
 def get_models():
@@ -85,8 +90,10 @@ def predict():
     try:
         # Preprocesare imagine
         image = Image.open(file.stream).convert('RGB')
+        base_arch = get_base_model_name(model_name)
+        input_size = get_input_size(base_arch)
         transform = transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize((input_size, input_size)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225])
@@ -94,7 +101,6 @@ def predict():
         input_tensor = transform(image).unsqueeze(0).to(DEVICE)
 
         # Încarcă modelul potrivit
-        base_arch = get_base_model_name(model_name)
         model = get_model(base_arch, num_classes=5, pretrained=False)
 
         if model is None:

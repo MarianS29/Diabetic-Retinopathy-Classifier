@@ -93,6 +93,10 @@ def get_model(model_name, num_classes=5, pretrained=True):
         model = InceptionWrapper(num_classes=num_classes, pretrained=pretrained)
 
     elif model_name == 'incres_v2':
+        if timm is None:
+            raise ImportError(
+                "Modelul incres_v2 necesita pachetul 'timm'. Instaleaza-l cu: pip install timm"
+            )
         model = timm.create_model('inception_resnet_v2', pretrained=pretrained, num_classes=num_classes)
 
     else:
@@ -103,7 +107,7 @@ def get_model(model_name, num_classes=5, pretrained=True):
 # ==============================================================================
 # 3. FABRICA DE LOSS-URI ȘI PREDICȚII (Totul se întâmplă aici)
 # ==============================================================================
-def get_loss_function(loss_name, class_weights=None, device='cuda'):
+def get_loss_function(loss_name, class_weights=None, device='cuda', gamma=1.5):
     loss_name = loss_name.lower()
     
     # -----------------------------------------------------------------
@@ -118,7 +122,7 @@ def get_loss_function(loss_name, class_weights=None, device='cuda'):
     elif loss_name == 'focal_loss':
         # Trimitem ponderile pe GPU (dacă există) pentru Focal Loss
         alpha_tensor = class_weights.to(device) if class_weights is not None else None
-        return FocalLossMultiClass(alpha=alpha_tensor, gamma=1.5)
+        return FocalLossMultiClass(alpha=alpha_tensor, gamma=gamma)
         
     elif loss_name == 'ce':
         return nn.CrossEntropyLoss()

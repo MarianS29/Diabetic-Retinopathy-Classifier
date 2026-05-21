@@ -58,6 +58,7 @@ def parse_args():
     parser.add_argument('--img_size', type=int, default=224)
     parser.add_argument('--num_workers', type=int, default=0)
     parser.add_argument('--class_weights', type=float, nargs='+', default=None)
+    parser.add_argument('--gamma', type=float, default=1.5, help='Valoarea gamma pentru Focal Loss (daca este selectat).')
 
     parser.add_argument(
         '--experiment',
@@ -390,7 +391,7 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     balanced_root = args.balanced_root or args.root_dir or os.path.join(PROJECT_ROOT, 'datasets', 'Diabetic_Balanced_Data')
-    aptos_root = args.aptos_root or os.path.join(PROJECT_ROOT, 'datasets', 'aptos', 'aptos_ben_graham')
+    aptos_root = args.aptos_root or os.path.join(PROJECT_ROOT, 'datasets', 'aptos', 'aptos_ben_graham') # sau aptos_ben_graham
     train_source, test_source = resolve_experiment(args.experiment, args.train_source, args.test_source)
     val_source = train_source
     experiment_name = args.experiment or f"{train_source}_to_{test_source}"
@@ -432,16 +433,19 @@ def main():
     val_loader = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
     test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
 
+    # Daca avem focal loss, afisam valoarea gamma
+    if args.loss_name == 'focal_loss':
+        print(f"Focal Loss activat cu gamma={args.gamma}")
     print(f"Distributie date: TRAIN={len(train_ds)} | VALIDARE={len(val_ds)} | TESTARE={len(test_ds)}")
 
     model = get_model(args.model, num_classes=5).to(device)
-    criterion = get_loss_function(args.loss_name, class_weights=args.class_weights, device=device)
+    criterion = get_loss_function(args.loss_name, class_weights=args.class_weights, device=device, gamma=args.gamma)
     optimizer = get_optimizer(model, optimizer_name=args.optimizer, lr=args.lr)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3)
 
     history = {'train_loss': [], 'val_loss': [], 'val_acc': [], 'val_auc': []}
     best_metric = 0.0
-    base_name = f"{experiment_name}_{args.model}_{args.loss_name}_{args.optimizer}_LR_{args.lr}"
+    base_name = f"{experiment_name}_{args.model}_{args.loss_name}_{args.optimizer}_LR_{args.lr}_Gamma_{args.gamma}"
     model_path = os.path.join(modele_dir, f"best_{base_name}.pth")
 
     for epoch in range(args.epochs):
