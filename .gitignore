@@ -7,3 +7,13 @@
 /datasets/dataset_combinat
 /datasets/Diabetic_Balanced_Aug
 /datasets/Diabetic_Balanced_Aug_Ben_Graham
+*.aux
+*.fdb_latexmk
+*.lof
+*.log
+*.lot
+*.out
+*.gz
+*.toc
+*.pyc
+*.pyc

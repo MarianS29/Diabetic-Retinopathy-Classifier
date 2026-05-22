@@ -97,7 +97,7 @@ def parse_args():
     return parser.parse_args()
 
 
-# --- ADAUGAT FUNCTIA LIPSĂ PENTRU ISTORIC COMBINAT ---
+# --- ADAUGAT FUNCTIA LIPSA PENTRU ISTORIC COMBINAT ---
 def save_combined_history(history, path, show=False):
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
     
@@ -391,7 +391,7 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     balanced_root = args.balanced_root or args.root_dir or os.path.join(PROJECT_ROOT, 'datasets', 'Diabetic_Balanced_Data')
-    aptos_root = args.aptos_root or os.path.join(PROJECT_ROOT, 'datasets', 'aptos', 'aptos_ben_graham') # sau aptos_ben_graham
+    aptos_root = args.aptos_root or os.path.join(PROJECT_ROOT, 'datasets', 'aptos', 'aptos_ben_graham_matched') # sau aptos_ben_graham
     train_source, test_source = resolve_experiment(args.experiment, args.train_source, args.test_source)
     val_source = train_source
     experiment_name = args.experiment or f"{train_source}_to_{test_source}"

@@ -13,7 +13,7 @@ function App() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
 
-  // Încărcare listă de modele la pornire
+  // Incarcare lista de modele la pornire
   useEffect(() => {
     axios.get(`${API_URL}/models`)
       .then((res) => {
@@ -22,7 +22,7 @@ function App() {
           setSelectedModel(res.data.models[0]);
         }
       })
-      .catch((err) => setError('Eroare la conectarea cu serverul. Asigură-te că backend-ul este pornit.'));
+      .catch((err) => setError('Eroare la conectarea cu serverul. Asigura-te ca backend-ul este pornit.'));
   }, []);
 
   const handleImageChange = (e) => {
@@ -38,7 +38,7 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!imageFile || !selectedModel) {
-      setError('Te rog selectează un model și încarcă o imagine.');
+      setError('Te rog selecteaza un model si incarca o imagine.');
       return;
     }
 
@@ -56,7 +56,7 @@ function App() {
       });
       setResult(response.data);
     } catch (err) {
-      setError(err.response?.data?.error || 'A apărut o eroare la procesarea imaginii.');
+      setError(err.response?.data?.error || 'A aparut o eroare la procesarea imaginii.');
     } finally {
       setLoading(false);
     }
@@ -78,12 +78,12 @@ function App() {
 
       <div className="card">
         <div className="form-group">
-          <label>Model de Inferență</label>
+          <label>Model de Inferenta</label>
           <select 
             value={selectedModel} 
             onChange={(e) => setSelectedModel(e.target.value)}
           >
-            {models.length === 0 ? <option>Se încarcă modelele...</option> : null}
+            {models.length === 0 ? <option>Se incarca modelele...</option> : null}
             {models.map(model => (
               <option key={model} value={model}>{model}</option>
             ))}
@@ -96,7 +96,7 @@ function App() {
             <div className="upload-area">
               <input type="file" accept="image/*" onChange={handleImageChange} />
               <UploadCloud className="upload-icon" />
-              <div className="upload-text">Apasă sau trage imaginea aici</div>
+              <div className="upload-text">Apasa sau trage imaginea aici</div>
               <div className="upload-hint">Format acceptat: JPG, PNG, JPEG</div>
             </div>
           ) : (
@@ -105,7 +105,7 @@ function App() {
               <button 
                 className="close-btn"
                 onClick={() => { setPreview(null); setImageFile(null); setResult(null); }}
-                title="Schimbă imaginea"
+                title="Schimba imaginea"
               >
                 <X size={18} />
               </button>
@@ -119,9 +119,9 @@ function App() {
           disabled={loading || !imageFile}
         >
           {loading ? (
-            <><span className="spinner"></span> Se analizează...</>
+            <><span className="spinner"></span> Se analizeaza...</>
           ) : (
-            'Analizează Imaginea'
+            'Analizeaza Imaginea'
           )}
         </button>
       </div>
@@ -144,7 +144,7 @@ function App() {
 
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
-                  <span>Nivel de încredere</span>
+                  <span>Nivel de incredere</span>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{(result.confidence * 100).toFixed(1)}%</span>
                 </div>
                 <div className="confidence-bar-bg">
@@ -158,10 +158,10 @@ function App() {
               <div className="divider"></div>
               
               <div className="recommendation">
-                <h4>Recomandări Medic</h4>
+                <h4>Recomandari Medic</h4>
                 <p>{result.recommendations.doctor}</p>
                 
-                <h4>Recomandări Pacient</h4>
+                <h4>Recomandari Pacient</h4>
                 <p>{result.recommendations.patient}</p>
               </div>
             </div>
@@ -170,11 +170,11 @@ function App() {
               <h3><FileText size={20} strokeWidth={1.5} /> Metadate Model</h3>
               <div className="engineering-data">
                 <p>
-                  <span>Fișier</span>
+                  <span>Fisier</span>
                   <strong>{result.model_data.model_name}</strong>
                 </p>
                 <p>
-                  <span>Timp Execuție</span>
+                  <span>Timp Executie</span>
                   <strong>{result.model_data.inference_time_ms.toFixed(2)} ms</strong>
                 </p>
                 <p>
@@ -184,12 +184,12 @@ function App() {
                 <p>
                   <span>Extragere Features</span>
                   <strong style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <CheckCircle size={16} color="var(--text-primary)" strokeWidth={1.5} /> Reușită
+                    <CheckCircle size={16} color="var(--text-primary)" strokeWidth={1.5} /> Reusita
                   </strong>
                 </p>
                 
                 <div style={{ marginTop: '1.5rem', marginBottom: '0.75rem', fontWeight: 500, color: 'var(--text-primary)' }}>
-                  Probabilități (Softmax)
+                  Probabilitati (Softmax)
                 </div>
                 <ul>
                   {result.model_data.raw_probabilities.map((prob, idx) => (

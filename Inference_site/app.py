@@ -8,7 +8,7 @@ from PIL import Image
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-# Adăugăm calea către notebook-uri pentru a putea importa get_model din builder.py
+# Adaugam calea catre notebook-uri pentru a putea importa get_model din builder.py
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SYS_PATH_TO_BUILDER = os.path.join(BASE_DIR, "Notebooks")
 if SYS_PATH_TO_BUILDER not in sys.path:
@@ -25,29 +25,29 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # Definim recomandarile in functie de stadiu
 RECOMMENDATIONS = {
     0: {
-        "name": "Fără Retinopatie (No DR)",
-        "patient": "Mențineți un stil de viață sănătos și veniți la un control de rutină o dată pe an.",
-        "doctor": "Nu se observă anomalii pe fundul de ochi. Programare pentru control anual."
+        "name": "Fara Retinopatie (No DR)",
+        "patient": "Mentineti un stil de viata sanatos si veniti la un control de rutina o data pe an.",
+        "doctor": "Nu se observa anomalii pe fundul de ochi. Programare pentru control anual."
     },
     1: {
-        "name": "Retinopatie Ușoară (Mild)",
-        "patient": "Este necesar controlul strict al glicemiei și dietei. Reveniți la control în 6-12 luni.",
-        "doctor": "Prezența microanevrismelor. Nu necesită tratament oftalmologic imediat, doar optimizare metabolică."
+        "name": "Retinopatie Usoara (Mild)",
+        "patient": "Este necesar controlul strict al glicemiei si dietei. Reveniti la control in 6-12 luni.",
+        "doctor": "Prezenta microanevrismelor. Nu necesita tratament oftalmologic imediat, doar optimizare metabolica."
     },
     2: {
-        "name": "Retinopatie Moderată (Moderate)",
-        "patient": "Sunt necesare controale oftalmologice mai dese (la 3-6 luni) și analize detaliate.",
-        "doctor": "Se recomandă evaluare atentă pentru identificarea unui potențial edem macular clinic semnificativ."
+        "name": "Retinopatie Moderata (Moderate)",
+        "patient": "Sunt necesare controale oftalmologice mai dese (la 3-6 luni) si analize detaliate.",
+        "doctor": "Se recomanda evaluare atenta pentru identificarea unui potential edem macular clinic semnificativ."
     },
     3: {
-        "name": "Retinopatie Severă (Severe)",
-        "patient": "Stare avansată. Trebuie să urmați tratamentul cu strictețe și să efectuați analize de urgență.",
-        "doctor": "Risc crescut de progresie către faza proliferativă. Recomandată Angiofluorografie și monitorizare strânsă."
+        "name": "Retinopatie Severa (Severe)",
+        "patient": "Stare avansata. Trebuie sa urmati tratamentul cu strictete si sa efectuati analize de urgenta.",
+        "doctor": "Risc crescut de progresie catre faza proliferativa. Recomandata Angiofluorografie si monitorizare stransa."
     },
     4: {
-        "name": "Retinopatie Proliferativă (Proliferative)",
-        "patient": "Situație critică pentru vedere. Poate fi necesară intervenție cu laser sau operație. Prezentați-vă urgent la specialist.",
-        "doctor": "Se impune fotocoagulare panretiniană (PRP) sau intervenție chirurgicală. Trimitere urgentă la specialist retinolog."
+        "name": "Retinopatie Proliferativa (Proliferative)",
+        "patient": "Situatie critica pentru vedere. Poate fi necesara interventie cu laser sau operatie. Prezentati-va urgent la specialist.",
+        "doctor": "Se impune fotocoagulare panretiniana (PRP) sau interventie chirurgicala. Trimitere urgenta la specialist retinolog."
     }
 }
 
@@ -100,7 +100,7 @@ def predict():
         ])
         input_tensor = transform(image).unsqueeze(0).to(DEVICE)
 
-        # Încarcă modelul potrivit
+        # Incarca modelul potrivit
         model = get_model(base_arch, num_classes=5, pretrained=False)
 
         if model is None:
@@ -110,7 +110,7 @@ def predict():
         model = model.to(DEVICE)
         model.eval()
 
-        # Evaluare și timing
+        # Evaluare si timing
         start_time = time.perf_counter()
         with torch.no_grad():
             outputs = model(input_tensor)

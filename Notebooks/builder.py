@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torchvision.models as models
 import torch.optim as optim
 
-# Importăm timm pentru Inception-ResNet-v2
+# Importam timm pentru Inception-ResNet-v2
 try:
     import timm
 except ImportError:
@@ -12,26 +12,26 @@ except ImportError:
 
 class InceptionWrapper(nn.Module):
     """
-    Carcasă de protecție pentru Inception-v3.
-    Lasă modelul să se încarce nativ, dar returnează o singură ieșire la antrenare,
-    exact cum așteaptă funcțiile noastre de Loss.
+    Carcasa de protectie pentru Inception-v3.
+    Lasa modelul sa se incarce nativ, dar returneaza o singura iesire la antrenare,
+    exact cum asteapta functiile noastre de Loss.
     """
     def __init__(self, num_classes, pretrained=True):
         super().__init__()
-        # Lăsăm Inception să se inițializeze 100% standard (fără erori de aux_logits)
+        # Lasam Inception sa se initializeze 100% standard (fara erori de aux_logits)
         weights = models.Inception_V3_Weights.DEFAULT if pretrained else None
         self.model = models.inception_v3(weights=weights)
         
-        # Modificăm ultimul strat
+        # Modificam ultimul strat
         in_features = self.model.fc.in_features
         self.model.fc = nn.Linear(in_features, num_classes)
         
     def forward(self, x):
         outputs = self.model(x)
-        # La antrenare, Inception returnează un obiect cu 2 ieșiri. Noi o dăm mai departe doar pe prima.
+        # La antrenare, Inception returneaza un obiect cu 2 iesiri. Noi o dam mai departe doar pe prima.
         if self.training:
-            return outputs[0]  # outputs[0] reprezintă predicția principală (logits)
-        # La validare, returnează oricum o singură ieșire
+            return outputs[0]  # outputs[0] reprezinta predictia principala (logits)
+        # La validare, returneaza oricum o singura iesire
         return outputs
 
 
@@ -41,7 +41,7 @@ class InceptionWrapper(nn.Module):
 class FocalLossMultiClass(nn.Module):
     """
     Focal Loss adaptat pentru clasificare multi-clasa.
-    Acceptă predicții de forma [Batch, Clase] și etichete standard (indici) de forma [Batch].
+    Accepta predictii de forma [Batch, Clase] si etichete standard (indici) de forma [Batch].
     """
     def __init__(self, alpha=None, gamma=1.5, reduction='mean'):
         super(FocalLossMultiClass, self).__init__()
@@ -50,7 +50,7 @@ class FocalLossMultiClass(nn.Module):
         self.reduction = reduction
 
     def forward(self, inputs, targets):
-        # Calculăm direct Cross Entropy (care știe să citească indicii claselor)
+        # Calculam direct Cross Entropy (care stie sa citeasca indicii claselor)
         ce_loss = F.cross_entropy(inputs, targets, weight=self.alpha, reduction='none')
         pt = torch.exp(-ce_loss)
         focal_loss = ((1 - pt) ** self.gamma) * ce_loss
@@ -105,13 +105,13 @@ def get_model(model_name, num_classes=5, pretrained=True):
     return model
 
 # ==============================================================================
-# 3. FABRICA DE LOSS-URI ȘI PREDICȚII (Totul se întâmplă aici)
+# 3. FABRICA DE LOSS-URI SI PREDICTII (Totul se intampla aici)
 # ==============================================================================
 def get_loss_function(loss_name, class_weights=None, device='cuda', gamma=1.5):
     loss_name = loss_name.lower()
     
     # -----------------------------------------------------------------
-    # REPARAT: Transformăm lista venită din consolă într-un Tensor
+    # REPARAT: Transformam lista venita din consola intr-un Tensor
     # -----------------------------------------------------------------
     if class_weights is not None and isinstance(class_weights, list):
         class_weights = torch.tensor(class_weights, dtype=torch.float)
@@ -120,7 +120,7 @@ def get_loss_function(loss_name, class_weights=None, device='cuda', gamma=1.5):
         return nn.BCEWithLogitsLoss()
         
     elif loss_name == 'focal_loss':
-        # Trimitem ponderile pe GPU (dacă există) pentru Focal Loss
+        # Trimitem ponderile pe GPU (daca exista) pentru Focal Loss
         alpha_tensor = class_weights.to(device) if class_weights is not None else None
         return FocalLossMultiClass(alpha=alpha_tensor, gamma=gamma)
         
@@ -129,8 +129,8 @@ def get_loss_function(loss_name, class_weights=None, device='cuda', gamma=1.5):
         
     elif loss_name == 'weighted_ce':
         if class_weights is None:
-            raise ValueError("Pentru Weighted CE, trebuie să trimiți '--class_weights'!")
-        # Acum class_weights este oficial un Tensor, deci .to(device) va funcționa perfect!
+            raise ValueError("Pentru Weighted CE, trebuie sa trimiti '--class_weights'!")
+        # Acum class_weights este oficial un Tensor, deci .to(device) va functiona perfect!
         return nn.CrossEntropyLoss(weight=class_weights.to(device))
         
     else:
@@ -139,35 +139,35 @@ def get_loss_function(loss_name, class_weights=None, device='cuda', gamma=1.5):
 
 def compute_loss(criterion, outputs, labels, loss_name, device):
     """
-    Calculează valoarea erorii. Gestionează automat transformările necesare 
-    pentru etichete (ex. transformarea în vectori ordinali).
+    Calculeaza valoarea erorii. Gestioneaza automat transformarile necesare
+    pentru etichete (ex. transformarea in vectori ordinali).
     """
     loss_name = loss_name.lower()
     
     if loss_name in ['bce_ordinal', 'ordinal']:
-        # Ordinal Regression necesită transformarea [2] -> [1, 1, 1, 0, 0]
+        # Ordinal Regression necesita transformarea [2] -> [1, 1, 1, 0, 0]
         levels = torch.arange(5).to(device)
         labels_ordinal = (labels.unsqueeze(1) >= levels).float()
         return criterion(outputs, labels_ordinal)
         
     else:
-        # Pentru CE, Weighted CE și noul Focal Loss, putem da etichetele exact așa cum vin (indici 0-4)
+        # Pentru CE, Weighted CE si noul Focal Loss, putem da etichetele exact asa cum vin (indici 0-4)
         return criterion(outputs, labels)
 
 
 def get_predictions(outputs, loss_name):
     """
-    Transformă ieșirea modelului (tensor de probabilități/logits) într-o etichetă finală (0, 1, 2, 3, 4).
+    Transforma iesirea modelului (tensor de probabilitati/logits) intr-o eticheta finala (0, 1, 2, 3, 4).
     """
     loss_name = loss_name.lower()
     
     if loss_name in ['bce_ordinal', 'ordinal']:
-        # Adunăm valorile care trec pragul de 0.0 (pragul implicit după BCEWithLogits)
+        # Adunam valorile care trec pragul de 0.0 (pragul implicit dupa BCEWithLogits)
         preds = (outputs > 0.0).sum(dim=1) - 1
         return torch.clamp(preds, min=0, max=4)
         
     else:
-        # Pentru CE, Weighted CE și Focal Loss, extragem direct valoarea maximă
+        # Pentru CE, Weighted CE si Focal Loss, extragem direct valoarea maxima
         return torch.argmax(outputs, dim=1)
 
 # ==============================================================================
