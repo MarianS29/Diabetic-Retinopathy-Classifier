@@ -17,3 +17,6 @@
 *.toc
 *.pyc
 *.pyc
+*.bbl
+*.blg
+*.fls

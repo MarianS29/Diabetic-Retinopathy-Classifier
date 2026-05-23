@@ -38,6 +38,7 @@ import my_dataset as my_dataset_module
 
 my_dataset_module = importlib.reload(my_dataset_module)
 EXPERIMENTS = my_dataset_module.EXPERIMENTS
+DATA_SOURCES = my_dataset_module.DATA_SOURCES
 make_dataset = my_dataset_module.make_dataset
 resolve_experiment = my_dataset_module.resolve_experiment
 
@@ -59,6 +60,25 @@ def parse_args():
     parser.add_argument('--num_workers', type=int, default=0)
     parser.add_argument('--class_weights', type=float, nargs='+', default=None)
     parser.add_argument('--gamma', type=float, default=1.5, help='Valoarea gamma pentru Focal Loss (daca este selectat).')
+    parser.add_argument(
+        '--train_augment',
+        type=str,
+        default='basic',
+        choices=['basic', 'none'],
+        help='Augmentare online pentru split-ul train. basic pastreaza comportamentul vechi; none aplica doar resize/tensor/normalizare.',
+    )
+    parser.add_argument(
+        '--early_stopping_patience',
+        type=int,
+        default=0,
+        help='Opreste antrenarea dupa N epoci fara imbunatatire. 0 dezactiveaza early stopping.',
+    )
+    parser.add_argument(
+        '--early_stopping_min_delta',
+        type=float,
+        default=0.0,
+        help='Imbunatatirea minima a metricii monitorizate necesara pentru resetarea patience.',
+    )
 
     parser.add_argument(
         '--experiment',
@@ -71,15 +91,23 @@ def parse_args():
         '--train_source',
         type=str,
         default='balanced',
-        choices=['balanced', 'aptos', 'combined'],
+        choices=DATA_SOURCES,
         help='Sursa pentru train/val daca nu folosesti --experiment.',
     )
     parser.add_argument(
         '--test_source',
         type=str,
         default='balanced',
-        choices=['balanced', 'aptos', 'combined'],
+        choices=DATA_SOURCES,
         help='Sursa pentru test daca nu folosesti --experiment.',
+    )
+    parser.add_argument(
+        '--test_sources',
+        type=str,
+        nargs='+',
+        default=None,
+        choices=DATA_SOURCES,
+        help='Optional: ruleaza testarea finala pe mai multe surse, in aceeasi antrenare. Ex: --test_sources aptos balanced',
     )
     parser.add_argument(
         '--root_dir',
@@ -88,6 +116,12 @@ def parse_args():
         help='Compatibilitate veche: radacina pentru Diabetic_Balanced_Data.',
     )
     parser.add_argument('--balanced_root', type=str, default=None)
+    parser.add_argument(
+        '--balanced_aug_root',
+        type=str,
+        default=None,
+        help='Radacina pentru Diabetic_Balanced_Aug_Ben_Graham, cu structura train/val/test/0..4.',
+    )
     parser.add_argument(
         '--aptos_root',
         type=str,
@@ -386,13 +420,98 @@ def evaluate(model, data_loader, criterion, loss_name, device, desc):
     return avg_loss, acc, auc, all_preds, all_labels, all_probs
 
 
+def make_result_base_name(base_name, test_source, use_test_suffix):
+    if not use_test_suffix:
+        return base_name
+    safe_test_source = test_source.replace('+', '_').replace('/', '_').replace('\\', '_')
+    return f"{base_name}_test_{safe_test_source}"
+
+
+def run_final_test(
+    model,
+    test_source,
+    test_loader,
+    criterion,
+    args,
+    device,
+    base_name,
+    grafice_dir,
+    use_test_suffix,
+):
+    result_base_name = make_result_base_name(base_name, test_source, use_test_suffix)
+
+    print("\n" + "=" * 50)
+    print(f"START TEST FINAL: {test_source}")
+    print("=" * 50)
+
+    test_loss, test_acc, test_auc, test_preds, test_labels, test_probs = evaluate(
+        model,
+        test_loader,
+        criterion,
+        args.loss_name,
+        device,
+        desc=f"Testare model [{test_source}]",
+    )
+
+    print("Rezultate testare finala:")
+    print(f"   Dataset test: {test_source}")
+    print(f"   Acuratete: {test_acc * 100:.2f}%")
+    print(f"   Scor AUC:  {test_auc:.4f}")
+    print(f"   Loss:      {test_loss:.4f}\n")
+
+    print("Classification report:")
+    prf1_path, report_path, metrics_path, report = save_precision_recall_f1(
+        test_labels,
+        test_preds,
+        result_base_name,
+        grafice_dir,
+        show=True
+    )
+    print(report)
+
+    cm_path = os.path.join(grafice_dir, f"cm_{result_base_name}.png")
+    save_confusion_matrix(test_labels, test_preds, cm_path, normalized=False, show=True)
+
+    cm_norm_path = os.path.join(grafice_dir, f"cm_norm_{result_base_name}.png")
+    save_confusion_matrix(test_labels, test_preds, cm_norm_path, normalized=True, show=True)
+
+    roc_path = save_roc_curve(test_labels, test_probs, result_base_name, grafice_dir, show=True)
+    gradcam_path = save_gradcam_overlay(model, test_loader, args.loss_name, device, result_base_name, grafice_dir, show=True)
+
+    print(f"Rezultate pentru test={test_source}:")
+    print(f"Matrice confuzie: {cm_path}")
+    print(f"Matrice confuzie normalizata: {cm_norm_path}")
+    print(f"Precision/Recall/F1: {prf1_path}")
+    print(f"Raport clasificare: {report_path}")
+    print(f"Metrici CSV: {metrics_path}")
+    print(f"ROC curve: {roc_path}")
+    if gradcam_path:
+        print(f"Grad-CAM overlay: {gradcam_path}")
+
+    return {
+        'source': test_source,
+        'loss': test_loss,
+        'acc': test_acc,
+        'auc': test_auc,
+        'cm_path': cm_path,
+        'cm_norm_path': cm_norm_path,
+        'prf1_path': prf1_path,
+        'report_path': report_path,
+        'metrics_path': metrics_path,
+        'roc_path': roc_path,
+        'gradcam_path': gradcam_path,
+    }
+
+
 def main():
     args = parse_args()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     balanced_root = args.balanced_root or args.root_dir or os.path.join(PROJECT_ROOT, 'datasets', 'Diabetic_Balanced_Data')
+    balanced_aug_root = args.balanced_aug_root or os.path.join(PROJECT_ROOT, 'datasets', 'Diabetic_Balanced_Aug_Ben_Graham')
     aptos_root = args.aptos_root or os.path.join(PROJECT_ROOT, 'datasets', 'aptos', 'aptos_ben_graham_matched') # sau aptos_ben_graham
     train_source, test_source = resolve_experiment(args.experiment, args.train_source, args.test_source)
+    test_sources = args.test_sources or [test_source]
     val_source = train_source
     experiment_name = args.experiment or f"{train_source}_to_{test_source}"
 
@@ -403,8 +522,10 @@ def main():
     os.makedirs(grafice_dir, exist_ok=True)
 
     print(f"Config: {args.model} | Loss: {args.loss_name} | Opt: {args.optimizer} | LR: {args.lr}")
-    print(f"Experiment: {experiment_name} | TRAIN/VAL={train_source} | TEST={test_source}")
+    print(f"Experiment: {experiment_name} | TRAIN/VAL={train_source} | TEST={', '.join(test_sources)}")
+    print(f"Train augment: {args.train_augment}")
     print(f"Balanced root: {balanced_root}")
+    print(f"Balanced Aug root: {balanced_aug_root}")
     print(f"APTOS root:    {aptos_root}")
 
     train_ds = make_dataset(
@@ -413,6 +534,8 @@ def main():
         image_size=args.img_size,
         balanced_root=balanced_root,
         aptos_root=aptos_root,
+        balanced_aug_root=balanced_aug_root,
+        train_augment=args.train_augment,
     )
     val_ds = make_dataset(
         val_source,
@@ -420,23 +543,33 @@ def main():
         image_size=args.img_size,
         balanced_root=balanced_root,
         aptos_root=aptos_root,
+        balanced_aug_root=balanced_aug_root,
+        train_augment=args.train_augment,
     )
-    test_ds = make_dataset(
-        test_source,
-        split='test',
-        image_size=args.img_size,
-        balanced_root=balanced_root,
-        aptos_root=aptos_root,
-    )
+    test_datasets = {}
+    for current_test_source in test_sources:
+        test_datasets[current_test_source] = make_dataset(
+            current_test_source,
+            split='test',
+            image_size=args.img_size,
+            balanced_root=balanced_root,
+            aptos_root=aptos_root,
+            balanced_aug_root=balanced_aug_root,
+            train_augment=args.train_augment,
+        )
 
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
     val_loader = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
-    test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
+    test_loaders = {
+        current_test_source: DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
+        for current_test_source, test_ds in test_datasets.items()
+    }
 
     # Daca avem focal loss, afisam valoarea gamma
     if args.loss_name == 'focal_loss':
         print(f"Focal Loss activat cu gamma={args.gamma}")
-    print(f"Distributie date: TRAIN={len(train_ds)} | VALIDARE={len(val_ds)} | TESTARE={len(test_ds)}")
+    test_sizes = ' | '.join([f"TESTARE[{source}]={len(dataset)}" for source, dataset in test_datasets.items()])
+    print(f"Distributie date: TRAIN={len(train_ds)} | VALIDARE={len(val_ds)} | {test_sizes}")
 
     model = get_model(args.model, num_classes=5).to(device)
     criterion = get_loss_function(args.loss_name, class_weights=args.class_weights, device=device, gamma=args.gamma)
@@ -445,6 +578,9 @@ def main():
 
     history = {'train_loss': [], 'val_loss': [], 'val_acc': [], 'val_auc': []}
     best_metric = 0.0
+    epochs_without_improvement = 0
+    stopped_early = False
+    stopped_epoch = None
     base_name = f"{experiment_name}_{args.model}_{args.loss_name}_{args.optimizer}_LR_{args.lr}_Gamma_{args.gamma}"
     model_path = os.path.join(modele_dir, f"best_{base_name}.pth")
 
@@ -483,10 +619,13 @@ def main():
         scheduler.step(val_auc)
         metric = val_acc if args.loss_name == 'bce_ordinal' else val_auc
         marker = ""
-        if metric > best_metric:
+        if metric > best_metric + args.early_stopping_min_delta:
             best_metric = metric
+            epochs_without_improvement = 0
             torch.save(model.state_dict(), model_path)
             marker = "NOU BEST"
+        else:
+            epochs_without_improvement += 1
 
         print(
             f"Ep {epoch + 1:02d}/{args.epochs} | "
@@ -494,35 +633,21 @@ def main():
             f"V_Acc: {val_acc * 100:.1f}% | V_AUC: {val_auc:.4f} {marker}"
         )
         print(f"Durata epoca: {(time.time() - start_time) / 60:.2f} min")
-
-    print("\n" + "=" * 50)
-    print(f"START TEST FINAL: {test_source}")
-    print("=" * 50)
+        if args.early_stopping_patience > 0:
+            print(
+                f"Early stopping: {epochs_without_improvement}/"
+                f"{args.early_stopping_patience} epoci fara imbunatatire"
+            )
+            if epochs_without_improvement >= args.early_stopping_patience:
+                stopped_early = True
+                stopped_epoch = epoch + 1
+                print(
+                    f"Early stopping activat la epoca {stopped_epoch}. "
+                    f"Cea mai buna metrica: {best_metric:.4f}"
+                )
+                break
 
     model.load_state_dict(torch.load(model_path, map_location=device))
-    test_loss, test_acc, test_auc, test_preds, test_labels, test_probs = evaluate(
-        model,
-        test_loader,
-        criterion,
-        args.loss_name,
-        device,
-        desc="Testare model",
-    )
-
-    print("Rezultate testare finala:")
-    print(f"   Acuratete: {test_acc * 100:.2f}%")
-    print(f"   Scor AUC:  {test_auc:.4f}")
-    print(f"   Loss:      {test_loss:.4f}\n")
-
-    print("Classification report:")
-    prf1_path, report_path, metrics_path, report = save_precision_recall_f1(
-        test_labels,
-        test_preds,
-        base_name,
-        grafice_dir,
-        show=True
-    )
-    print(report)
 
     # Afisare grafice de acuratete, loss, AUC, matricile de confuzie (normala + normalizata), Grad-CAM, curba ROC
     # Am adaugat paramtetrul show=True ca sa apara pozele dupa testare
@@ -539,29 +664,35 @@ def main():
     auc_path = os.path.join(grafice_dir, f"auc_{base_name}.png")
     save_line_plot(history['val_auc'], 'Scor AUC Validare', 'AUC', auc_path, color='green', label='Val AUC', show=True)
 
-    cm_path = os.path.join(grafice_dir, f"cm_{base_name}.png")
-    save_confusion_matrix(test_labels, test_preds, cm_path, normalized=False, show=True)
-
-    cm_norm_path = os.path.join(grafice_dir, f"cm_norm_{base_name}.png")
-    save_confusion_matrix(test_labels, test_preds, cm_norm_path, normalized=True, show=True)
-
-    roc_path = save_roc_curve(test_labels, test_probs, base_name, grafice_dir, show=True)
-    
-    gradcam_path = save_gradcam_overlay(model, test_loader, args.loss_name, device, base_name, grafice_dir, show=True)
+    use_test_suffix = len(test_loaders) > 1
+    test_results = []
+    for current_test_source, current_test_loader in test_loaders.items():
+        test_results.append(run_final_test(
+            model=model,
+            test_source=current_test_source,
+            test_loader=current_test_loader,
+            criterion=criterion,
+            args=args,
+            device=device,
+            base_name=base_name,
+            grafice_dir=grafice_dir,
+            use_test_suffix=use_test_suffix,
+        ))
 
     print(f"\nGata. Model: {model_path}")
     print(f"Grafic evolutie combinat: {history_path}")
     print(f"Grafic loss: {loss_path}")
     print(f"Grafic acuratete: {acc_path}")
     print(f"Grafic AUC: {auc_path}")
-    print(f"Matrice confuzie: {cm_path}")
-    print(f"Matrice confuzie normalizata: {cm_norm_path}")
-    print(f"Precision/Recall/F1: {prf1_path}")
-    print(f"Raport clasificare: {report_path}")
-    print(f"Metrici CSV: {metrics_path}")
-    print(f"ROC curve: {roc_path}")
-    if gradcam_path:
-        print(f"Grad-CAM overlay: {gradcam_path}")
+    if stopped_early:
+        print(f"Antrenare oprita anticipat la epoca {stopped_epoch}/{args.epochs}.")
+    if len(test_results) > 1:
+        print("Rezumat testari finale:")
+        for result in test_results:
+            print(
+                f"   {result['source']}: "
+                f"Acc={result['acc'] * 100:.2f}% | AUC={result['auc']:.4f} | Loss={result['loss']:.4f}"
+            )
 
 
 if __name__ == '__main__':

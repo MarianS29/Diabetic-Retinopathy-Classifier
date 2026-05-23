@@ -15,13 +15,30 @@ EXPERIMENTS = {
     'balanced_aptos_to_balanced': ('combined', 'balanced'),
     'aptos_to_balanced': ('aptos', 'balanced'),
     'aptos_to_balanced_aptos': ('aptos', 'combined'),
-    'balanced_to_aptos': ('balanced', 'aptos')
+    'balanced_to_aptos': ('balanced', 'aptos'),
+    'balanced_aug_to_balanced_aug': ('balanced_aug', 'balanced_aug'),
+    'balanced_aug_aptos_to_balanced_aug_aptos': ('balanced_aug_aptos', 'balanced_aug_aptos'),
+    'balanced_aug_aptos_to_aptos': ('balanced_aug_aptos', 'aptos'),
+    'balanced_aug_aptos_to_balanced_aug': ('balanced_aug_aptos', 'balanced_aug'),
 }
 
+DATA_SOURCES = [
+    'balanced',
+    'balanced_aug',
+    'aptos',
+    'combined',
+    'balanced_aptos',
+    'balanced_aug_aptos',
+    'diabetic_balanced_data+aptos',
+    'diabetic_balanced_aug+aptos',
+]
 
-def default_transform(split='train', image_size=224):
+
+def default_transform(split='train', image_size=224, train_augment='basic'):
     split = split.lower()
-    if split == 'train':
+    train_augment = train_augment.lower()
+
+    if split == 'train' and train_augment == 'basic':
         return T.Compose([
             T.Resize((image_size, image_size)),
             T.RandomHorizontalFlip(p=0.5),
@@ -40,7 +57,7 @@ def default_transform(split='train', image_size=224):
 
 
 class BalancedDRDataset(Dataset):
-    def __init__(self, root_dir, split='train', image_size=224, transform=None):
+    def __init__(self, root_dir, split='train', image_size=224, transform=None, train_augment='basic'):
         self.root_dir = root_dir
         self.split = split.lower()
         self.image_size = image_size
@@ -61,7 +78,7 @@ class BalancedDRDataset(Dataset):
                     self.image_paths.append(os.path.join(class_folder, img_name))
                     self.labels.append(class_id)
 
-        self.transform = transform or default_transform(self.split, self.image_size)
+        self.transform = transform or default_transform(self.split, self.image_size, train_augment=train_augment)
 
     def __len__(self):
         return len(self.image_paths)
@@ -92,20 +109,35 @@ def make_dataset(
     image_size,
     balanced_root,
     aptos_root,
+    balanced_aug_root=None,
+    train_augment='basic',
 ):
     source = source.lower()
     split = split.lower()
 
     if source == 'balanced':
-        return BalancedDRDataset(balanced_root, split=split, image_size=image_size)
+        return BalancedDRDataset(balanced_root, split=split, image_size=image_size, train_augment=train_augment)
+
+    if source == 'balanced_aug':
+        if balanced_aug_root is None:
+            raise ValueError("balanced_aug_root trebuie setat pentru sursa 'balanced_aug'.")
+        return BalancedDRDataset(balanced_aug_root, split=split, image_size=image_size, train_augment=train_augment)
 
     if source == 'aptos':
-        return AptosDRDataset(aptos_root, split=split, image_size=image_size)
+        return AptosDRDataset(aptos_root, split=split, image_size=image_size, train_augment=train_augment)
 
     if source in ('combined', 'balanced_aptos', 'diabetic_balanced_data+aptos'):
         return ConcatDataset([
-            BalancedDRDataset(balanced_root, split=split, image_size=image_size),
-            AptosDRDataset(aptos_root, split=split, image_size=image_size),
+            BalancedDRDataset(balanced_root, split=split, image_size=image_size, train_augment=train_augment),
+            AptosDRDataset(aptos_root, split=split, image_size=image_size, train_augment=train_augment),
+        ])
+
+    if source in ('balanced_aug_aptos', 'diabetic_balanced_aug+aptos'):
+        if balanced_aug_root is None:
+            raise ValueError("balanced_aug_root trebuie setat pentru sursa 'balanced_aug_aptos'.")
+        return ConcatDataset([
+            BalancedDRDataset(balanced_aug_root, split=split, image_size=image_size, train_augment=train_augment),
+            AptosDRDataset(aptos_root, split=split, image_size=image_size, train_augment=train_augment),
         ])
 
     raise ValueError(f"Sursa de date necunoscuta: {source}")
