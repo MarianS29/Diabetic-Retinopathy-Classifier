@@ -1753,9 +1753,20 @@ Hiperparametrii sunt transmiși prin linia de comandă în \texttt{train.py}. Pr
 importanți se află \texttt{model}, \texttt{loss\_name}, \texttt{optimizer}, \texttt{epochs},
 \texttt{batch\_size}, \texttt{lr}, \texttt{img\_size}, \texttt{num\_workers},
 \texttt{gamma}, \texttt{train\_source}, \texttt{test\_source} și \texttt{test\_sources}.
-Scriptul folosește și un scheduler de tip \texttt{ReduceLROnPlateau},
-care reduce rata de învățare atunci când AUC-ul de validare nu se
-mai îmbunătățește.
+Pentru experimentele recente au fost adăugați parametri suplimentari, precum
+\texttt{monitor\_metric}, \texttt{scheduler}, \texttt{amp}, \texttt{grad\_clip},
+\texttt{ema\_decay}, \texttt{tta\_eval}, \texttt{model\_dropout},
+\texttt{freeze\_backbone\_epochs}, \texttt{backbone\_lr\_mult} și
+\texttt{train\_augment}.
+Aceștia permit control mai fin asupra criteriului de selecție,
+stabilității antrenării și modului de fine-tuning.
+\bigskip
+
+Scheduler-ul poate fi selectat între \texttt{plateau}, \texttt{cosine} și \texttt{none}.
+În varianta \texttt{plateau}, rata de învățare este redusă atunci când metrica
+monitorizată nu se mai îmbunătățește. În experimentele recente, metrica monitorizată
+poate fi aleasă explicit, ceea ce permite salvarea modelului în funcție de
+AUC, acuratețe, balanced accuracy, macro F1 sau quadratic weighted kappa.
 
 \section{Strategia de evaluare}
 
@@ -1770,11 +1781,18 @@ pentru ca testarea să rămână o evaluare cât mai obiectivă a modelului
 ales.
 \bigskip
 
-Metricile urmărite sunt funcția de pierdere, acuratețea, AUC-ul multiclasă, raportul de clasificare,
-matricea de confuzie și curbele ROC. AUC-ul este calculat în regim one-vs-rest
-și mediat macro, astfel încât fiecare clasă să contribuie egal la scorul
-final. În plus, scriptul include generarea de hărți Grad-CAM, utile pentru a
-observa regiunile imaginii care influențează predicția modelului.
+Metricile urmărite sunt funcția de pierdere, acuratețea, AUC-ul multiclasă, balanced accuracy,
+macro F1, quadratic weighted kappa, raportul de clasificare, matricea de confuzie și
+curbele ROC. AUC-ul este calculat în regim one-vs-rest și mediat macro,
+astfel încât fiecare clasă să contribuie egal la scorul final.
+\bigskip
+
+Pentru retinopatia diabetică, quadratic weighted kappa este relevantă deoarece clasele au
+o ordine naturală. O eroare între două clase vecine este mai puțin gravă
+decât o eroare între clase îndepărtate, iar această metrică penalizează mai puternic
+diferențele mari de severitate. Din acest motiv, experimentele recente folosesc frecvent
+\texttt{qwk} ca metrică de monitorizare. În plus, scriptul include generarea de hărți
+Grad-CAM, utile pentru a observa regiunile imaginii care influențează predicția modelului.
 
 \section{Implementarea procesului de antrenare}
 
@@ -1793,6 +1811,35 @@ scriptul generează graficele de istoric, matricea de confuzie, curbele ROC și,
 când este posibil, imaginile Grad-CAM. În cazul evaluării pe mai multe surse
 de test, fiecare set primește fișiere separate, marcate în nume prin sufixe
 precum \texttt{test\_aptos}, \texttt{test\_balanced} sau \texttt{test\_balanced\_aug}.
+\bigskip
+
+Pentru seturile care conțin deja imagini augmentate sau preprocesate, scriptul permite
+dezactivarea augmentărilor online prin \texttt{train\_augment=none}. Această opțiune evită aplicarea dublă
+a augmentărilor în experimentele recente, păstrând în același timp comportamentul vechi prin
+valoarea implicită \texttt{train\_augment=basic}.
+
+\section{Optimizări recente ale protocolului experimental}
+
+\ \ \ \ Pentru experimentele finale au fost introduse mai multe optimizări care nu modifică
+dataset-urile, ci procesul de antrenare și evaluare. Prima optimizare este folosirea
+mixed precision prin \texttt{torch.amp}, care reduce consumul de memorie și poate accelera
+antrenarea pe GPU. A doua este gradient clipping, folosit pentru a limita
+actualizările foarte mari ale parametrilor și pentru a crește stabilitatea.
+\bigskip
+
+A fost introdusă și media exponențială a ponderilor modelului, prin parametrul
+\texttt{ema\_decay}. Modelul EMA păstrează o versiune netezită a parametrilor și poate produce
+predicții mai stabile la validare și testare. Pentru evaluare a fost adăugat
+\texttt{tta\_eval}, care aplică test-time augmentation prin combinarea predicției pe imaginea originală
+cu predicția pe imaginea oglindită orizontal.
+\bigskip
+
+Pentru ResNet50, aceste optimizări sunt folosite împreună cu Focal Loss și
+\texttt{gamma=1.6}. Configurația urmărește îmbunătățirea performanței fără a schimba arhitectura de bază.
+Pentru Inception-ResNet-V2, care reprezintă modelul principal vizat, protocolul include și fine-tuning
+gradual: înghețarea temporară a backbone-ului, rată de învățare mai mică pentru
+backbone, dropout configurabil și imagini de intrare mai mari. Aceste setări sunt
+menite să protejeze reprezentările preantrenate și să reducă supraînvățarea.
 
 
 \chapter{Rezultate experimentale}
@@ -1861,6 +1908,44 @@ este mărit față de experimentele inițiale, pentru a observa dacă modelele c
 să învețe după primele 15 epoci. Valorile marcate cu ``--'' reprezintă rezultate
 care urmează să fie completate după finalizarea antrenărilor.
 
+\bigskip
+
+După primele rulări, protocolul experimental a fost extins cu o variantă de
+antrenare mai robustă. Aceasta păstrează Focal Loss și valoarea \texttt{gamma=1.6}, dar
+adaugă monitorizare prin QWK, early stopping, mixed precision, gradient clipping, EMA,
+scheduler configurabil și test-time augmentation opțional. Scopul acestor modificări este creșterea
+stabilității și reducerea timpului pierdut în epoci în care modelul nu mai
+învață suficient.
+
+\begin{table}[H]
+\centering
+\caption{Experimente recente cu optimizări de antrenare}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{1.5cm}|p{2.7cm}|p{4.8cm}|p{3.5cm}|p{3.2cm}|}
+\hline
+\textbf{Exp.} & \textbf{Model} & \textbf{Configurație} & \textbf{Metrici urmărite} & \textbf{Status} \\
+\hline
+7-R & ResNet50 & Focal Loss, \texttt{gamma=1.6}, QWK monitor, AMP, grad clipping, EMA,
+early stopping, \texttt{train\_augment} configurabil, scheduler configurabil & Acc., AUC, QWK, macro F1, balanced acc. &
+în curs; valori de completat \\
+\hline
+8-I & Inception-ResNet-V2 & Focal Loss, imagini de intrare mai mari, AdamW,
+dropout configurabil, backbone înghețat temporar, LR diferențiat, AMP, EMA,
+\texttt{train\_augment} configurabil &
+Acc., AUC, QWK, macro F1, balanced acc. & în curs; valori de completat \\
+\hline
+\end{tabular}
+}
+\end{table}
+
+Rezultatele generate de script sunt salvate în subdirectoare separate, pentru a
+facilita compararea experimentelor. Matricele de confuzie, curbele ROC, graficele de loss,
+graficele de acuratețe, rapoartele de clasificare, imaginile Grad-CAM și graficele pentru
+QWK, macro F1 și balanced accuracy sunt grupate în directoare dedicate. Această
+organizare reduce riscul de amestecare a fișierelor atunci când sunt rulate mai
+multe configurații succesiv.
+
 \section{Evoluția funcției de pierdere}
 
 \ \ \ \ Evoluția funcției de pierdere indică stabilitatea procesului de învățare. În mod ideal,
@@ -1898,11 +1983,12 @@ folosind probabilitățile produse de softmax. Spre deosebire de acuratețe, AUC
 considerare ordonarea scorurilor și este mai potrivit pentru analiza separabilității.
 \bigskip
 
-În scriptul de antrenare, AUC-ul de validare este folosit ca metrică principală
-pentru salvarea modelului în majoritatea configurațiilor. Această alegere este justificată deoarece o
+În experimentele inițiale, AUC-ul de validare a fost folosit frecvent ca
+metrică principală pentru salvarea modelului. Această alegere este justificată deoarece o
 predicție medicală nu trebuie analizată doar ca etichetă finală, ci și prin
-distribuția probabilităților. Un model cu AUC ridicat poate separa bine clasele chiar
-și atunci când unele predicții finale rămân ambigue.
+distribuția probabilităților. În experimentele recente, criteriul de selecție a fost generalizat prin
+argumentul \texttt{monitor\_metric}. Astfel, modelul poate fi salvat și după QWK, macro F1,
+balanced accuracy sau acuratețe, în funcție de obiectivul experimentului.
 
 \section{Analiza curbelor ROC multiclasă}
 
@@ -1978,15 +2064,17 @@ diagnosticul medical.
 
 Rezultatul afișat include clasa prezisă, denumirea stadiului, nivelul de încredere, probabilitățile pentru
 fiecare clasă, timpul de inferență și recomandări orientative pentru medic și pacient.
-Aceste informații arată cum poate fi conectat un model antrenat la o
-interfață utilizabilă, nu doar la un script de evaluare.
+În versiunea recentă, interfața include și informații tehnice suplimentare despre model,
+pentru a susține analiza din perspectiva inginerului. Aceste informații arată cum poate
+fi conectat un model antrenat la o interfață utilizabilă, nu doar la
+un script de evaluare.
 
 \section{Arhitectura aplicației}
 
 \ \ \ \ Aplicația este organizată în două componente principale: un backend Flask și un
-frontend React. Backend-ul este responsabil pentru încărcarea modelului, preprocesarea imaginii și calcularea
-predicției. Frontend-ul este responsabil pentru interfața de utilizare, selecția modelului, încărcarea imaginii
-și afișarea rezultatului.
+frontend React. Backend-ul este responsabil pentru încărcarea modelului, verificarea și preprocesarea imaginii,
+precum și calcularea predicției. Frontend-ul este responsabil pentru interfața de utilizare,
+selecția modelului, încărcarea imaginii, vizualizarea 3D și afișarea rezultatului.
 \bigskip
 
 Cele două componente comunică prin cereri HTTP. Backend-ul expune endpoint-uri sub forma
@@ -2002,10 +2090,11 @@ modelului, backend-ul importă funcția \texttt{get\_model} din \texttt{builder.
 \bigskip
 
 Endpoint-ul \texttt{/api/models} returnează lista fișierelor \texttt{.pth} disponibile. Endpoint-ul \texttt{/api/predict} primește imaginea și
-numele modelului, verifică existența fișierului, aplică transformările necesare și rulează inferența. Imaginea
-este convertită în RGB, redimensionată la 224$\times$224, transformată în tensor și normalizată
-cu valorile ImageNet. Predicția este calculată cu \texttt{torch.no\_grad()}, iar probabilitățile sunt obținute
-prin softmax.
+numele modelului, verifică existența fișierului, aplică transformările necesare și rulează inferența. Dacă
+imaginea pare să fie o imagine brută, de exemplu din EyePACS, backend-ul aplică
+preprocesarea necesară înainte de inferență. Imaginea este convertită în RGB, redimensionată la
+dimensiunea așteptată de model, transformată în tensor și normalizată cu valorile ImageNet.
+Predicția este calculată cu \texttt{torch.no\_grad()}, iar probabilitățile sunt obținute prin softmax.
 
 \section{Componenta frontend}
 
@@ -2017,9 +2106,15 @@ model din listă, poate încărca o imagine și poate vizualiza o previzualizare
 
 După apăsarea butonului de analiză, frontend-ul construiește un obiect \texttt{FormData} care conține
 imaginea și numele modelului selectat. Răspunsul primit de la backend este afișat
-în două zone: una orientată spre rezultat clinic orientativ și una cu
-metadate tehnice, precum timpul de inferență, dispozitivul folosit și probabilitățile brute pentru
-cele cinci clase.
+în zone distincte pentru rezultat, recomandări și metadate tehnice. Aceste zone au
+fost echilibrate vizual pentru a avea dimensiuni comparabile și pentru a rămâne
+ușor de citit pe rezoluții diferite.
+\bigskip
+
+Interfața a fost adaptată pentru utilizare responsive și include un comutator pentru
+modul light/dark. De asemenea, aplicația conține o vizualizare 3D a imaginii originale
+încărcate, nu a imaginii preprocesate. Utilizatorul poate roti obiectul cu mouse-ul,
+ceea ce oferă o reprezentare interactivă a fundului de ochi în interiorul aplicației.
 
 \section{Fluxul de utilizare}
 
@@ -2050,8 +2145,8 @@ coerența între antrenare și inferență.
 \section{Limitări practice ale aplicației}
 
 \ \ \ \ Aplicația are rol demonstrativ și prezintă mai multe limitări. În primul rând,
-nu verifică dacă imaginea încărcată este într-adevăr o imagine de fund de
-ochi sau dacă are o calitate suficientă pentru diagnostic. În al doilea
+verificarea preprocesării nu este echivalentă cu validarea medicală a imaginii și nu
+garantează că imaginea are o calitate suficientă pentru diagnostic. În al doilea
 rând, modelul este încărcat la fiecare cerere, ceea ce este simplu pentru
 testare, dar ineficient pentru producție.
 \bigskip
