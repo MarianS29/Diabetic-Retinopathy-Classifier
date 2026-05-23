@@ -1,4 +1,4 @@
-import torch
+﻿import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
@@ -65,7 +65,7 @@ class FocalLossMultiClass(nn.Module):
 # ==============================================================================
 # 2. FABRICA DE MODELE
 # ==============================================================================
-def get_model(model_name, num_classes=5, pretrained=True):
+def get_model(model_name, num_classes=5, pretrained=True, drop_rate=0.0):
     """
     Fabrica de modele. Toate au strat final modificat pentru num_classes.
     """
@@ -80,7 +80,7 @@ def get_model(model_name, num_classes=5, pretrained=True):
             nn.Linear(num_ftrs, num_classes)
         )
 
-    elif model_name == 'efficientnet_b3':
+    elif model_name == 'efficientnet_b3': # TODO adauga experiment cu asta, daca timpul permite
         weights = models.EfficientNet_B3_Weights.DEFAULT if pretrained else None
         model = models.efficientnet_b3(weights=weights)
         in_features = model.classifier[1].in_features
@@ -97,7 +97,12 @@ def get_model(model_name, num_classes=5, pretrained=True):
             raise ImportError(
                 "Modelul incres_v2 necesita pachetul 'timm'. Instaleaza-l cu: pip install timm"
             )
-        model = timm.create_model('inception_resnet_v2', pretrained=pretrained, num_classes=num_classes)
+        model = timm.create_model(
+            'inception_resnet_v2',
+            pretrained=pretrained,
+            num_classes=num_classes,
+            drop_rate=drop_rate,
+        )
 
     else:
         raise ValueError(f"Modelul {model_name} nu este suportat!")
@@ -170,17 +175,65 @@ def get_predictions(outputs, loss_name):
         # Pentru CE, Weighted CE si Focal Loss, extragem direct valoarea maxima
         return torch.argmax(outputs, dim=1)
 
+HEAD_PARAM_KEYWORDS = (
+    'fc',
+    'classifier',
+    'classif',
+    'head',
+    'last_linear',
+    'logits',
+)
+
+
+def is_head_parameter(name):
+    lowered = name.lower()
+    return any(keyword in lowered for keyword in HEAD_PARAM_KEYWORDS)
+
+
+def set_backbone_trainable(model, trainable):
+    for name, param in model.named_parameters():
+        if not is_head_parameter(name):
+            param.requires_grad = trainable
+
+
+def count_trainable_parameters(model):
+    return sum(param.numel() for param in model.parameters() if param.requires_grad)
+
+
+def get_optimizer_params(model, lr, backbone_lr_mult=1.0):
+    if backbone_lr_mult == 1.0:
+        return model.parameters()
+
+    head_params = []
+    backbone_params = []
+    for name, param in model.named_parameters():
+        if is_head_parameter(name):
+            head_params.append(param)
+        else:
+            backbone_params.append(param)
+
+    return [
+        {'params': backbone_params, 'lr': lr * backbone_lr_mult},
+        {'params': head_params, 'lr': lr},
+    ]
+
+
+def format_lrs(optimizer):
+    return ', '.join([f"{group['lr']:.8f}" for group in optimizer.param_groups])
+
+
 # ==============================================================================
 # 4. FABRICA DE OPTIMIZATORI
 # ==============================================================================
-def get_optimizer(model, optimizer_name='adam', lr=1e-4):
+def get_optimizer(model, optimizer_name='adam', lr=1e-4, backbone_lr_mult=1.0):
     optimizer_name = optimizer_name.lower()
+    params = get_optimizer_params(model, lr, backbone_lr_mult=backbone_lr_mult)
     
     if optimizer_name == 'adam':
-        return optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+        return optim.Adam(params, lr=lr, weight_decay=1e-4)
     elif optimizer_name == 'adamw':
-        return optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
+        return optim.AdamW(params, lr=lr, weight_decay=1e-4)
     elif optimizer_name == 'sgd':
-        return optim.SGD(model.parameters(), lr=lr, momentum=0.9, weight_decay=1e-5)
+        return optim.SGD(params, lr=lr, momentum=0.9, weight_decay=1e-5)
     else:
         raise ValueError(f"Optimizatorul '{optimizer_name}' nu este suportat.")

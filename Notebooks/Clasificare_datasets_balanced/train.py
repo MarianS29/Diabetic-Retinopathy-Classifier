@@ -1,4 +1,4 @@
-import argparse
+﻿import argparse
 import importlib
 import os
 import sys
@@ -11,8 +11,11 @@ import torch
 import torch.nn.functional as F
 from sklearn.metrics import (
     auc,
+    balanced_accuracy_score,
     classification_report,
+    cohen_kappa_score,
     confusion_matrix,
+    f1_score,
     precision_recall_fscore_support,
     roc_auc_score,
     roc_curve,
@@ -33,7 +36,16 @@ PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, '..', '..'))
 if PARENT_DIR not in sys.path:
     sys.path.insert(0, PARENT_DIR)
 
-from builder import compute_loss, get_loss_function, get_model, get_optimizer, get_predictions
+from builder import (
+    compute_loss,
+    count_trainable_parameters,
+    format_lrs,
+    get_loss_function,
+    get_model,
+    get_optimizer,
+    get_predictions,
+    set_backbone_trainable,
+)
 import my_dataset as my_dataset_module
 
 my_dataset_module = importlib.reload(my_dataset_module)
@@ -46,6 +58,23 @@ resolve_experiment = my_dataset_module.resolve_experiment
 CLASS_NAMES = ['0', '1', '2', '3', '4']
 IMAGENET_MEAN = np.array([0.485, 0.456, 0.406])
 IMAGENET_STD = np.array([0.229, 0.224, 0.225])
+
+RESULT_SUBDIRS = {
+    'history': 'istoric',
+    'loss': 'loss',
+    'accuracy': 'acuratete',
+    'auc': 'auc',
+    'qwk': 'qwk',
+    'macro_f1': 'macro_f1',
+    'balanced_acc': 'balanced_accuracy',
+    'confusion': 'matrici_confuzie',
+    'classification_reports': 'rapoarte_clasificare',
+    'precision_recall_f1': 'precision_recall_f1',
+    'roc': 'roc',
+    'gradcam': 'gradcam',
+    'errors': 'erori',
+    'other': 'altele',
+}
 
 
 def parse_args():
@@ -60,6 +89,46 @@ def parse_args():
     parser.add_argument('--num_workers', type=int, default=0)
     parser.add_argument('--class_weights', type=float, nargs='+', default=None)
     parser.add_argument('--gamma', type=float, default=1.5, help='Valoarea gamma pentru Focal Loss (daca este selectat).')
+    parser.add_argument(
+        '--monitor_metric',
+        type=str,
+        default='qwk',
+        choices=['qwk', 'macro_f1', 'balanced_acc', 'auc', 'acc'],
+        help='Metrica folosita pentru checkpoint si early stopping.',
+    )
+    parser.add_argument(
+        '--scheduler',
+        type=str,
+        default='plateau',
+        choices=['plateau', 'cosine', 'none'],
+        help='Scheduler LR. plateau pastreaza comportamentul vechi; cosine e util pentru fine-tuning.',
+    )
+    parser.add_argument('--amp', action='store_true', help='Activeaza mixed precision pe CUDA.')
+    parser.add_argument('--grad_clip', type=float, default=0.0, help='Clip gradient norm. 0 dezactiveaza.')
+    parser.add_argument('--ema_decay', type=float, default=0.0, help='EMA pentru greutati. Ex: 0.999. 0 dezactiveaza.')
+    parser.add_argument(
+        '--model_dropout',
+        type=float,
+        default=0.0,
+        help='Dropout intern pentru modele timm, util pentru incres_v2. 0 pastreaza comportamentul implicit.',
+    )
+    parser.add_argument(
+        '--freeze_backbone_epochs',
+        type=int,
+        default=0,
+        help='Antreneaza doar head-ul in primele N epoci, apoi deblocheaza backbone-ul.',
+    )
+    parser.add_argument(
+        '--backbone_lr_mult',
+        type=float,
+        default=1.0,
+        help='Multiplicator LR pentru backbone. Ex: 0.1 inseamna backbone LR = lr * 0.1.',
+    )
+    parser.add_argument(
+        '--tta_eval',
+        action='store_true',
+        help='Activeaza TTA la validare/test pentru multiclass: original + horizontal flip.',
+    )
     parser.add_argument(
         '--train_augment',
         type=str,
@@ -131,9 +200,20 @@ def parse_args():
     return parser.parse_args()
 
 
+def make_results_dirs(grafice_dir):
+    dirs = {}
+    os.makedirs(grafice_dir, exist_ok=True)
+    for key, folder_name in RESULT_SUBDIRS.items():
+        path = os.path.join(grafice_dir, folder_name)
+        os.makedirs(path, exist_ok=True)
+        dirs[key] = path
+    return dirs
+
+
 # --- ADAUGAT FUNCTIA LIPSA PENTRU ISTORIC COMBINAT ---
 def save_combined_history(history, path, show=False):
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+    fig, axes = plt.subplots(2, 3, figsize=(18, 10))
+    axes = axes.ravel()
     
     axes[0].plot(history['train_loss'], label='Train Loss')
     axes[0].plot(history['val_loss'], label='Val Loss')
@@ -153,6 +233,24 @@ def save_combined_history(history, path, show=False):
     axes[2].set_xlabel('Epoca')
     axes[2].set_ylabel('AUC')
     axes[2].legend()
+
+    axes[3].plot(history['val_qwk'], label='Val QWK', color='purple')
+    axes[3].set_title('Istoric QWK (Val)')
+    axes[3].set_xlabel('Epoca')
+    axes[3].set_ylabel('QWK')
+    axes[3].legend()
+
+    axes[4].plot(history['val_macro_f1'], label='Val Macro F1', color='red')
+    axes[4].set_title('Istoric Macro F1 (Val)')
+    axes[4].set_xlabel('Epoca')
+    axes[4].set_ylabel('Macro F1')
+    axes[4].legend()
+
+    axes[5].plot(history['val_balanced_acc'], label='Val Balanced Acc', color='brown')
+    axes[5].set_title('Istoric Balanced Accuracy (Val)')
+    axes[5].set_xlabel('Epoca')
+    axes[5].set_ylabel('Balanced Accuracy')
+    axes[5].legend()
 
     plt.savefig(path, bbox_inches='tight')
     if show:
@@ -204,7 +302,7 @@ def save_confusion_matrix(labels, preds, path, normalized=False, show=False):
     plt.close()
 
 
-def save_precision_recall_f1(labels, preds, base_name, grafice_dir, show=False):
+def save_precision_recall_f1(labels, preds, base_name, results_dirs, show=False):
     precision, recall, f1, support = precision_recall_fscore_support(
         labels,
         preds,
@@ -227,7 +325,7 @@ def save_precision_recall_f1(labels, preds, base_name, grafice_dir, show=False):
     plt.legend()
     plt.grid(axis='y', alpha=0.25)
 
-    prf1_path = os.path.join(grafice_dir, f"prf1_{base_name}.png")
+    prf1_path = os.path.join(results_dirs['precision_recall_f1'], f"prf1_{base_name}.png")
     plt.savefig(prf1_path, bbox_inches='tight')
     if show:
         plt.show()
@@ -240,11 +338,11 @@ def save_precision_recall_f1(labels, preds, base_name, grafice_dir, show=False):
         target_names=CLASS_NAMES,
         zero_division=0,
     )
-    report_path = os.path.join(grafice_dir, f"classification_report_{base_name}.txt")
+    report_path = os.path.join(results_dirs['classification_reports'], f"classification_report_{base_name}.txt")
     with open(report_path, 'w', encoding='utf-8') as report_file:
         report_file.write(report)
 
-    metrics_path = os.path.join(grafice_dir, f"prf1_{base_name}.csv")
+    metrics_path = os.path.join(results_dirs['precision_recall_f1'], f"prf1_{base_name}.csv")
     with open(metrics_path, 'w', encoding='utf-8') as metrics_file:
         metrics_file.write('class,precision,recall,f1,support\n')
         for class_name, p, r, f, s in zip(CLASS_NAMES, precision, recall, f1, support):
@@ -253,7 +351,7 @@ def save_precision_recall_f1(labels, preds, base_name, grafice_dir, show=False):
     return prf1_path, report_path, metrics_path, report
 
 
-def save_roc_curve(labels, probs, base_name, grafice_dir, show=False):
+def save_roc_curve(labels, probs, base_name, results_dirs, show=False):
     labels = np.asarray(labels)
     probs = np.asarray(probs)
     y_true = label_binarize(labels, classes=list(range(5)))
@@ -287,7 +385,7 @@ def save_roc_curve(labels, probs, base_name, grafice_dir, show=False):
     plt.legend(loc='lower right')
     plt.grid(alpha=0.25)
 
-    roc_path = os.path.join(grafice_dir, f"roc_{base_name}.png")
+    roc_path = os.path.join(results_dirs['roc'], f"roc_{base_name}.png")
     plt.savefig(roc_path, bbox_inches='tight')
     if show:
         plt.show()
@@ -313,7 +411,7 @@ def denormalize_image(tensor):
     return np.clip(image, 0, 1)
 
 
-def save_gradcam_overlay(model, data_loader, loss_name, device, base_name, grafice_dir, show=False):
+def save_gradcam_overlay(model, data_loader, loss_name, device, base_name, results_dirs, show=False):
     try:
         layer_name, target_layer = find_last_conv_layer(model)
     except RuntimeError as error:
@@ -364,7 +462,7 @@ def save_gradcam_overlay(model, data_loader, loss_name, device, base_name, grafi
         heatmap = plt.cm.jet(cam)[..., :3]
         overlay = np.clip((0.55 * image) + (0.45 * heatmap), 0, 1)
 
-        gradcam_path = os.path.join(grafice_dir, f"gradcam_{base_name}.png")
+        gradcam_path = os.path.join(results_dirs['gradcam'], f"gradcam_{base_name}.png")
         plt.figure(figsize=(10, 4))
         plt.subplot(1, 2, 1)
         plt.imshow(image)
@@ -389,10 +487,66 @@ def save_gradcam_overlay(model, data_loader, loss_name, device, base_name, grafi
         backward_handle.remove()
 
 
-def evaluate(model, data_loader, criterion, loss_name, device, desc):
+class ModelEMA:
+    def __init__(self, model, decay):
+        self.decay = decay
+        self.shadow = {
+            name: param.detach().clone()
+            for name, param in model.state_dict().items()
+            if torch.is_floating_point(param)
+        }
+        self.backup = {}
+
+    @torch.no_grad()
+    def update(self, model):
+        model_state = model.state_dict()
+        for name, shadow_param in self.shadow.items():
+            shadow_param.mul_(self.decay).add_(model_state[name].detach(), alpha=1.0 - self.decay)
+
+    def apply_shadow(self, model):
+        self.backup = {}
+        model_state = model.state_dict()
+        for name, shadow_param in self.shadow.items():
+            self.backup[name] = model_state[name].detach().clone()
+            model_state[name].copy_(shadow_param)
+
+    def restore(self, model):
+        model_state = model.state_dict()
+        for name, backup_param in self.backup.items():
+            model_state[name].copy_(backup_param)
+        self.backup = {}
+
+
+def get_multiclass_outputs(model, imgs, use_tta=False):
+    outputs = model(imgs)
+    if not use_tta:
+        return outputs
+
+    flipped_outputs = model(torch.flip(imgs, dims=[3]))
+    return (outputs + flipped_outputs) / 2.0
+
+
+def compute_extra_metrics(labels, preds):
+    try:
+        qwk = cohen_kappa_score(labels, preds, weights='quadratic')
+    except Exception:
+        qwk = 0.0
+    try:
+        macro_f1 = f1_score(labels, preds, labels=list(range(5)), average='macro', zero_division=0)
+    except Exception:
+        macro_f1 = 0.0
+    try:
+        balanced_acc = balanced_accuracy_score(labels, preds)
+    except Exception:
+        balanced_acc = 0.0
+    return qwk, macro_f1, balanced_acc
+
+
+def evaluate(model, data_loader, criterion, loss_name, device, desc, use_tta=False):
     model.eval()
     total_loss, correct, total = 0.0, 0, 0
     all_preds, all_labels, all_probs = [], [], []
+    use_tta = use_tta and loss_name.lower() not in ['bce_ordinal', 'ordinal']
 
     with torch.no_grad():
         progress = tqdm(data_loader, desc=desc, leave=False)
@@ -400,15 +554,16 @@ def evaluate(model, data_loader, criterion, loss_name, device, desc):
             imgs, labels = imgs.to(device), labels.to(device)
             outputs = model(imgs)
             loss = compute_loss(criterion, outputs, labels, loss_name, device)
+            metric_outputs = get_multiclass_outputs(model, imgs, use_tta=use_tta)
 
             total_loss += loss.item()
-            preds = get_predictions(outputs, loss_name)
+            preds = get_predictions(metric_outputs, loss_name)
             correct += (preds == labels).sum().item()
             total += labels.size(0)
 
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
-            all_probs.extend(F.softmax(outputs, dim=1).cpu().numpy())
+            all_probs.extend(F.softmax(metric_outputs, dim=1).cpu().numpy())
 
     avg_loss = total_loss / max(len(data_loader), 1)
     acc = correct / max(total, 1)
@@ -416,8 +571,19 @@ def evaluate(model, data_loader, criterion, loss_name, device, desc):
         auc = roc_auc_score(all_labels, all_probs, multi_class='ovr', average='macro')
     except Exception:
         auc = 0.0
+    qwk, macro_f1, balanced_acc = compute_extra_metrics(all_labels, all_preds)
 
-    return avg_loss, acc, auc, all_preds, all_labels, all_probs
+    return avg_loss, acc, auc, qwk, macro_f1, balanced_acc, all_preds, all_labels, all_probs
+
+
+def select_metric(metrics, monitor_metric):
+    return {
+        'acc': metrics['acc'],
+        'auc': metrics['auc'],
+        'qwk': metrics['qwk'],
+        'macro_f1': metrics['macro_f1'],
+        'balanced_acc': metrics['balanced_acc'],
+    }[monitor_metric]
 
 
 def make_result_base_name(base_name, test_source, use_test_suffix):
@@ -435,7 +601,7 @@ def run_final_test(
     args,
     device,
     base_name,
-    grafice_dir,
+    results_dirs,
     use_test_suffix,
 ):
     result_base_name = make_result_base_name(base_name, test_source, use_test_suffix)
@@ -444,19 +610,23 @@ def run_final_test(
     print(f"START TEST FINAL: {test_source}")
     print("=" * 50)
 
-    test_loss, test_acc, test_auc, test_preds, test_labels, test_probs = evaluate(
+    test_loss, test_acc, test_auc, test_qwk, test_macro_f1, test_balanced_acc, test_preds, test_labels, test_probs = evaluate(
         model,
         test_loader,
         criterion,
         args.loss_name,
         device,
         desc=f"Testare model [{test_source}]",
+        use_tta=args.tta_eval,
     )
 
     print("Rezultate testare finala:")
     print(f"   Dataset test: {test_source}")
     print(f"   Acuratete: {test_acc * 100:.2f}%")
     print(f"   Scor AUC:  {test_auc:.4f}")
+    print(f"   QWK:       {test_qwk:.4f}")
+    print(f"   Macro F1:  {test_macro_f1:.4f}")
+    print(f"   Bal Acc:   {test_balanced_acc:.4f}")
     print(f"   Loss:      {test_loss:.4f}\n")
 
     print("Classification report:")
@@ -464,19 +634,19 @@ def run_final_test(
         test_labels,
         test_preds,
         result_base_name,
-        grafice_dir,
+        results_dirs,
         show=True
     )
     print(report)
 
-    cm_path = os.path.join(grafice_dir, f"cm_{result_base_name}.png")
+    cm_path = os.path.join(results_dirs['confusion'], f"cm_{result_base_name}.png")
     save_confusion_matrix(test_labels, test_preds, cm_path, normalized=False, show=True)
 
-    cm_norm_path = os.path.join(grafice_dir, f"cm_norm_{result_base_name}.png")
+    cm_norm_path = os.path.join(results_dirs['confusion'], f"cm_norm_{result_base_name}.png")
     save_confusion_matrix(test_labels, test_preds, cm_norm_path, normalized=True, show=True)
 
-    roc_path = save_roc_curve(test_labels, test_probs, result_base_name, grafice_dir, show=True)
-    gradcam_path = save_gradcam_overlay(model, test_loader, args.loss_name, device, result_base_name, grafice_dir, show=True)
+    roc_path = save_roc_curve(test_labels, test_probs, result_base_name, results_dirs, show=True)
+    gradcam_path = save_gradcam_overlay(model, test_loader, args.loss_name, device, result_base_name, results_dirs, show=True)
 
     print(f"Rezultate pentru test={test_source}:")
     print(f"Matrice confuzie: {cm_path}")
@@ -493,6 +663,9 @@ def run_final_test(
         'loss': test_loss,
         'acc': test_acc,
         'auc': test_auc,
+        'qwk': test_qwk,
+        'macro_f1': test_macro_f1,
+        'balanced_acc': test_balanced_acc,
         'cm_path': cm_path,
         'cm_norm_path': cm_norm_path,
         'prf1_path': prf1_path,
@@ -519,11 +692,22 @@ def main():
     modele_dir = os.path.join(rezultate_dir, "modele")
     grafice_dir = os.path.join(rezultate_dir, "grafice")
     os.makedirs(modele_dir, exist_ok=True)
-    os.makedirs(grafice_dir, exist_ok=True)
+    results_dirs = make_results_dirs(grafice_dir)
 
     print(f"Config: {args.model} | Loss: {args.loss_name} | Opt: {args.optimizer} | LR: {args.lr}")
     print(f"Experiment: {experiment_name} | TRAIN/VAL={train_source} | TEST={', '.join(test_sources)}")
     print(f"Train augment: {args.train_augment}")
+    print(f"Monitor metric: {args.monitor_metric} | Scheduler: {args.scheduler}")
+    print(f"AMP: {args.amp} | Grad clip: {args.grad_clip} | EMA decay: {args.ema_decay} | TTA eval: {args.tta_eval}")
+    print(
+        f"Model dropout: {args.model_dropout} | Freeze backbone epochs: {args.freeze_backbone_epochs} | "
+        f"Backbone LR mult: {args.backbone_lr_mult}"
+    )
+    if args.model.lower() == 'incres_v2' and args.img_size < 299:
+        print(
+            "Atentie: incres_v2 este de obicei folosit cu input >= 299. "
+            "Pentru rularea principala ia in calcul --img_size 299 sau 384."
+        )
     print(f"Balanced root: {balanced_root}")
     print(f"Balanced Aug root: {balanced_aug_root}")
     print(f"APTOS root:    {aptos_root}")
@@ -571,13 +755,40 @@ def main():
     test_sizes = ' | '.join([f"TESTARE[{source}]={len(dataset)}" for source, dataset in test_datasets.items()])
     print(f"Distributie date: TRAIN={len(train_ds)} | VALIDARE={len(val_ds)} | {test_sizes}")
 
-    model = get_model(args.model, num_classes=5).to(device)
+    model = get_model(args.model, num_classes=5, drop_rate=args.model_dropout).to(device)
+    if args.freeze_backbone_epochs > 0:
+        set_backbone_trainable(model, trainable=False)
+        print(
+            f"Backbone inghetat pentru primele {args.freeze_backbone_epochs} epoci. "
+            f"Parametri antrenabili initial: {count_trainable_parameters(model):,}"
+        )
     criterion = get_loss_function(args.loss_name, class_weights=args.class_weights, device=device, gamma=args.gamma)
-    optimizer = get_optimizer(model, optimizer_name=args.optimizer, lr=args.lr)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3)
+    optimizer = get_optimizer(
+        model,
+        optimizer_name=args.optimizer,
+        lr=args.lr,
+        backbone_lr_mult=args.backbone_lr_mult,
+    )
+    if args.scheduler == 'plateau':
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3)
+    elif args.scheduler == 'cosine':
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max(args.epochs, 1), eta_min=args.lr * 0.01)
+    else:
+        scheduler = None
+    use_amp = args.amp and device.type == 'cuda'
+    scaler = torch.amp.GradScaler(device.type, enabled=use_amp)
+    ema = ModelEMA(model, args.ema_decay) if args.ema_decay > 0 else None
 
-    history = {'train_loss': [], 'val_loss': [], 'val_acc': [], 'val_auc': []}
-    best_metric = 0.0
+    history = {
+        'train_loss': [],
+        'val_loss': [],
+        'val_acc': [],
+        'val_auc': [],
+        'val_qwk': [],
+        'val_macro_f1': [],
+        'val_balanced_acc': [],
+    }
+    best_metric = -float('inf')
     epochs_without_improvement = 0
     stopped_early = False
     stopped_epoch = None
@@ -586,43 +797,80 @@ def main():
 
     for epoch in range(args.epochs):
         start_time = time.time()
+        if args.freeze_backbone_epochs > 0 and epoch == args.freeze_backbone_epochs:
+            set_backbone_trainable(model, trainable=True)
+            print(
+                f"Backbone deblocat la epoca {epoch + 1}. "
+                f"Parametri antrenabili: {count_trainable_parameters(model):,}"
+            )
         model.train()
         train_loss = 0.0
 
         progress = tqdm(train_loader, desc=f"Ep {epoch + 1:02d} [TRAIN]", leave=False)
         for imgs, labels in progress:
             imgs, labels = imgs.to(device), labels.to(device)
-            optimizer.zero_grad()
-            outputs = model(imgs)
-            loss = compute_loss(criterion, outputs, labels, args.loss_name, device)
-            loss.backward()
-            optimizer.step()
+            optimizer.zero_grad(set_to_none=True)
+            with torch.amp.autocast(device.type, enabled=use_amp):
+                outputs = model(imgs)
+                loss = compute_loss(criterion, outputs, labels, args.loss_name, device)
+
+            scaler.scale(loss).backward()
+            if args.grad_clip > 0:
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
+            scaler.step(optimizer)
+            scaler.update()
+            if ema is not None:
+                ema.update(model)
 
             train_loss += loss.item()
             progress.set_postfix({'loss': f"{loss.item():.4f}"})
 
         epoch_train_loss = train_loss / max(len(train_loader), 1)
-        val_loss, val_acc, val_auc, _, _, _ = evaluate(
+        if ema is not None:
+            ema.apply_shadow(model)
+        val_loss, val_acc, val_auc, val_qwk, val_macro_f1, val_balanced_acc, _, _, _ = evaluate(
             model,
             val_loader,
             criterion,
             args.loss_name,
             device,
             desc=f"Ep {epoch + 1:02d} [VALID]",
+            use_tta=args.tta_eval,
         )
+        if ema is not None:
+            ema.restore(model)
 
         history['train_loss'].append(epoch_train_loss)
         history['val_loss'].append(val_loss)
         history['val_acc'].append(val_acc)
         history['val_auc'].append(val_auc)
+        history['val_qwk'].append(val_qwk)
+        history['val_macro_f1'].append(val_macro_f1)
+        history['val_balanced_acc'].append(val_balanced_acc)
 
-        scheduler.step(val_auc)
-        metric = val_acc if args.loss_name == 'bce_ordinal' else val_auc
+        metrics = {
+            'acc': val_acc,
+            'auc': val_auc,
+            'qwk': val_qwk,
+            'macro_f1': val_macro_f1,
+            'balanced_acc': val_balanced_acc,
+        }
+        metric = select_metric(metrics, args.monitor_metric)
+        if scheduler is not None:
+            if args.scheduler == 'plateau':
+                scheduler.step(metric)
+            else:
+                scheduler.step()
         marker = ""
         if metric > best_metric + args.early_stopping_min_delta:
             best_metric = metric
             epochs_without_improvement = 0
+            if ema is not None:
+                ema.apply_shadow(model)
             torch.save(model.state_dict(), model_path)
+            if ema is not None:
+                ema.restore(model)
             marker = "NOU BEST"
         else:
             epochs_without_improvement += 1
@@ -630,8 +878,11 @@ def main():
         print(
             f"Ep {epoch + 1:02d}/{args.epochs} | "
             f"T_Loss: {epoch_train_loss:.4f} | V_Loss: {val_loss:.4f} | "
-            f"V_Acc: {val_acc * 100:.1f}% | V_AUC: {val_auc:.4f} {marker}"
+            f"V_Acc: {val_acc * 100:.1f}% | V_AUC: {val_auc:.4f} | "
+            f"V_QWK: {val_qwk:.4f} | V_F1: {val_macro_f1:.4f} | "
+            f"V_BalAcc: {val_balanced_acc:.4f} | Best[{args.monitor_metric}]={best_metric:.4f} {marker}"
         )
+        print(f"LR curent: {format_lrs(optimizer)}")
         print(f"Durata epoca: {(time.time() - start_time) / 60:.2f} min")
         if args.early_stopping_patience > 0:
             print(
@@ -652,17 +903,34 @@ def main():
     # Afisare grafice de acuratete, loss, AUC, matricile de confuzie (normala + normalizata), Grad-CAM, curba ROC
     # Am adaugat paramtetrul show=True ca sa apara pozele dupa testare
 
-    history_path = os.path.join(grafice_dir, f"istoric_combinat_{base_name}.png")
+    history_path = os.path.join(results_dirs['history'], f"istoric_combinat_{base_name}.png")
     save_combined_history(history, history_path, show=True)
 
-    loss_path = os.path.join(grafice_dir, f"loss_{base_name}.png")
+    loss_path = os.path.join(results_dirs['loss'], f"loss_{base_name}.png")
     save_line_plot(history['train_loss'], 'Loss Antrenament', 'Loss', loss_path, color='blue', label='Train Loss', show=True)
 
-    acc_path = os.path.join(grafice_dir, f"acc_{base_name}.png")
+    acc_path = os.path.join(results_dirs['accuracy'], f"acc_{base_name}.png")
     save_line_plot(history['val_acc'], 'Acuratete Validare', 'Acuratete', acc_path, color='orange', label='Val Acc', show=True)
 
-    auc_path = os.path.join(grafice_dir, f"auc_{base_name}.png")
+    auc_path = os.path.join(results_dirs['auc'], f"auc_{base_name}.png")
     save_line_plot(history['val_auc'], 'Scor AUC Validare', 'AUC', auc_path, color='green', label='Val AUC', show=True)
+
+    qwk_path = os.path.join(results_dirs['qwk'], f"qwk_{base_name}.png")
+    save_line_plot(history['val_qwk'], 'Quadratic Weighted Kappa Validare', 'QWK', qwk_path, color='purple', label='Val QWK', show=True)
+
+    macro_f1_path = os.path.join(results_dirs['macro_f1'], f"macro_f1_{base_name}.png")
+    save_line_plot(history['val_macro_f1'], 'Macro F1 Validare', 'Macro F1', macro_f1_path, color='red', label='Val Macro F1', show=True)
+
+    balanced_acc_path = os.path.join(results_dirs['balanced_acc'], f"balanced_acc_{base_name}.png")
+    save_line_plot(
+        history['val_balanced_acc'],
+        'Balanced Accuracy Validare',
+        'Balanced Accuracy',
+        balanced_acc_path,
+        color='brown',
+        label='Val Balanced Acc',
+        show=True,
+    )
 
     use_test_suffix = len(test_loaders) > 1
     test_results = []
@@ -675,7 +943,7 @@ def main():
             args=args,
             device=device,
             base_name=base_name,
-            grafice_dir=grafice_dir,
+            results_dirs=results_dirs,
             use_test_suffix=use_test_suffix,
         ))
 
@@ -684,6 +952,9 @@ def main():
     print(f"Grafic loss: {loss_path}")
     print(f"Grafic acuratete: {acc_path}")
     print(f"Grafic AUC: {auc_path}")
+    print(f"Grafic QWK: {qwk_path}")
+    print(f"Grafic Macro F1: {macro_f1_path}")
+    print(f"Grafic Balanced Acc: {balanced_acc_path}")
     if stopped_early:
         print(f"Antrenare oprita anticipat la epoca {stopped_epoch}/{args.epochs}.")
     if len(test_results) > 1:
@@ -691,7 +962,9 @@ def main():
         for result in test_results:
             print(
                 f"   {result['source']}: "
-                f"Acc={result['acc'] * 100:.2f}% | AUC={result['auc']:.4f} | Loss={result['loss']:.4f}"
+                f"Acc={result['acc'] * 100:.2f}% | AUC={result['auc']:.4f} | "
+                f"QWK={result['qwk']:.4f} | F1={result['macro_f1']:.4f} | "
+                f"BalAcc={result['balanced_acc']:.4f} | Loss={result['loss']:.4f}"
             )
 
 
