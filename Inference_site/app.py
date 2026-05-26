@@ -22,7 +22,7 @@ from builder import get_model
 app = Flask(__name__)
 CORS(app) # Permitem comunicarea cu frontend-ul pe un port diferit
 
-MODELS_DIR = os.path.join(BASE_DIR, "Notebooks", "Clasificare_datasets_balanced", "Rezultate", "modele")
+MODELS_DIR = os.path.join(BASE_DIR, "Notebooks", "Rezultate", "New", "modele")
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Definim recomandarile in functie de stadiu
