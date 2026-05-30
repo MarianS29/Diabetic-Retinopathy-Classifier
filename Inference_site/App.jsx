@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import {
   Activity,
   AlertCircle,
@@ -9,7 +7,7 @@ import {
   FileText,
   Image as ImageIcon,
   Moon,
-  Rotate3D,
+  ScanEye,
   Stethoscope,
   Sun,
   UploadCloud,
@@ -18,95 +16,99 @@ import {
 
 const API_URL = 'http://127.0.0.1:5000/api';
 
-function EyeModel3D({ imageUrl }) {
-  const mountRef = useRef(null);
+function ProcessedImageViewer({ imageUrl }) {
+  const viewerRef = useRef(null);
+  const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
+  const [drag, setDrag] = useState(null);
+
+  const resetView = () => {
+    setView({ scale: 1, x: 0, y: 0 });
+  };
 
   useEffect(() => {
-    if (!mountRef.current || !imageUrl) return undefined;
+    const viewer = viewerRef.current;
+    if (!viewer || !imageUrl) return undefined;
 
-    const mount = mountRef.current;
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
-    camera.position.set(0, 0, 3.2);
+    const handleWheel = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    mount.appendChild(renderer.domElement);
+      const rect = viewer.getBoundingClientRect();
+      const pointerX = event.clientX - rect.left - rect.width / 2;
+      const pointerY = event.clientY - rect.top - rect.height / 2;
+      const zoomFactor = event.deltaY < 0 ? 1.18 : 0.84;
 
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.06;
-    controls.enablePan = false;
-    controls.minDistance = 2.15;
-    controls.maxDistance = 5;
-    controls.rotateSpeed = 0.75;
-    controls.zoomSpeed = 0.75;
-
-    const texture = new THREE.TextureLoader().load(imageUrl);
-    texture.colorSpace = THREE.SRGBColorSpace;
-
-    const retina = new THREE.Mesh(
-      new THREE.SphereGeometry(1, 96, 96),
-      new THREE.MeshStandardMaterial({
-        map: texture,
-        roughness: 0.82,
-        metalness: 0.02,
-      }),
-    );
-    retina.rotation.y = -0.35;
-    scene.add(retina);
-
-    const glow = new THREE.Mesh(
-      new THREE.SphereGeometry(1.015, 96, 96),
-      new THREE.MeshBasicMaterial({
-        color: 0x8fb6ff,
-        transparent: true,
-        opacity: 0.08,
-      }),
-    );
-    scene.add(glow);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.45);
-    keyLight.position.set(1.8, 2.2, 3);
-    scene.add(keyLight);
-
-    let frameId = null;
-    const resize = () => {
-      const { clientWidth, clientHeight } = mount;
-      const width = Math.max(clientWidth, 240);
-      const height = Math.max(clientHeight, 260);
-      renderer.setSize(width, height, false);
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
+      setView((current) => {
+        const nextScale = Math.min(8, Math.max(1, current.scale * zoomFactor));
+        const ratio = nextScale / current.scale;
+        return {
+          scale: nextScale,
+          x: pointerX - (pointerX - current.x) * ratio,
+          y: pointerY - (pointerY - current.y) * ratio,
+        };
+      });
     };
 
-    const animate = () => {
-      controls.update();
-      glow.rotation.y -= 0.002;
-      renderer.render(scene, camera);
-      frameId = requestAnimationFrame(animate);
-    };
-
-    resize();
-    animate();
-    window.addEventListener('resize', resize);
-
-    return () => {
-      window.removeEventListener('resize', resize);
-      if (frameId) cancelAnimationFrame(frameId);
-      texture.dispose();
-      retina.geometry.dispose();
-      retina.material.dispose();
-      glow.geometry.dispose();
-      glow.material.dispose();
-      controls.dispose();
-      renderer.dispose();
-      mount.removeChild(renderer.domElement);
-    };
+    viewer.addEventListener('wheel', handleWheel, { passive: false });
+    return () => viewer.removeEventListener('wheel', handleWheel);
   }, [imageUrl]);
 
-  return <div ref={mountRef} className="eye-3d-canvas" aria-label="Vizualizare 3D imagine retina" />;
+  const handlePointerDown = (event) => {
+    if (!imageUrl) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDrag({
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      viewX: view.x,
+      viewY: view.y,
+    });
+  };
+
+  const handlePointerMove = (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    setView((current) => ({
+      ...current,
+      x: drag.viewX + event.clientX - drag.startX,
+      y: drag.viewY + event.clientY - drag.startY,
+    }));
+  };
+
+  const handlePointerUp = () => {
+    setDrag(null);
+  };
+
+  if (!imageUrl) {
+    return (
+      <div className="processed-placeholder">
+        <ScanEye size={36} />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={viewerRef}
+      className="processed-viewer"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onDoubleClick={resetView}
+      role="img"
+      aria-label="Imagine preprocesata"
+    >
+      <img
+        src={imageUrl}
+        alt="Imagine preprocesata"
+        draggable="false"
+        style={{
+          transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,
+        }}
+      />
+      <div className="zoom-badge">{view.scale.toFixed(1)}x</div>
+    </div>
+  );
 }
 
 function App() {
@@ -177,7 +179,7 @@ function App() {
     }
   };
 
-  const eye3dImage = preview;
+  const processedPreview = result?.processed_image;
   const probabilities = result?.model_data?.raw_probabilities || [];
   const sortedProbabilities = probabilities
     .map((prob, idx) => ({ prob, idx }))
@@ -256,22 +258,14 @@ function App() {
           </button>
         </section>
 
-        <section className="panel eye-panel">
-          <div className="panel-header">
-            <h2><Rotate3D size={20} /> Vizualizare 3D</h2>
-          </div>
-          {eye3dImage ? (
-            <>
-              <EyeModel3D imageUrl={eye3dImage} />
-              <div className="preprocess-status">
-                <span>Proiectie din imaginea originala</span>
-                <strong>Trage cu mouse-ul pentru rotire, scroll pentru zoom</strong>
-              </div>
-            </>
+        <section className="panel processing-panel">
+          {preview ? (
+            <div className="processing-viewer-shell">
+              <ProcessedImageViewer imageUrl={processedPreview} />
+            </div>
           ) : (
-            <div className="empty-3d">
-              <Rotate3D size={36} />
-              <span>Incarca o imagine pentru a vedea retina in 3D</span>
+            <div className="empty-processing">
+              <ScanEye size={36} />
             </div>
           )}
         </section>
@@ -311,9 +305,7 @@ function App() {
                 <p>{result.recommendations.patient}</p>
                 <h4>Observatie tehnica</h4>
                 <p>
-                  {result.preprocessing?.applied
-                    ? 'Imaginea a fost detectata ca neprelucrata si a trecut prin crop, resize si normalizare inainte de predictie.'
-                    : 'Imaginea pare deja preprocesata; pentru inferenta s-a aplicat doar redimensionarea si normalizarea ceruta de model.'}
+                  Imaginea a fost transformata cu pipeline-ul din Scripts/New/Diabetic_Balanced_Aug, apoi acea imagine procesata a fost trimisa catre model.
                 </p>
               </div>
             </article>
@@ -335,6 +327,9 @@ function App() {
                 <p><span>Dimensiune model</span><strong>{result.model_data.model_file_size_mb?.toFixed(2) || 'n/a'} MB</strong></p>
                 <p><span>Margin top-2</span><strong>{result.model_data.top2_margin != null ? `${(result.model_data.top2_margin * 100).toFixed(2)} pp` : 'n/a'}</strong></p>
                 <p><span>Preprocesare</span><strong>{result.preprocessing?.applied ? 'aplicata' : 'neaplicata'}</strong></p>
+                <p><span>Metoda</span><strong>{result.preprocessing?.method || 'n/a'}</strong></p>
+                <p><span>Dimensiune procesare</span><strong>{result.preprocessing?.processing_size ? `${result.preprocessing.processing_size} px` : 'n/a'}</strong></p>
+                <p><span>Script sursa</span><strong>{result.preprocessing?.source_script || 'n/a'}</strong></p>
                 <p><span>Dark ratio</span><strong>{result.preprocessing ? (result.preprocessing.dark_ratio * 100).toFixed(2) : 'n/a'}%</strong></p>
                 <p><span>Dark border</span><strong>{result.preprocessing ? (result.preprocessing.dark_border_ratio * 100).toFixed(2) : 'n/a'}%</strong></p>
                 <p><span>Aspect delta</span><strong>{result.preprocessing ? result.preprocessing.aspect_delta.toFixed(3) : 'n/a'}</strong></p>

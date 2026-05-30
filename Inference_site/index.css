@@ -346,28 +346,78 @@ select:focus {
   cursor: not-allowed;
 }
 
-.eye-panel {
+.processing-panel {
   min-height: clamp(420px, 62vh, 620px);
+  padding: clamp(1rem, 2vw, 1.25rem);
 }
 
-.eye-3d-canvas {
+.processing-viewer-shell {
+  flex: 1;
+  display: flex;
+  min-height: 340px;
+}
+
+.processed-viewer,
+.processed-placeholder {
+  position: relative;
   flex: 1;
   min-height: 340px;
   overflow: hidden;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  background:
-    radial-gradient(circle at 50% 44%, color-mix(in srgb, var(--primary-color) 24%, transparent), transparent 45%),
-    linear-gradient(145deg, #070a10, #182133 56%, #0a0e15);
+  background: #05070a;
 }
 
-.eye-3d-canvas canvas {
+.processed-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+}
+
+.processed-viewer {
+  cursor: grab;
+  overscroll-behavior: contain;
+  touch-action: none;
+  user-select: none;
+}
+
+.processed-viewer:active {
+  cursor: grabbing;
+}
+
+.processed-viewer img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   display: block;
-  width: 100% !important;
-  height: 100% !important;
+  width: min(100%, 640px);
+  height: min(100%, 640px);
+  object-fit: contain;
+  transform-origin: center;
+  translate: -50% -50%;
+  transition: transform 0.06s linear;
+  will-change: transform;
 }
 
-.empty-3d {
+.zoom-badge {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  min-width: 54px;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-pill);
+  background: rgba(7, 12, 20, 0.76);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.empty-processing {
   display: flex;
   flex: 1;
   min-height: 340px;
@@ -597,7 +647,7 @@ select:focus {
     grid-template-columns: 1fr;
   }
 
-  .eye-panel {
+  .processing-panel {
     min-height: 420px;
   }
 
@@ -637,8 +687,9 @@ select:focus {
   }
 
   .upload-area,
-  .empty-3d,
-  .eye-3d-canvas {
+  .empty-processing,
+  .processed-viewer,
+  .processed-placeholder {
     min-height: 280px;
   }
 

@@ -49,10 +49,7 @@ from builder import (
 import my_dataset as my_dataset_module
 
 my_dataset_module = importlib.reload(my_dataset_module)
-EXPERIMENTS = my_dataset_module.EXPERIMENTS
-DATA_SOURCES = my_dataset_module.DATA_SOURCES
 make_dataset = my_dataset_module.make_dataset
-resolve_experiment = my_dataset_module.resolve_experiment
 
 
 CLASS_NAMES = ['0', '1', '2', '3', '4']
@@ -78,7 +75,7 @@ RESULT_SUBDIRS = {
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Antrenament DR - experimente Balanced/APTOS")
+    parser = argparse.ArgumentParser(description="Antrenament DR - dataseturi custom ImageFolder")
     parser.add_argument('--model', type=str, default='resnet50', help='ex: resnet50, efficientnet_b3, inception_v3')
     parser.add_argument('--loss_name', type=str, default='ce', help='ex: ce, bce_ordinal, focal_loss, weighted_ce')
     parser.add_argument('--optimizer', type=str, default='adam', help='Variante: adam, adamw, sgd')
@@ -150,54 +147,47 @@ def parse_args():
     )
 
     parser.add_argument(
-        '--experiment',
+        '--train_dataset_roots',
         type=str,
-        default=None,
-        choices=list(EXPERIMENTS.keys()),
-        help='Alege direct combinatia train/test. Ex: balanced_aptos_to_aptos',
+        nargs='+',
+        required=True,
+        help='Unul sau mai multe root-uri pentru train/val. Fiecare trebuie sa contina train/0..4 si val/0..4.',
     )
     parser.add_argument(
-        '--train_source',
-        type=str,
-        default='balanced',
-        choices=DATA_SOURCES,
-        help='Sursa pentru train/val daca nu folosesti --experiment.',
-    )
-    parser.add_argument(
-        '--test_source',
-        type=str,
-        default='balanced',
-        choices=DATA_SOURCES,
-        help='Sursa pentru test daca nu folosesti --experiment.',
-    )
-    parser.add_argument(
-        '--test_sources',
+        '--train_dataset_names',
         type=str,
         nargs='+',
         default=None,
-        choices=DATA_SOURCES,
-        help='Optional: ruleaza testarea finala pe mai multe surse, in aceeasi antrenare. Ex: --test_sources aptos balanced',
+        help='Optional: nume pentru dataseturile din --train_dataset_roots, in aceeasi ordine.',
     )
     parser.add_argument(
-        '--root_dir',
+        '--test_dataset_roots',
         type=str,
-        default=None,
-        help='Compatibilitate veche: radacina pentru Diabetic_Balanced_Data.',
-    )
-    parser.add_argument('--balanced_root', type=str, default=None)
-    parser.add_argument(
-        '--balanced_aug_root',
-        type=str,
-        default=None,
-        help='Radacina pentru Diabetic_Balanced_Aug_Ben_Graham, cu structura train/val/test/0..4.',
+        nargs='+',
+        required=True,
+        help='Unul sau mai multe root-uri pentru testare. Fiecare trebuie sa contina test/0..4.',
     )
     parser.add_argument(
-        '--aptos_root',
+        '--test_dataset_names',
         type=str,
+        nargs='+',
         default=None,
-        help='Radacina APTOS deja preprocesat Ben Graham, cu structura train/val/test/0..4.',
+        help='Optional: nume pentru dataseturile din --test_dataset_roots, in aceeasi ordine.',
     )
     return parser.parse_args()
+
+
+def resolve_dataset_path(path):
+    if path is None:
+        return None
+    path = os.path.expanduser(path)
+    if os.path.isabs(path):
+        return os.path.abspath(path)
+    return os.path.abspath(os.path.join(PROJECT_ROOT, path))
+
+
+def safe_source_name(name):
+    return name.replace(' ', '_').replace('/', '_').replace('\\', '_').lower()
 
 
 def make_results_dirs(grafice_dir):
@@ -603,6 +593,19 @@ def make_result_base_name(base_name, test_source, use_test_suffix):
     return f"{base_name}_test_{safe_test_source}"
 
 
+def make_experiment_base_name(experiment_name, args):
+    parts = [experiment_name, args.model]
+
+    if args.loss_name != 'focal_loss':
+        parts.append(args.loss_name)
+    if args.optimizer != 'adam':
+        parts.append(args.optimizer)
+    if args.loss_name == 'focal_loss':
+        parts.append(f"g{args.gamma:g}")
+
+    return "_".join(parts)
+
+
 def run_final_test(
     model,
     test_source,
@@ -690,13 +693,24 @@ def main():
     args = parse_args()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    balanced_root = args.balanced_root or args.root_dir or os.path.join(PROJECT_ROOT, 'datasets', 'Diabetic_Balanced_Data')
-    balanced_aug_root = args.balanced_aug_root or os.path.join(PROJECT_ROOT, 'datasets', 'Diabetic_Balanced_Aug_Ben_Graham')
-    aptos_root = args.aptos_root or os.path.join(PROJECT_ROOT, 'datasets', 'aptos', 'aptos_ben_graham')
-    train_source, test_source = resolve_experiment(args.experiment, args.train_source, args.test_source)
-    test_sources = args.test_sources or [test_source]
-    val_source = train_source
-    experiment_name = args.experiment or f"{train_source}_to_{test_source}"
+    if args.train_dataset_names and len(args.train_dataset_names) != len(args.train_dataset_roots):
+        raise ValueError("--train_dataset_names trebuie sa aiba acelasi numar de valori ca --train_dataset_roots.")
+    if args.test_dataset_names and len(args.test_dataset_names) != len(args.test_dataset_roots):
+        raise ValueError("--test_dataset_names trebuie sa aiba acelasi numar de valori ca --test_dataset_roots.")
+
+    train_roots = [resolve_dataset_path(path) for path in args.train_dataset_roots]
+    test_roots = [resolve_dataset_path(path) for path in args.test_dataset_roots]
+    train_names = [
+        safe_source_name(args.train_dataset_names[index] if args.train_dataset_names else os.path.basename(os.path.normpath(root)) or f"train_{index + 1}")
+        for index, root in enumerate(train_roots)
+    ]
+    test_sources = [
+        safe_source_name(args.test_dataset_names[index] if args.test_dataset_names else os.path.basename(os.path.normpath(root)) or f"test_{index + 1}")
+        for index, root in enumerate(test_roots)
+    ]
+    test_roots_by_source = dict(zip(test_sources, test_roots))
+    train_source = '+'.join(train_names)
+    experiment_name = f"{train_source}_to_{'_'.join(test_sources)}"
 
     rezultate_dir = os.path.join(CURRENT_DIR, "Rezultate")
     modele_dir = os.path.join(rezultate_dir, "modele")
@@ -718,37 +732,31 @@ def main():
             "Atentie: incres_v2 este de obicei folosit cu input >= 299. "
             "Pentru rularea principala ia in calcul --img_size 299 sau 384."
         )
-    print(f"Balanced root: {balanced_root}")
-    print(f"Balanced Aug root: {balanced_aug_root}")
-    print(f"APTOS root:    {aptos_root}")
+    print("Train dataset roots:")
+    for source_name, root in zip(train_names, train_roots):
+        print(f"  {source_name}: {root}")
+    print("Test dataset roots:")
+    for source_name, root in test_roots_by_source.items():
+        print(f"  {source_name}: {root}")
 
     train_ds = make_dataset(
-        train_source,
+        train_roots,
         split='train',
         image_size=args.img_size,
-        balanced_root=balanced_root,
-        aptos_root=aptos_root,
-        balanced_aug_root=balanced_aug_root,
         train_augment=args.train_augment,
     )
     val_ds = make_dataset(
-        val_source,
+        train_roots,
         split='val',
         image_size=args.img_size,
-        balanced_root=balanced_root,
-        aptos_root=aptos_root,
-        balanced_aug_root=balanced_aug_root,
         train_augment=args.train_augment,
     )
     test_datasets = {}
     for current_test_source in test_sources:
         test_datasets[current_test_source] = make_dataset(
-            current_test_source,
+            test_roots_by_source[current_test_source],
             split='test',
             image_size=args.img_size,
-            balanced_root=balanced_root,
-            aptos_root=aptos_root,
-            balanced_aug_root=balanced_aug_root,
             train_augment=args.train_augment,
         )
 
@@ -803,7 +811,7 @@ def main():
     epochs_without_improvement = 0
     stopped_early = False
     stopped_epoch = None
-    base_name = f"{experiment_name}_{args.model}_{args.loss_name}_{args.optimizer}_LR_{args.lr}_Gamma_{args.gamma}"
+    base_name = make_experiment_base_name(experiment_name, args)
     model_path = os.path.join(modele_dir, f"best_{base_name}.pth")
 
     for epoch in range(args.epochs):

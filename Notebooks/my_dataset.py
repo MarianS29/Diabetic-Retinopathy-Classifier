@@ -8,31 +8,6 @@ import torchvision.transforms as T
 
 IMAGE_EXTENSIONS = ('.png', '.jpg', '.jpeg')
 
-EXPERIMENTS = {
-    'balanced_to_balanced': ('balanced', 'balanced'),
-    'balanced_aptos_to_balanced_aptos': ('combined', 'combined'),
-    'balanced_aptos_to_aptos': ('combined', 'aptos'),
-    'balanced_aptos_to_balanced': ('combined', 'balanced'),
-    'aptos_to_balanced': ('aptos', 'balanced'),
-    'aptos_to_balanced_aptos': ('aptos', 'combined'),
-    'balanced_to_aptos': ('balanced', 'aptos'),
-    'balanced_aug_to_balanced_aug': ('balanced_aug', 'balanced_aug'),
-    'balanced_aug_aptos_to_balanced_aug_aptos': ('balanced_aug_aptos', 'balanced_aug_aptos'),
-    'balanced_aug_aptos_to_aptos': ('balanced_aug_aptos', 'aptos'),
-    'balanced_aug_aptos_to_balanced_aug': ('balanced_aug_aptos', 'balanced_aug'),
-}
-
-DATA_SOURCES = [
-    'balanced',
-    'balanced_aug',
-    'aptos',
-    'combined',
-    'balanced_aptos',
-    'balanced_aug_aptos',
-    'diabetic_balanced_data+aptos',
-    'diabetic_balanced_aug+aptos',
-]
-
 
 def default_transform(split='train', image_size=224, train_augment='basic'):
     split = split.lower()
@@ -56,7 +31,7 @@ def default_transform(split='train', image_size=224, train_augment='basic'):
     ])
 
 
-class BalancedDRDataset(Dataset):
+class ImageFolderDRDataset(Dataset):
     def __init__(self, root_dir, split='train', image_size=224, transform=None, train_augment='basic'):
         self.root_dir = root_dir
         self.split = split.lower()
@@ -98,57 +73,28 @@ class BalancedDRDataset(Dataset):
         return image, torch.tensor(label, dtype=torch.long)
 
 
-class AptosDRDataset(BalancedDRDataset):
-    """APTOS Ben Graham este deja preprocesat si organizat pe foldere train/val/test/0..4."""
-    pass
-
-
 def make_dataset(
-    source,
+    root_dirs,
     split,
     image_size,
-    balanced_root,
-    aptos_root,
-    balanced_aug_root=None,
     train_augment='basic',
 ):
-    source = source.lower()
-    split = split.lower()
+    if isinstance(root_dirs, (str, os.PathLike)):
+        root_dirs = [root_dirs]
 
-    if source == 'balanced':
-        return BalancedDRDataset(balanced_root, split=split, image_size=image_size, train_augment=train_augment)
+    root_dirs = [str(root_dir) for root_dir in root_dirs if root_dir]
+    if not root_dirs:
+        raise ValueError("Trebuie sa furnizezi cel putin un root de dataset.")
 
-    if source == 'balanced_aug':
-        if balanced_aug_root is None:
-            raise ValueError("balanced_aug_root trebuie setat pentru sursa 'balanced_aug'.")
-        return BalancedDRDataset(balanced_aug_root, split=split, image_size=image_size, train_augment=train_augment)
-
-    if source == 'aptos':
-        return AptosDRDataset(aptos_root, split=split, image_size=image_size, train_augment=train_augment)
-
-    if source in ('combined', 'balanced_aptos', 'diabetic_balanced_data+aptos'):
+    if len(root_dirs) > 1:
         return ConcatDataset([
-            BalancedDRDataset(balanced_root, split=split, image_size=image_size, train_augment=train_augment),
-            AptosDRDataset(aptos_root, split=split, image_size=image_size, train_augment=train_augment),
+            ImageFolderDRDataset(
+                root_dir,
+                split=split,
+                image_size=image_size,
+                train_augment=train_augment,
+            )
+            for root_dir in root_dirs
         ])
 
-    if source in ('balanced_aug_aptos', 'diabetic_balanced_aug+aptos'):
-        if balanced_aug_root is None:
-            raise ValueError("balanced_aug_root trebuie setat pentru sursa 'balanced_aug_aptos'.")
-        return ConcatDataset([
-            BalancedDRDataset(balanced_aug_root, split=split, image_size=image_size, train_augment=train_augment),
-            AptosDRDataset(aptos_root, split=split, image_size=image_size, train_augment=train_augment),
-        ])
-
-    raise ValueError(f"Sursa de date necunoscuta: {source}")
-
-
-def resolve_experiment(experiment=None, train_source=None, test_source=None):
-    if experiment:
-        experiment = experiment.lower()
-        if experiment not in EXPERIMENTS:
-            valid = ', '.join(EXPERIMENTS.keys())
-            raise ValueError(f"Experiment necunoscut: {experiment}. Variante: {valid}")
-        return EXPERIMENTS[experiment]
-
-    return (train_source or 'balanced').lower(), (test_source or 'balanced').lower()
+    return ImageFolderDRDataset(root_dirs[0], split=split, image_size=image_size, train_augment=train_augment)

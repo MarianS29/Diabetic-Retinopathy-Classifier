@@ -2,12 +2,14 @@ import os
 import sys
 import time
 import base64
+import importlib.util
 from io import BytesIO
+import cv2
 import torch
 import torch.nn.functional as F
 from torchvision import transforms
 import numpy as np
-from PIL import Image, ImageOps, ImageFilter
+from PIL import Image
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -24,6 +26,31 @@ CORS(app) # Permitem comunicarea cu frontend-ul pe un port diferit
 
 MODELS_DIR = os.path.join(BASE_DIR, "Notebooks", "Rezultate", "New", "modele")
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+DIABETIC_BALANCED_AUG_SCRIPT = os.path.join(
+    BASE_DIR,
+    "Scripts",
+    "New",
+    "Diabetic_Balanced_Aug",
+    "ben_graham+augment_the_split_dataset.py",
+)
+
+def load_diabetic_balanced_aug_preprocessor():
+    spec = importlib.util.spec_from_file_location(
+        "diabetic_balanced_aug_preprocessor",
+        DIABETIC_BALANCED_AUG_SCRIPT,
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Nu pot incarca scriptul de preprocesare: {DIABETIC_BALANCED_AUG_SCRIPT}")
+
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    if not hasattr(module, "preprocess_testam_chestii"):
+        raise RuntimeError("Scriptul nu contine functia preprocess_testam_chestii.")
+
+    return module.preprocess_testam_chestii
+
+DIABETIC_BALANCED_AUG_PREPROCESS = load_diabetic_balanced_aug_preprocessor()
 
 # Definim recomandarile in functie de stadiu
 RECOMMENDATIONS = {
@@ -76,38 +103,34 @@ def image_to_data_url(image):
     encoded = base64.b64encode(buffer.getvalue()).decode('ascii')
     return f"data:image/png;base64,{encoded}"
 
-def crop_dark_border(image, threshold=12):
-    arr = np.asarray(image)
-    mask = arr.mean(axis=2) > threshold
-    if not mask.any():
-        return image
+def pil_to_bgr(image):
+    rgb = np.asarray(image.convert('RGB'))
+    return cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
 
-    y_idx, x_idx = np.where(mask)
-    top, bottom = y_idx.min(), y_idx.max()
-    left, right = x_idx.min(), x_idx.max()
-    return image.crop((left, top, right + 1, bottom + 1))
-
-def pad_to_square(image, fill=(0, 0, 0)):
+def preprocess_like_training_scripts(image, size=512):
+    bgr_image = pil_to_bgr(image)
+    gray = cv2.cvtColor(cv2.resize(bgr_image, (size, size)), cv2.COLOR_BGR2GRAY)
+    processed = DIABETIC_BALANCED_AUG_PREPROCESS(bgr_image, size=size)
+    processed_rgb = cv2.cvtColor(processed, cv2.COLOR_GRAY2RGB)
+    processed_pil = Image.fromarray(processed_rgb, mode='RGB')
+    dark_ratio = float((gray < 18).mean())
+    border = np.concatenate([gray[:12, :].ravel(), gray[-12:, :].ravel(), gray[:, :12].ravel(), gray[:, -12:].ravel()])
+    dark_border_ratio = float((border < 18).mean())
     width, height = image.size
-    size = max(width, height)
-    canvas = Image.new('RGB', (size, size), fill)
-    offset = ((size - width) // 2, (size - height) // 2)
-    canvas.paste(image, offset)
-    return canvas
+    aspect_delta = abs(width - height) / max(width, height)
 
-def apply_ben_graham_like(image, output_size):
-    image = crop_dark_border(image)
-    image = pad_to_square(image)
-    image = image.resize((output_size, output_size), Image.Resampling.LANCZOS)
-    image = ImageOps.autocontrast(image, cutoff=1)
+    return processed_pil, {
+        "applied": True,
+        "method": "Scripts/New/Diabetic_Balanced_Aug/ben_graham+augment_the_split_dataset.py::preprocess_testam_chestii",
+        "reason": "preprocesare aplicata ca in ben_graham+augment_the_split_dataset.py",
+        "processing_size": size,
+        "source_script": DIABETIC_BALANCED_AUG_SCRIPT,
+        "dark_ratio": dark_ratio,
+        "dark_border_ratio": dark_border_ratio,
+        "aspect_delta": aspect_delta,
+    }
 
-    arr = np.asarray(image).astype(np.float32)
-    blurred = np.asarray(image.filter(ImageFilter.GaussianBlur(radius=max(output_size / 30, 6)))).astype(np.float32)
-    enhanced = (4.0 * arr) + (-4.0 * blurred) + 128.0
-    enhanced = np.clip(enhanced, 0, 255).astype(np.uint8)
-    return Image.fromarray(enhanced, mode='RGB')
-
-def should_preprocess_fundus(image):
+def legacy_unused_preprocess_detection(image):
     arr = np.asarray(image.resize((256, 256), Image.Resampling.BILINEAR)).astype(np.uint8)
     gray = arr.mean(axis=2)
     dark_ratio = float((gray < 18).mean())
@@ -161,8 +184,7 @@ def predict():
         original_image_size = image.size
         base_arch = get_base_model_name(model_name)
         input_size = get_input_size(base_arch)
-        should_apply_preprocessing, preprocessing_info = should_preprocess_fundus(image)
-        inference_image = apply_ben_graham_like(image, input_size) if should_apply_preprocessing else image.resize((input_size, input_size), Image.Resampling.LANCZOS)
+        inference_image, preprocessing_info = preprocess_like_training_scripts(image, size=512)
 
         transform = transforms.Compose([
             transforms.Resize((input_size, input_size)),

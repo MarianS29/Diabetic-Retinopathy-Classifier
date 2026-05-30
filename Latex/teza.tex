@@ -1975,7 +1975,7 @@ Grad-CAM, utile pentru a observa regiunile imaginii care influențează predicț
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\columnwidth]{Figuri/cam_resnet50_focal_loss_adam_LR_0.0001.png}
+\includegraphics[width=0.95\columnwidth]{Figuri/cam_resnet50.png}
 \captionsetup{justification=centering}
 \caption{Exemplu de hărți Grad-CAM pentru un model ResNet50 antrenat cu Focal Loss și Adam}
 \label{fig:grad-cam-example}
@@ -2166,7 +2166,7 @@ ResNet50, cu cea mai bună valoare AUC de validare în jurul epocii 4.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/Old/grafice/istoric_incres_v2_focal_loss_adam_LR_0.0001.png}
+\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/Old/grafice/istoric_incres_v2.png}
 \captionsetup{justification=centering}
 \caption{Evoluția antrenării pentru Inception-ResNet-V2 cu Focal Loss în experimentele inițiale}
 \label{fig:istoric-incres-initial}
@@ -2174,7 +2174,7 @@ ResNet50, cu cea mai bună valoare AUC de validare în jurul epocii 4.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/New/grafice/loss/loss_balanced_aug_aptos_to_balanced_aug_aptos_resnet50_focal_loss_adam_LR_0.0001_Gamma_1.6.png}
+\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/New/grafice/loss/loss_balanced_aug_aptos_to_balanced_aug_aptos_resnet50_g1.6.png}
 \captionsetup{justification=centering}
 \caption{Evoluția funcției de pierdere pentru ResNet50 pe Balanced Aug + APTOS}
 \label{fig:loss-balanced-aug-aptos-resnet}
@@ -2196,7 +2196,7 @@ că validarea combinată poate ascunde diferențe importante între domenii.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/New/grafice/acuratete/acc_balanced_aptos_to_balanced_aptos_resnet50_focal_loss_adam_LR_0.0001_Gamma_1.6.png}
+\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/New/grafice/acuratete/acc_balanced_aptos_to_balanced_aptos_resnet50_g1.6.png}
 \captionsetup{justification=centering}
 \caption{Evoluția acurateții pentru ResNet50 antrenat pe Balanced + APTOS}
 \label{fig:acc-balanced-aptos-resnet}
@@ -2217,7 +2217,7 @@ sub valorile obținute pe Balanced.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/New/grafice/auc/auc_balanced_aug_aptos_to_balanced_aug_aptos_resnet50_focal_loss_adam_LR_0.0001_Gamma_1.6.png}
+\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/New/grafice/auc/auc_balanced_aug_aptos_to_balanced_aug_aptos_resnet50_g1.6.png}
 \captionsetup{justification=centering}
 \caption{Evoluția AUC pentru ResNet50 pe Balanced Aug + APTOS}
 \label{fig:auc-balanced-aug-aptos-resnet}
@@ -2237,7 +2237,7 @@ Balanced, dar poate avea praguri mult mai nesigure pe APTOS.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/Old/grafice/roc_inception_v3_focal_loss_adam_LR_0.0001.png}
+\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/Old/grafice/roc_inception_v3.png}
 \captionsetup{justification=centering}
 \caption{Curbe ROC pentru InceptionV3 în experimentele inițiale}
 \label{fig:roc-inception-initial}
@@ -2245,7 +2245,7 @@ Balanced, dar poate avea praguri mult mai nesigure pe APTOS.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/New/grafice/roc/roc_balanced_aptos_to_balanced_aptos_resnet50_focal_loss_adam_LR_0.0001_Gamma_1.6_test_aptos.png}
+\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/New/grafice/roc/roc_balanced_aptos_to_balanced_aptos_resnet50_g1.6_test_aptos.png}
 \captionsetup{justification=centering}
 \caption{Curbe ROC pentru ResNet50 antrenat pe Balanced + APTOS și testat pe APTOS}
 \label{fig:roc-balanced-aptos-test-aptos}
@@ -2267,7 +2267,7 @@ matricile de confuzie pe APTOS arată o degradare mai puternică a claselor inte
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.72\textwidth]{../Notebooks/Rezultate/New/grafice/matrici_confuzie/cm_norm_balanced_to_balanced_resnet50_focal_loss_adam_LR_0.0001_Gamma_1.6.png}
+\includegraphics[width=0.72\textwidth]{../Notebooks/Rezultate/New/grafice/matrici_confuzie/cm_norm_balanced_to_balanced_resnet50_g1.6.png}
 \captionsetup{justification=centering}
 \caption{Matrice de confuzie normalizată pentru ResNet50 pe Balanced, \texttt{gamma=1.6}}
 \label{fig:cm-resnet-balanced-gamma16}
@@ -2275,7 +2275,7 @@ matricile de confuzie pe APTOS arată o degradare mai puternică a claselor inte
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.72\textwidth]{../Notebooks/Rezultate/New/grafice/matrici_confuzie/cm_norm_balanced_aptos_to_balanced_aptos_resnet50_focal_loss_adam_LR_0.0001_Gamma_1.6_test_aptos.png}
+\includegraphics[width=0.72\textwidth]{../Notebooks/Rezultate/New/grafice/matrici_confuzie/cm_norm_balanced_aptos_to_balanced_aptos_resnet50_g1.6_test_aptos.png}
 \captionsetup{justification=centering}
 \caption{Matrice de confuzie normalizată pentru ResNet50 antrenat pe Balanced + APTOS și testat pe APTOS}
 \label{fig:cm-resnet-balanced-aptos-test-aptos}
@@ -2300,7 +2300,7 @@ scenariu, dar pe Balanced\_Aug scorul macro F1 rămâne redus, 0.5414, deși acu
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/New/grafice/precision_recall_f1/prf1_balanced_aptos_to_balanced_aptos_resnet50_focal_loss_adam_LR_0.0001_Gamma_1.6_test_balanced.png}
+\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/New/grafice/precision_recall_f1/prf1_balanced_aptos_to_balanced_aptos_resnet50_g1.6_test_balanced.png}
 \captionsetup{justification=centering}
 \caption{Precision, recall și F1 pe clase pentru ResNet50 testat pe Balanced după antrenare Balanced + APTOS}
 \label{fig:prf1-balanced-aptos-test-balanced}
@@ -2321,7 +2321,7 @@ confuzie.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/New/grafice/gradcam/gradcam_balanced_aptos_to_balanced_aptos_resnet50_focal_loss_adam_LR_0.0001_Gamma_1.6_test_balanced.png}
+\includegraphics[width=0.82\textwidth]{../Notebooks/Rezultate/New/grafice/gradcam/gradcam_balanced_aptos_to_balanced_aptos_resnet50_g1.6_test_balanced.png}
 \captionsetup{justification=centering}
 \caption{Exemplu Grad-CAM pentru ResNet50 evaluat pe Balanced după antrenare Balanced + APTOS}
 \label{fig:gradcam-resnet-balanced-aptos}

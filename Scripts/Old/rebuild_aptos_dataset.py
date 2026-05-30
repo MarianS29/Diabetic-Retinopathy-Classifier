@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument(
         "--processed_dir",
         type=Path,
-        default=root / "datasets" / "aptos" / "aptos_ben_graham_matched",
+        default=root / "datasets" / "aptos" / "aptos_ben_graham_part_4",
     )
     parser.add_argument("--train_target", type=int, default=DEFAULT_TARGETS["train"])
     parser.add_argument("--val_target", type=int, default=DEFAULT_TARGETS["val"])

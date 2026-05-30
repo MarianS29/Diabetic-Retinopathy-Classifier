@@ -1,12 +1,4 @@
-/Dataset/test_images
-/Dataset/test_images/test_images
-/Dataset/test_images
-/Dataset/train_images
-/Dataset/val_images
-/datasets/aptos
-/datasets/dataset_combinat
-/datasets/Diabetic_Balanced_Aug
-/datasets/Diabetic_Balanced_Aug_Ben_Graham
+/datasets
 *.aux
 *.fdb_latexmk
 *.lof
@@ -20,4 +12,4 @@
 *.bbl
 *.blg
 *.fls
-/datasets/Diabetic_Balanced_Aug_Ben_Graham_matched
+/datasets

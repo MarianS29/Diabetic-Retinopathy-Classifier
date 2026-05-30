@@ -18,7 +18,7 @@ def parse_args():
         description="Construieste un dataset ImageFolder cu preprocessing Ben Graham, apropiat de Diabetic_Balanced_Data."
     )
     parser.add_argument("--input_dir", type=Path, default=root / "datasets" / "aptos" / "aptos_augmented_balanced")
-    parser.add_argument("--output_dir", type=Path, default=root / "datasets" / "aptos" / "aptos_ben_graham_matched")
+    parser.add_argument("--output_dir", type=Path, default=root / "datasets" / "aptos" / "aptos_ben_graham_part_4")
     parser.add_argument("--output_size", type=int, default=512)
     parser.add_argument("--radius", type=int, default=300)
     parser.add_argument("--black_threshold", type=int, default=7)

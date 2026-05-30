@@ -41,7 +41,7 @@ def parse_args():
     parser.add_argument(
         "--output_dir",
         type=Path,
-        default=root / "datasets" / "Diabetic_Balanced_Aug_Ben_Graham",
+        default=root / "datasets" / "Diabetic_Balanced_Aug_Ben_Graham_part_2",
     )
     parser.add_argument("--train_ratio", type=float, default=0.80)
     parser.add_argument("--test_ratio", type=float, default=0.15)
