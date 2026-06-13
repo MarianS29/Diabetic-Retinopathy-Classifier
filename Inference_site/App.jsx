@@ -3,7 +3,6 @@ import axios from 'axios';
 import {
   Activity,
   AlertCircle,
-  CheckCircle,
   FileText,
   Image as ImageIcon,
   Moon,
@@ -113,6 +112,7 @@ function ProcessedImageViewer({ imageUrl }) {
 
 function App() {
   const [models, setModels] = useState([]);
+  const [modelGroups, setModelGroups] = useState([]);
   const [selectedModel, setSelectedModel] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -129,8 +129,11 @@ function App() {
   useEffect(() => {
     axios.get(`${API_URL}/models`)
       .then((res) => {
-        setModels(res.data.models);
-        if (res.data.models.length > 0) setSelectedModel(res.data.models[0]);
+        const nextModels = res.data.models || [];
+        setModels(nextModels);
+        setModelGroups(res.data.groups || []);
+        const firstAvailable = nextModels.find((model) => model.available !== false);
+        if (firstAvailable) setSelectedModel(firstAvailable.id);
       })
       .catch(() => setError('Eroare la conectarea cu serverul. Asigura-te ca backend-ul este pornit.'));
   }, []);
@@ -185,6 +188,13 @@ function App() {
     .map((prob, idx) => ({ prob, idx }))
     .sort((a, b) => b.prob - a.prob);
   const secondChoice = sortedProbabilities[1];
+  const groupedModels = modelGroups
+    .map((group) => ({
+      ...group,
+      models: models.filter((model) => model.group === group.id),
+    }))
+    .filter((group) => group.models.length > 0);
+  const ungroupedModels = models.filter((model) => !modelGroups.some((group) => group.id === model.group));
 
   return (
     <div className="app-shell">
@@ -228,8 +238,19 @@ function App() {
               onChange={(e) => setSelectedModel(e.target.value)}
             >
               {models.length === 0 ? <option>Se incarca modelele...</option> : null}
-              {models.map((model) => (
-                <option key={model} value={model}>{model}</option>
+              {groupedModels.map((group) => (
+                <optgroup key={group.id} label={group.label}>
+                  {group.models.map((model) => (
+                    <option key={model.id} value={model.id} disabled={model.available === false}>
+                      {model.label}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+              {ungroupedModels.map((model) => (
+                <option key={model.id} value={model.id} disabled={model.available === false}>
+                  {model.label}
+                </option>
               ))}
             </select>
           </div>
@@ -319,25 +340,13 @@ function App() {
                 <p><span>Imagine originala</span><strong>{result.model_data.original_image_size || 'n/a'}</strong></p>
                 <p><span>Imagine inferenta</span><strong>{result.model_data.inference_image_size || 'n/a'}</strong></p>
                 <p><span>Timp executie</span><strong>{result.model_data.inference_time_ms.toFixed(2)} ms</strong></p>
-                <p><span>Incarcare model</span><strong>{result.model_data.model_load_time_ms?.toFixed(2) || 'n/a'} ms</strong></p>
-                <p><span>Dispozitiv</span><strong>{result.model_data.device}</strong></p>
-                <p><span>CUDA</span><strong>{result.model_data.cuda_name || 'n/a'}</strong></p>
-                <p><span>Parametri</span><strong>{result.model_data.parameter_count?.toLocaleString('ro-RO') || 'n/a'}</strong></p>
-                <p><span>Parametri antrenabili</span><strong>{result.model_data.trainable_parameter_count?.toLocaleString('ro-RO') || 'n/a'}</strong></p>
-                <p><span>Dimensiune model</span><strong>{result.model_data.model_file_size_mb?.toFixed(2) || 'n/a'} MB</strong></p>
-                <p><span>Margin top-2</span><strong>{result.model_data.top2_margin != null ? `${(result.model_data.top2_margin * 100).toFixed(2)} pp` : 'n/a'}</strong></p>
-                <p><span>Preprocesare</span><strong>{result.preprocessing?.applied ? 'aplicata' : 'neaplicata'}</strong></p>
                 <p><span>Metoda</span><strong>{result.preprocessing?.method || 'n/a'}</strong></p>
-                <p><span>Dimensiune procesare</span><strong>{result.preprocessing?.processing_size ? `${result.preprocessing.processing_size} px` : 'n/a'}</strong></p>
-                <p><span>Script sursa</span><strong>{result.preprocessing?.source_script || 'n/a'}</strong></p>
-                <p><span>Dark ratio</span><strong>{result.preprocessing ? (result.preprocessing.dark_ratio * 100).toFixed(2) : 'n/a'}%</strong></p>
-                <p><span>Dark border</span><strong>{result.preprocessing ? (result.preprocessing.dark_border_ratio * 100).toFixed(2) : 'n/a'}%</strong></p>
-                <p><span>Aspect delta</span><strong>{result.preprocessing ? result.preprocessing.aspect_delta.toFixed(3) : 'n/a'}</strong></p>
-                <p><span>Normalizare</span><strong>ImageNet mean/std</strong></p>
-                <p>
-                  <span>Features</span>
-                  <strong className="status-ok"><CheckCircle size={16} /> Reusita</strong>
-                </p>
+                {result.model_data.pipeline?.enabled ? (
+                  <>
+                    <p><span>Detector</span><strong>{result.model_data.pipeline.detector_model}</strong></p>
+                    <p><span>Clasificator 1-4</span><strong>{result.model_data.pipeline.stage2_model || 'indisponibil'}</strong></p>
+                  </>
+                ) : null}
                 <div className="probability-title">Probabilitati softmax</div>
                 <ul>
                   {result.model_data.raw_probabilities.map((prob, idx) => (

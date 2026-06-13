@@ -535,7 +535,7 @@ Absolvent: {\@author}
         \pagestyle{empty}
         \titlep
         % \inscrierep
-        \declaratiep
+        % \declaratiep
         \tableofcontents
         %\ifcopyright\copyrightp\fi  
         \c@page2 % set page counter so that next is 2
