@@ -1,4 +1,4 @@
-﻿import torch
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
@@ -43,15 +43,16 @@ class FocalLossMultiClass(nn.Module):
     Focal Loss adaptat pentru clasificare multi-clasa.
     Accepta predictii de forma [Batch, Clase] si etichete standard (indici) de forma [Batch].
     """
-    def __init__(self, alpha=None, gamma=1.5, reduction='mean'):
+    def __init__(self, alpha=None, gamma=1.5, reduction='mean', label_smoothing=0.0):
         super(FocalLossMultiClass, self).__init__()
         self.gamma = gamma
         self.alpha = alpha 
         self.reduction = reduction
+        self.label_smoothing = label_smoothing
 
     def forward(self, inputs, targets):
         # Calculam direct Cross Entropy (care stie sa citeasca indicii claselor)
-        ce_loss = F.cross_entropy(inputs, targets, weight=self.alpha, reduction='none')
+        ce_loss = F.cross_entropy(inputs, targets, weight=self.alpha, reduction='none', label_smoothing=self.label_smoothing)
         pt = torch.exp(-ce_loss)
         focal_loss = ((1 - pt) ** self.gamma) * ce_loss
         
@@ -112,7 +113,7 @@ def get_model(model_name, num_classes=5, pretrained=True, drop_rate=0.0):
 # ==============================================================================
 # 3. FABRICA DE LOSS-URI SI PREDICTII (Totul se intampla aici)
 # ==============================================================================
-def get_loss_function(loss_name, class_weights=None, device='cuda', gamma=1.5):
+def get_loss_function(loss_name, class_weights=None, device='cuda', gamma=1.5, label_smoothing=0.0):
     loss_name = loss_name.lower()
     
     # -----------------------------------------------------------------
@@ -127,16 +128,16 @@ def get_loss_function(loss_name, class_weights=None, device='cuda', gamma=1.5):
     elif loss_name == 'focal_loss':
         # Trimitem ponderile pe GPU (daca exista) pentru Focal Loss
         alpha_tensor = class_weights.to(device) if class_weights is not None else None
-        return FocalLossMultiClass(alpha=alpha_tensor, gamma=gamma)
+        return FocalLossMultiClass(alpha=alpha_tensor, gamma=gamma, label_smoothing=label_smoothing)
         
     elif loss_name == 'ce':
-        return nn.CrossEntropyLoss()
+        return nn.CrossEntropyLoss(label_smoothing=label_smoothing)
         
     elif loss_name == 'weighted_ce':
         if class_weights is None:
             raise ValueError("Pentru Weighted CE, trebuie sa trimiti '--class_weights'!")
         # Acum class_weights este oficial un Tensor, deci .to(device) va functiona perfect!
-        return nn.CrossEntropyLoss(weight=class_weights.to(device))
+        return nn.CrossEntropyLoss(weight=class_weights.to(device), label_smoothing=label_smoothing)
         
     else:
         raise ValueError(f"Loss-ul '{loss_name}' nu este suportat.")

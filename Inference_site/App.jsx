@@ -116,6 +116,7 @@ function App() {
   const [selectedModel, setSelectedModel] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [imagePreprocessed, setImagePreprocessed] = useState(true);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
@@ -169,6 +170,7 @@ function App() {
     const formData = new FormData();
     formData.append('image', imageFile);
     formData.append('model_name', selectedModel);
+    formData.append('image_preprocessed', imagePreprocessed ? 'true' : 'false');
 
     try {
       const response = await axios.post(`${API_URL}/predict`, formData, {
@@ -184,6 +186,9 @@ function App() {
 
   const processedPreview = result?.processed_image;
   const probabilities = result?.model_data?.raw_probabilities || [];
+  const probabilityTitle = result?.model_data?.pipeline?.enabled
+    ? (result.model_data.pipeline.stage2_details?.probability_kind === 'softmax' ? 'Probabilitati softmax pipeline' : 'Probabilitati / scoruri pipeline')
+    : 'Probabilitati softmax';
   const sortedProbabilities = probabilities
     .map((prob, idx) => ({ prob, idx }))
     .sort((a, b) => b.prob - a.prob);
@@ -274,6 +279,18 @@ function App() {
             )}
           </div>
 
+          <label className="switch-row">
+            <input
+              type="checkbox"
+              checked={imagePreprocessed}
+              onChange={(e) => setImagePreprocessed(e.target.checked)}
+            />
+            <span className="switch-track" aria-hidden="true">
+              <span className="switch-thumb" />
+            </span>
+            <span>Imagine deja preprocesata</span>
+          </label>
+
           <button className="button-primary" onClick={handleSubmit} disabled={loading || !imageFile} type="button">
             {loading ? <><span className="spinner" /> Se analizeaza...</> : 'Analizeaza imaginea'}
           </button>
@@ -326,7 +343,9 @@ function App() {
                 <p>{result.recommendations.patient}</p>
                 <h4>Observatie tehnica</h4>
                 <p>
-                  Imaginea a fost transformata cu pipeline-ul din Scripts/New/Diabetic_Balanced_Aug, apoi acea imagine procesata a fost trimisa catre model.
+                  {result.preprocessing?.applied
+                    ? 'Imaginea a fost preprocesata inainte de inferenta.'
+                    : 'Imaginea a fost trimisa catre model fara preprocesare suplimentara.'}
                 </p>
               </div>
             </article>
@@ -334,6 +353,17 @@ function App() {
             <article className="result-card">
               <h3><FileText size={20} /> Metadate model</h3>
               <div className="engineering-data">
+                <div className="probability-title">
+                  {probabilityTitle}
+                </div>
+                <ul>
+                  {result.model_data.raw_probabilities.map((prob, idx) => (
+                    <li key={idx}>
+                      <span>{result.model_data.pipeline?.enabled && idx === 1 && result.model_data.raw_probabilities.length === 2 ? 'Prob. boala' : `Clasa ${idx}`}</span>
+                      <strong>{(prob * 100).toFixed(2)}%</strong>
+                    </li>
+                  ))}
+                </ul>
                 <p><span>Fisier</span><strong>{result.model_data.model_name}</strong></p>
                 <p><span>Arhitectura</span><strong>{result.model_data.architecture || 'n/a'}</strong></p>
                 <p><span>Input</span><strong>{result.model_data.input_size ? `${result.model_data.input_size} px` : 'n/a'}</strong></p>
@@ -345,17 +375,12 @@ function App() {
                   <>
                     <p><span>Detector</span><strong>{result.model_data.pipeline.detector_model}</strong></p>
                     <p><span>Clasificator 1-4</span><strong>{result.model_data.pipeline.stage2_model || 'indisponibil'}</strong></p>
+                    <p><span>Ramura</span><strong>{result.model_data.pipeline.stage2_mode || 'n/a'}</strong></p>
+                    {result.model_data.pipeline.stage2_details?.regression_score !== undefined ? (
+                      <p><span>Scor regresie</span><strong>{result.model_data.pipeline.stage2_details.regression_score.toFixed(3)}</strong></p>
+                    ) : null}
                   </>
                 ) : null}
-                <div className="probability-title">Probabilitati softmax</div>
-                <ul>
-                  {result.model_data.raw_probabilities.map((prob, idx) => (
-                    <li key={idx}>
-                      <span>Clasa {idx}</span>
-                      <strong>{(prob * 100).toFixed(2)}%</strong>
-                    </li>
-                  ))}
-                </ul>
               </div>
             </article>
           </div>

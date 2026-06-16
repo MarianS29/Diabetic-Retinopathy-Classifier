@@ -298,6 +298,60 @@ select:focus {
   object-fit: contain;
 }
 
+.switch-row {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.2rem 0 1.15rem;
+  color: var(--text-primary);
+  font-size: 0.94rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.switch-row input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.switch-track {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  flex: 0 0 48px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.switch-row input:checked + .switch-track {
+  border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 18%, var(--surface));
+}
+
+.switch-row input:checked + .switch-track .switch-thumb {
+  transform: translateX(20px);
+  background: var(--primary-color);
+}
+
+.switch-row input:focus-visible + .switch-track {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-color) 16%, transparent);
+}
+
 .close-btn {
   position: absolute;
   top: 10px;

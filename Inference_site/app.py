@@ -6,7 +6,9 @@ import importlib.util
 from io import BytesIO
 import cv2
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
+from torchvision import models
 from torchvision import transforms
 import numpy as np
 from PIL import Image
@@ -44,7 +46,14 @@ CORS(app) # Permitem comunicarea cu frontend-ul pe un port diferit
 
 EXPERIMENT_MODELS_DIR = os.path.join(BASE_DIR, "Notebooks", "Rezultate", "New", "modele")
 MAIN_MODELS_DIR = os.path.join(BASE_DIR, "Notebooks", "Main", "Local")
+MAIN_RESULTS_DIR = os.path.join(MAIN_MODELS_DIR, "Rezultate_main")
+MAIN_BINAR_DIR = os.path.join(MAIN_RESULTS_DIR, "binar")
 MAIN_DETECTOR_FILENAME = "efficientnet_b3_binar_best.pth"
+MAIN_DETECTOR_PATH = os.path.join(MAIN_BINAR_DIR, MAIN_DETECTOR_FILENAME)
+MAIN_CLASSIFIER_MODE = "regression"
+MAIN_CLASSIFIER_PATH = os.path.join(MAIN_RESULTS_DIR, "clasificare_regression", "model_best.pth")
+MAIN_ROUNDER_PATH = os.path.join(MAIN_RESULTS_DIR, "clasificare_regression", "rounder_coef.npy")
+MAIN_INPUT_SIZE = 300
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Definim recomandarile in functie de stadiu
@@ -98,12 +107,8 @@ def image_to_data_url(image):
     encoded = base64.b64encode(buffer.getvalue()).decode('ascii')
     return f"data:image/png;base64,{encoded}"
 
-def pil_to_bgr(image):
-    rgb = np.asarray(image.convert('RGB'))
-    return cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
-
-def preprocess_like_training_scripts(image, size=512):
-    bgr_image = pil_to_bgr(image)
+def preprocess_like_fixed_notebook(image, size=512):
+    bgr_image = cv2.cvtColor(np.asarray(image.convert('RGB')), cv2.COLOR_RGB2BGR)
     resized = cv2.resize(bgr_image, (size, size), interpolation=cv2.INTER_AREA)
     gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (0, 0), sigmaX=size / 30)
@@ -136,6 +141,22 @@ def preprocess_like_training_scripts(image, size=512):
         "dark_ratio": dark_ratio,
         "dark_border_ratio": dark_border_ratio,
         "aspect_delta": aspect_delta,
+    }
+
+def skip_preprocessing_info(image):
+    arr = np.asarray(image.resize((256, 256), Image.Resampling.BILINEAR)).astype(np.uint8)
+    gray = arr.mean(axis=2)
+    border = np.concatenate([gray[:12, :].ravel(), gray[-12:, :].ravel(), gray[:, :12].ravel(), gray[:, -12:].ravel()])
+    width, height = image.size
+
+    return {
+        "applied": False,
+        "method": "Fara preprocesare",
+        "reason": "imaginea a fost marcata ca deja preprocesata",
+        "processing_size": format_size(image.size),
+        "dark_ratio": float((gray < 18).mean()),
+        "dark_border_ratio": float((border < 18).mean()),
+        "aspect_delta": abs(width - height) / max(width, height),
     }
 
 def legacy_unused_preprocess_detection(image):
@@ -172,15 +193,36 @@ def list_pth_files(folder):
         return []
     return sorted([f for f in os.listdir(folder) if f.lower().endswith('.pth')])
 
-def find_main_stage2_model():
-    candidates = []
-    for filename in list_pth_files(MAIN_MODELS_DIR):
-        lowered = filename.lower()
-        if filename == MAIN_DETECTOR_FILENAME:
-            continue
-        if any(token in lowered for token in ("stage2", "severitate", "severity", "1_4", "1-4", "clasificare")):
-            candidates.append(filename)
-    return candidates[0] if candidates else None
+class CoralLayer(nn.Module):
+    def __init__(self, in_features, num_classes):
+        super().__init__()
+        self.fc = nn.Linear(in_features, 1, bias=False)
+        self.bias = nn.Parameter(torch.zeros(num_classes - 1).float())
+
+    def forward(self, x):
+        return self.fc(x) + self.bias
+
+def build_main_binary_model():
+    model = models.efficientnet_b3(weights=None)
+    in_features = model.classifier[1].in_features
+    model.classifier[1] = nn.Sequential(
+        nn.Dropout(p=0.40),
+        nn.Linear(in_features, 1),
+    )
+    return model
+
+def build_main_branch_model(branch):
+    model = models.efficientnet_b3(weights=None)
+    in_features = model.classifier[1].in_features
+    if branch == "crossentropy":
+        model.classifier[1] = nn.Sequential(nn.Dropout(0.40), nn.Linear(in_features, 4))
+    elif branch == "regression":
+        model.classifier[1] = nn.Sequential(nn.Dropout(0.40), nn.Linear(in_features, 1))
+    elif branch == "ordinal":
+        model.classifier = nn.Sequential(nn.Dropout(0.40), CoralLayer(in_features, 4))
+    else:
+        raise ValueError(f"Ramura principala necunoscuta: {branch}")
+    return model
 
 def build_model_option(model_id, label, group, mode, filename=None, architecture=None, available=True):
     return {
@@ -200,16 +242,16 @@ def get_model_catalog():
         {"id": "experiments", "label": "Experimente"},
     ]
 
-    detector_path = os.path.join(MAIN_MODELS_DIR, MAIN_DETECTOR_FILENAME)
-    stage2_filename = find_main_stage2_model()
-    main_available = os.path.exists(detector_path)
-    main_label = "Pipeline principal: detectie + clasificare 1-4" if stage2_filename else "Pipeline principal: detectie binara"
+    main_available = os.path.exists(MAIN_DETECTOR_PATH) and os.path.exists(MAIN_CLASSIFIER_PATH)
+    main_label = "Pipeline principal: binar + clasificare 1-4 regression"
+    if not main_available:
+        main_label = f"{main_label} (indisponibil)"
     models.append(build_model_option(
         "main:pipeline",
         main_label,
         "main",
         "pipeline",
-        filename=MAIN_DETECTOR_FILENAME,
+        filename=f"{MAIN_DETECTOR_FILENAME} + {os.path.basename(MAIN_CLASSIFIER_PATH)}",
         architecture="efficientnet_b3",
         available=main_available,
     ))
@@ -229,21 +271,23 @@ def get_model_catalog():
 
 def resolve_model_selection(model_id):
     if model_id == "main:pipeline":
-        detector_path = os.path.join(MAIN_MODELS_DIR, MAIN_DETECTOR_FILENAME)
-        if not os.path.exists(detector_path):
-            raise FileNotFoundError(f"Modelul principal de detectie nu exista: {detector_path}")
+        if not os.path.exists(MAIN_DETECTOR_PATH):
+            raise FileNotFoundError(f"Modelul principal de detectie nu exista: {MAIN_DETECTOR_PATH}")
+        if not os.path.exists(MAIN_CLASSIFIER_PATH):
+            raise FileNotFoundError(f"Modelul de clasificare 1-4 nu exista: {MAIN_CLASSIFIER_PATH}")
 
-        stage2_filename = find_main_stage2_model()
-        stage2_path = os.path.join(MAIN_MODELS_DIR, stage2_filename) if stage2_filename else None
         return {
             "id": model_id,
             "mode": "pipeline",
-            "detector_path": detector_path,
+            "branch": MAIN_CLASSIFIER_MODE,
+            "detector_path": MAIN_DETECTOR_PATH,
             "detector_name": MAIN_DETECTOR_FILENAME,
             "detector_arch": "efficientnet_b3",
-            "stage2_path": stage2_path,
-            "stage2_name": stage2_filename,
-            "stage2_arch": get_base_model_name(stage2_filename) if stage2_filename else None,
+            "stage2_path": MAIN_CLASSIFIER_PATH,
+            "stage2_name": os.path.join(f"clasificare_{MAIN_CLASSIFIER_MODE}", os.path.basename(MAIN_CLASSIFIER_PATH)),
+            "stage2_arch": "efficientnet_b3",
+            "stage2_mode": MAIN_CLASSIFIER_MODE,
+            "rounder_path": MAIN_ROUNDER_PATH,
         }
 
     if model_id.startswith("exp:"):
@@ -278,6 +322,28 @@ def load_model_for_inference(architecture, num_classes, model_path):
     model_load_time_ms = (time.perf_counter() - model_load_start) * 1000
     return model, model_load_time_ms
 
+def load_state_into_model(model, model_path):
+    state = torch.load(model_path, map_location=DEVICE)
+    if isinstance(state, dict) and "state_dict" in state:
+        state = state["state_dict"]
+    state = {k.replace("module.", "", 1): v for k, v in state.items()}
+    model.load_state_dict(state)
+    model = model.to(DEVICE)
+    model.eval()
+    return model
+
+def load_main_binary_for_inference(model_path):
+    model_load_start = time.perf_counter()
+    model = load_state_into_model(build_main_binary_model(), model_path)
+    model_load_time_ms = (time.perf_counter() - model_load_start) * 1000
+    return model, model_load_time_ms
+
+def load_main_branch_for_inference(branch, model_path):
+    model_load_start = time.perf_counter()
+    model = load_state_into_model(build_main_branch_model(branch), model_path)
+    model_load_time_ms = (time.perf_counter() - model_load_start) * 1000
+    return model, model_load_time_ms
+
 def run_multiclass_model(model, input_tensor):
     start_time = time.perf_counter()
     with torch.no_grad():
@@ -286,6 +352,44 @@ def run_multiclass_model(model, input_tensor):
         confidence, predicted_class = torch.max(probs, 0)
     inference_time_ms = (time.perf_counter() - start_time) * 1000
     return predicted_class.item(), confidence.item(), [float(p) for p in probs.cpu().numpy()], inference_time_ms
+
+def run_main_branch_model(model, input_tensor, branch, rounder_path=None):
+    start_time = time.perf_counter()
+    with torch.no_grad():
+        outputs = model(input_tensor)
+        if branch == "crossentropy":
+            probs = F.softmax(outputs, dim=1)[0]
+            confidence, predicted_class = torch.max(probs, 0)
+            stage_probs = [float(p) for p in probs.cpu().numpy()]
+            details = {"probability_kind": "softmax"}
+            result = predicted_class.item(), confidence.item(), stage_probs, details
+        elif branch == "regression":
+            score = float(outputs.squeeze(1).item())
+            if rounder_path and os.path.exists(rounder_path):
+                coef = np.sort(np.load(rounder_path))
+                predicted_class = int(np.clip(np.digitize([score], coef)[0], 0, 3))
+                rounder = [float(x) for x in coef]
+            else:
+                predicted_class = int(np.clip(round(score), 0, 3))
+                rounder = None
+            details = {
+                "probability_kind": "regression_score",
+                "regression_score": score,
+                "rounder_coef": rounder,
+            }
+            result = predicted_class, None, None, details
+        elif branch == "ordinal":
+            sigmoids = torch.sigmoid(outputs)[0]
+            predicted_class = int((sigmoids > 0.5).sum().item())
+            details = {
+                "probability_kind": "ordinal_sigmoid",
+                "ordinal_threshold_probabilities": [float(p) for p in sigmoids.cpu().numpy()],
+            }
+            result = predicted_class, None, None, details
+        else:
+            raise ValueError(f"Ramura principala necunoscuta: {branch}")
+    inference_time_ms = (time.perf_counter() - start_time) * 1000
+    return (*result, inference_time_ms)
 
 def run_binary_detector(model, input_tensor):
     start_time = time.perf_counter()
@@ -307,14 +411,19 @@ def predict():
 
     file = request.files['image']
     model_id = request.form['model_name']
+    image_is_preprocessed = request.form.get('image_preprocessed', 'true').lower() in ('1', 'true', 'yes', 'on')
 
     try:
         selection = resolve_model_selection(model_id)
         image = Image.open(file.stream).convert('RGB')
         original_image_size = image.size
         base_arch = selection["detector_arch"] if selection["mode"] == "pipeline" else selection["architecture"]
-        input_size = get_input_size(base_arch)
-        inference_image, preprocessing_info = preprocess_like_training_scripts(image, size=512)
+        input_size = MAIN_INPUT_SIZE if selection["mode"] == "pipeline" else get_input_size(base_arch)
+        if image_is_preprocessed:
+            inference_image = image
+            preprocessing_info = skip_preprocessing_info(image)
+        else:
+            inference_image, preprocessing_info = preprocess_like_fixed_notebook(image)
 
         transform = transforms.Compose([
             transforms.Resize((input_size, input_size)),
@@ -325,11 +434,7 @@ def predict():
         input_tensor = transform(inference_image).unsqueeze(0).to(DEVICE)
 
         if selection["mode"] == "pipeline":
-            detector, detector_load_time_ms = load_model_for_inference(
-                selection["detector_arch"],
-                num_classes=1,
-                model_path=selection["detector_path"],
-            )
+            detector, detector_load_time_ms = load_main_binary_for_inference(selection["detector_path"])
             disease_probability, detector_time_ms = run_binary_detector(detector, input_tensor)
             healthy_probability = 1.0 - disease_probability
             model_load_time_ms = detector_load_time_ms
@@ -341,36 +446,27 @@ def predict():
                 predicted_class = 0
                 confidence = healthy_probability
                 raw_probabilities = [healthy_probability, disease_probability]
-            elif selection["stage2_path"]:
-                stage2_arch = selection["stage2_arch"]
-                stage2_input_size = get_input_size(stage2_arch)
-                if stage2_input_size != input_size:
-                    stage2_transform = transforms.Compose([
-                        transforms.Resize((stage2_input_size, stage2_input_size)),
-                        transforms.ToTensor(),
-                        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                             std=[0.229, 0.224, 0.225])
-                    ])
-                    stage2_input_tensor = stage2_transform(inference_image).unsqueeze(0).to(DEVICE)
-                else:
-                    stage2_input_tensor = input_tensor
-
-                stage2, stage2_load_time_ms = load_model_for_inference(
-                    stage2_arch,
-                    num_classes=4,
-                    model_path=selection["stage2_path"],
+                stage2_details = {"probability_kind": "binary_sigmoid"}
+            else:
+                stage2, stage2_load_time_ms = load_main_branch_for_inference(
+                    selection["stage2_mode"],
+                    selection["stage2_path"],
                 )
-                stage2_class, stage2_confidence, stage2_probs, stage2_time_ms = run_multiclass_model(stage2, stage2_input_tensor)
+                stage2_class, stage2_confidence, stage2_probs, stage2_details, stage2_time_ms = run_main_branch_model(
+                    stage2,
+                    input_tensor,
+                    selection["stage2_mode"],
+                    selection.get("rounder_path"),
+                )
                 predicted_class = stage2_class + 1
-                confidence = stage2_confidence
-                raw_probabilities = [healthy_probability] + [disease_probability * prob for prob in stage2_probs]
+                confidence = stage2_confidence if stage2_confidence is not None else disease_probability
+                if stage2_probs is not None:
+                    raw_probabilities = [healthy_probability] + [disease_probability * prob for prob in stage2_probs]
+                else:
+                    raw_probabilities = [healthy_probability, disease_probability]
                 model_load_time_ms += stage2_load_time_ms
                 inference_time_ms += stage2_time_ms
                 stage2_used = True
-            else:
-                predicted_class = 1
-                confidence = disease_probability
-                raw_probabilities = [healthy_probability, disease_probability]
 
             model_display_name = selection["detector_name"]
             if selection["stage2_name"]:
@@ -379,8 +475,10 @@ def predict():
                 "enabled": True,
                 "detector_model": selection["detector_name"],
                 "stage2_model": selection["stage2_name"],
+                "stage2_mode": selection["stage2_mode"],
                 "stage2_used": stage2_used,
                 "disease_probability": disease_probability,
+                "stage2_details": stage2_details,
             }
             model_path_for_size = selection["detector_path"]
         else:

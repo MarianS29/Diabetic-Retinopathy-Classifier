@@ -1,4 +1,4 @@
-﻿import argparse
+import argparse
 import os
 import sys
 import time
@@ -27,6 +27,7 @@ def parse_args():
     parser.add_argument('--num_workers', type=int, default=0)
     parser.add_argument('--class_weights', type=float, nargs='+', default=None)
     parser.add_argument('--gamma', type=float, default=1.5)
+    parser.add_argument('--label_smoothing', type=float, default=0.0)
     parser.add_argument('--monitor_metric', type=str, default='qwk', choices=['qwk', 'macro_f1', 'balanced_acc', 'auc', 'acc', 'val_loss'])
     parser.add_argument('--scheduler', type=str, default='plateau', choices=['plateau', 'cosine', 'none'])
     parser.add_argument('--amp', action='store_true')
@@ -91,7 +92,7 @@ def main():
         set_backbone_trainable(model, trainable=False)
         print(f"Backbone inghetat pentru primele {args.freeze_backbone_epochs} epoci. Parametri antrenabili initial: {count_trainable_parameters(model):,}")
 
-    criterion = get_loss_function(args.loss_name, class_weights=args.class_weights, device=device, gamma=args.gamma)
+    criterion = get_loss_function(args.loss_name, class_weights=args.class_weights, device=device, gamma=args.gamma, label_smoothing=args.label_smoothing)
     optimizer = get_optimizer(model, optimizer_name=args.optimizer, lr=args.lr, backbone_lr_mult=args.backbone_lr_mult)
     
     if args.scheduler == 'plateau':

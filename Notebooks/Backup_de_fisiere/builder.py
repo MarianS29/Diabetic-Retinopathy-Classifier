@@ -80,7 +80,7 @@ def get_model(model_name, num_classes=5, pretrained=True, drop_rate=0.0):
             nn.Linear(num_ftrs, num_classes)
         )
 
-    elif model_name == 'efficientnet_b3': # TODO adauga experiment cu asta, daca timpul permite
+    elif model_name == 'efficientnet_b3':
         weights = models.EfficientNet_B3_Weights.DEFAULT if pretrained else None
         model = models.efficientnet_b3(weights=weights)
         in_features = model.classifier[1].in_features

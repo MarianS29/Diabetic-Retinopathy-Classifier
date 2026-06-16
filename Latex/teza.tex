@@ -27,7 +27,7 @@
   linktocpage]{hyperref}
 \usepackage{url}
 
-\singlespacing
+\singlespacing 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%cod colorat
 \usepackage{listings}
@@ -2650,61 +2650,89 @@ patologic, iar a doua etapă poate trata separat diferențele mai dificile dintr
 
 \section{Integrarea cu sistemul final în două etape}
 
-\ \ \ \ Noile rezultate susțin decizia de a trata soluția finală ca un pipeline în două etape:
-detecție urmată de clasificarea severității. Analizele pe clase și matricele de confuzie arată că
-separarea clasei 0 de clasele patologice are o importanță diferită față de diferențierea dintre
-stadiile 1--4. De asemenea, erorile observate în matricele de confuzie indică faptul că modelul
-confundă mai ales clasele 1 și 2 cu clasa 0, dar nu confundă în aceeași măsură clasele marginale,
-cum ar fi clasa 0 și clasa 4. Această distribuție a erorilor justifică separarea problemei: primul
-model trebuie să fie sensibil la prezența oricărei forme de boală, iar al doilea model poate fi
-specializat pe diferențele mai fine dintre gradele de retinopatie.
+\ \ \ \ Varianta finală a experimentului este implementată în notebook-ul
+\path{Notebooks/Main/Local/diabetic-retinopathy-classifier-FIXED.ipynb}. Acesta înlocuiește
+varianta de test pe subset și construiește un pipeline local complet, bazat pe \texttt{EfficientNet-B3},
+pentru două sarcini complementare: detecția binară a bolii și gradarea severității pe clasele 1--4.
+Codul complet exportat din notebook este inclus în listarea \ref{lst:cap6-11-fixed}, astfel încât
+configurația experimentală să poată fi reprodusă fără a depinde de interfața Jupyter.
 \bigskip
 
-Această idee este implementată și testată în notebook-ul
-\path{Notebooks/Main/Local/demo_subset_training_local_cuda.ipynb}. Notebook-ul rulează local, cu
-acceleratorul setat explicit pe CUDA, și folosește EyePACS ca sursă de date pentru un test rapid pe
-subset. Înainte de antrenare, fișierul \texttt{all\_labels.csv} este mapat la imaginile disponibile
-pe disc, sunt eliminate intrările fără fișier valid, iar etichetele sunt transformate în două ținte:
-\texttt{is\_diseased}, pentru etapa binară, și \texttt{level\_stage2}, pentru clasificarea claselor
-1--4. Astfel, aceeași sursă de date produce două probleme de învățare distincte, dar coerente între
-ele.
+Prima etapă tratează problema ca o clasificare binară între imaginile \textit{sănătoase} și imaginile
+cu retinopatie diabetică. Setul de date folosit este
+\path{datasets/processed_by_me/eyepacs/eyepacs_binar}, organizat pe directoare de antrenare,
+validare și test. Modelul pornește de la \texttt{EfficientNet-B3} pre-antrenat pe ImageNet, iar
+clasificatorul final este înlocuit cu un strat \texttt{Dropout} urmat de un neuron de ieșire. Funcția
+de pierdere este \texttt{BCEWithLogitsLoss}, iar pragul final de decizie nu este ales arbitrar, ci este
+optimizat pe setul de validare prin scorul \(F_{\beta}\), cu \(\beta=2\). Această alegere favorizează
+reducerea falselor negative, aspect important într-un scenariu de screening, unde ratarea unei imagini
+patologice este mai gravă decât trimiterea unei imagini sănătoase către verificare suplimentară.
 \bigskip
 
-Preprocesarea este realizată offline printr-o combinație Ben Graham + CLAHE. Fiecare imagine este
-redimensionată la \(224 \times 224\), este detectată zona utilă a retinei, fundalul este tratat printr-o
-mască și un halo gradual, iar contrastul local este îmbunătățit cu CLAHE. După această etapă,
-notebook-ul construiește DataLoader-e separate pentru cele două faze. Pentru antrenare sunt folosite
-augmentări dinamice moderate: flip orizontal, rotații mici, translații, scalare și variații reduse de
-luminozitate și contrast. Pentru validare se păstrează doar transformarea în tensor și normalizarea
-ImageNet, astfel încât evaluarea să fie stabilă.
+Antrenarea este împărțită în două faze. În primele trei epoci, backbone-ul este înghețat și se
+antrenează doar capul nou adăugat, cu rată de învățare mai mare. După această stabilizare inițială,
+backbone-ul este dezghețat și se aplică fine-tuning complet, cu rate de învățare diferențiate pentru
+straturile pre-antrenate și pentru clasificator. În etapa binară, cel mai bun rezultat de validare a
+fost un AUC de \(0.8602\), obținut după trecerea în faza de fine-tuning. Curbele din figura
+\ref{fig:cap6-11-curbe-combinate} arată că îmbunătățirea apare mai ales după dezghețarea modelului,
+ceea ce confirmă utilitatea adaptării întregului extractor de caracteristici la imaginile de fund de
+ochi.
 \bigskip
 
-Etapa 1 este formulată ca detecție binară \textit{No DR} versus \textit{DR}. În configurația din
-notebook, aceasta folosește \texttt{EfficientNet-B3} cu un singur neuron de ieșire și
-\texttt{BCEWithLogitsLoss}. Pentru dezechilibrul dintre imaginile sănătoase și cele patologice este
-calculat \texttt{pos\_weight}, astfel încât exemplele pozitive să nu fie ignorate. Etapa 2 este
-formulată ca problemă multiclasă pe clasele 1, 2, 3 și 4. Pentru aceasta este folosit
-\texttt{Inception-ResNet-v2}, construit prin \texttt{timm}, cu \texttt{CrossEntropyLoss}, ponderi pe
-clase și \textit{label smoothing}. Cele două modele au optimizatoare AdamW separate, rate de învățare
-diferite și scheduler \texttt{ReduceLROnPlateau} pe baza scorului QWK.
+A doua etapă este activată doar pentru imaginile considerate patologice de primul model și clasifică
+severitatea în clasele 1, 2, 3 și 4. Pentru această etapă a fost folosit setul
+\path{datasets/processed_by_me/eyepacs/eyepacs_1_4}, cu \(40000\) imagini în antrenare și câte
+\(3503\), respectiv \(3504\), imagini în validare și test. Notebook-ul compară trei formulări ale
+aceleiași probleme, toate pe același backbone \texttt{EfficientNet-B3}: clasificare multiclasă cu
+\texttt{CrossEntropyLoss}, regresie cu rotunjire optimizată pe validare și formulare ordinală de tip
+CORAL. Această comparație este relevantă deoarece gradele retinopatiei nu sunt clase nominale
+independente, ci niveluri ordonate de severitate.
 \bigskip
 
-Motorul de antrenare urmărește pentru fiecare epocă pierderea, acuratețea și QWK pe validare, iar cel
-mai bun model este păstrat în funcție de QWK. Această alegere este importantă deoarece QWK ține cont
-de ordinea claselor și penalizează mai puternic confuziile între stadii îndepărtate. Notebook-ul
-include și un modul de evaluare care produce rapoarte de clasificare și matrice de confuzie pentru
-fiecare etapă. În acest fel, se poate vedea separat dacă sistemul eșuează la detecția bolii sau la
-gradarea severității.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{Figuri/cap6_11_curbe_combinate_comentate.png}
+    \caption{Curbe combinate pentru experimentul final în două etape. Prima celulă sintetizează etapa
+    binară, iar celelalte trei celule compară formulările multiclasă pentru clasele 1--4.}
+    \label{fig:cap6-11-curbe-combinate}
+\end{figure}
+
+\ \ \ \ Rezultatele pe test indică diferențe importante între cele trei formulări multiclasă. Varianta
+cu \texttt{CrossEntropyLoss} obține cea mai bună acuratețe globală, \(0.6618\), însă scorul QWK este
+\(0.6247\). Varianta de regresie obține o acuratețe de \(0.6179\) și un QWK de \(0.6440\), iar pragurile
+de rotunjire sunt învățate exclusiv pe validare, nu pe test. Varianta ordinală obține cea mai bună
+valoare QWK, \(0.6561\), chiar dacă acuratețea este mai mică, \(0.5848\). Această diferență arată că
+modelul ordinal face mai puține greșeli grave din punct de vedere clinic: majoritatea erorilor sunt
+între clase vecine, nu între stadii îndepărtate.
 \bigskip
 
-Fluxul de inferență din notebook reflectă direct arhitectura finală. Funcția \texttt{predict\_retina}
-primește o imagine, aplică transformarea de validare și rulează mai întâi modelul binar. Dacă
-probabilitatea de boală este sub pragul ales, sistemul returnează clasa 0. Dacă probabilitatea
-depășește pragul, imaginea este transmisă către modelul de severitate, care produce probabilități
-pentru clasele 1--4, iar clasa finală este obținută prin adăugarea offset-ului necesar la predicția
-din etapa a doua. Această structură păstrează ieșirea finală în scala completă 0--4, dar permite
-analizarea și optimizarea separată a celor două decizii critice: prezența bolii și severitatea ei.
+Matricele de confuzie din figura \ref{fig:cap6-11-matrici-combinate} confirmă aceeași observație.
+Pentru formularea cu regresie, \(92.5\%\) dintre erori sunt la distanță de un singur grad, iar pentru
+formularea ordinală proporția crește la \(93.2\%\). În schimb, formularea cu cross-entropy are o
+acuratețe mai ridicată, dar păstrează o proporție mai mare de erori la două grade, \(12.8\%\). Din
+perspectiva sistemului final, această comparație susține folosirea QWK ca metrică principală pentru
+alegerea modelului de severitate, deoarece penalizează explicit distanța dintre clasa reală și clasa
+prezisă.
+\bigskip
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{Figuri/cap6_11_matrici_combinate_comentate.png}
+    \caption{Matrici de confuzie combinate pentru etapa binară și pentru cele trei variante multiclasă.
+    Comentariile evidențiază diferența dintre acuratețe globală și respectarea ordinii clinice a
+    claselor.}
+    \label{fig:cap6-11-matrici-combinate}
+\end{figure}
+
+\ \ \ \ Integrarea finală se bazează, așadar, pe o decizie secvențială. Imaginea este preprocesată și
+trimisă mai întâi către modelul binar. Dacă probabilitatea de boală este sub pragul optimizat pe
+validare, sistemul returnează clasa 0. Dacă probabilitatea depășește pragul, imaginea este transmisă
+către modelul multiclasă, iar predicția finală este translatată în scala completă 1--4. Prin această
+separare, modelul binar poate fi calibrat pentru sensibilitate ridicată, iar modelul de severitate
+poate fi selectat după comportamentul ordinal al erorilor. În forma analizată, varianta ordinală este
+cea mai potrivită pentru a doua etapă atunci când criteriul principal este QWK, în timp ce varianta
+cross-entropy rămâne utilă atunci când se urmărește acuratețea brută.
+\bigskip
 
 \chapter{Aplicația de inferență}
 
