@@ -609,6 +609,49 @@ select:focus {
   transition: width 0.7s ease;
 }
 
+.grade-probabilities {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 1.15rem;
+}
+
+.grade-probability-row {
+  min-width: 0;
+}
+
+.grade-probability-label {
+  display: grid;
+  grid-template-columns: 4.7rem minmax(8rem, 1fr) 3rem minmax(0, 5.5rem);
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.grade-probability-label strong {
+  color: var(--text-primary);
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.grade-probability-label em {
+  color: var(--accent-color);
+  font-style: normal;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.grade-probability-blocks {
+  min-width: 0;
+  color: var(--accent-color);
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 .recommendation h4,
 .probability-title {
   margin: 0 0 0.45rem;
@@ -761,5 +804,13 @@ select:focus {
   .preprocess-status strong,
   .engineering-data strong {
     text-align: left;
+  }
+
+  .grade-probability-label {
+    grid-template-columns: 4.4rem minmax(5rem, 1fr) 2.8rem;
+  }
+
+  .grade-probability-label em {
+    grid-column: 2 / -1;
   }
 }

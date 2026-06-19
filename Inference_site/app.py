@@ -50,8 +50,17 @@ MAIN_RESULTS_DIR = os.path.join(MAIN_MODELS_DIR, "Rezultate_main")
 MAIN_BINAR_DIR = os.path.join(MAIN_RESULTS_DIR, "binar")
 MAIN_DETECTOR_FILENAME = "efficientnet_b3_binar_best.pth"
 MAIN_DETECTOR_PATH = os.path.join(MAIN_BINAR_DIR, MAIN_DETECTOR_FILENAME)
-MAIN_CLASSIFIER_MODE = "regression"
-MAIN_CLASSIFIER_PATH = os.path.join(MAIN_RESULTS_DIR, "clasificare_regression", "model_best.pth")
+MAIN_CLASSIFIER_PREFERRED_MODE = "regression"
+
+def get_main_classifier_path(mode):
+    return os.path.join(MAIN_RESULTS_DIR, f"clasificare_{mode}", "model_best.pth")
+
+MAIN_CLASSIFIER_MODE = (
+    MAIN_CLASSIFIER_PREFERRED_MODE
+    if os.path.exists(get_main_classifier_path(MAIN_CLASSIFIER_PREFERRED_MODE))
+    else "regression"
+)
+MAIN_CLASSIFIER_PATH = get_main_classifier_path(MAIN_CLASSIFIER_MODE)
 MAIN_ROUNDER_PATH = os.path.join(MAIN_RESULTS_DIR, "clasificare_regression", "rounder_coef.npy")
 MAIN_INPUT_SIZE = 300
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -243,7 +252,7 @@ def get_model_catalog():
     ]
 
     main_available = os.path.exists(MAIN_DETECTOR_PATH) and os.path.exists(MAIN_CLASSIFIER_PATH)
-    main_label = "Pipeline principal: binar + clasificare 1-4 regression"
+    main_label = f"Pipeline principal: binar + clasificare 1-4 {MAIN_CLASSIFIER_MODE}"
     if not main_available:
         main_label = f"{main_label} (indisponibil)"
     models.append(build_model_option(
@@ -353,6 +362,49 @@ def run_multiclass_model(model, input_tensor):
     inference_time_ms = (time.perf_counter() - start_time) * 1000
     return predicted_class.item(), confidence.item(), [float(p) for p in probs.cpu().numpy()], inference_time_ms
 
+def get_regression_alternative_class(score, predicted_class, rounder):
+    candidates = []
+    if predicted_class > 0:
+        boundary = rounder[predicted_class - 1] if rounder else predicted_class - 0.5
+        candidates.append((predicted_class - 1, abs(score - boundary)))
+    if predicted_class < 3:
+        boundary = rounder[predicted_class] if rounder else predicted_class + 0.5
+        candidates.append((predicted_class + 1, abs(score - boundary)))
+    if not candidates:
+        return None
+    return min(candidates, key=lambda item: item[1])[0] + 1
+
+def normalize_grade_probabilities(values):
+    clipped = np.clip(np.asarray(values, dtype=np.float64), 0.0, 1.0)
+    total = float(clipped.sum())
+    if total > 0:
+        clipped = clipped / total
+    return [
+        {"grade": grade, "probability": float(probability)}
+        for grade, probability in enumerate(clipped.tolist(), start=1)
+    ]
+
+def regression_grade_probabilities(score):
+    grade_scores = -np.square(np.arange(4, dtype=np.float64) - float(score))
+    grade_scores = grade_scores - np.max(grade_scores)
+    probabilities = np.exp(grade_scores)
+    probabilities = probabilities / max(float(probabilities.sum()), 1e-12)
+    return normalize_grade_probabilities(probabilities)
+
+def coral_grade_probabilities(sigmoids):
+    threshold_probs = [float(p) for p in sigmoids.detach().cpu().numpy()]
+    if not threshold_probs:
+        return []
+
+    class_probs = [1.0 - threshold_probs[0]]
+    class_probs.extend(
+        threshold_probs[idx - 1] - threshold_probs[idx]
+        for idx in range(1, len(threshold_probs))
+    )
+    class_probs.append(threshold_probs[-1])
+
+    return normalize_grade_probabilities(class_probs)
+
 def run_main_branch_model(model, input_tensor, branch, rounder_path=None):
     start_time = time.perf_counter()
     with torch.no_grad():
@@ -361,7 +413,12 @@ def run_main_branch_model(model, input_tensor, branch, rounder_path=None):
             probs = F.softmax(outputs, dim=1)[0]
             confidence, predicted_class = torch.max(probs, 0)
             stage_probs = [float(p) for p in probs.cpu().numpy()]
-            details = {"probability_kind": "softmax"}
+            grade_probabilities = normalize_grade_probabilities(stage_probs)
+            details = {
+                "probability_kind": "softmax",
+                "stage2_predicted_grade": predicted_class.item() + 1,
+                "grade_probabilities_1_4": grade_probabilities,
+            }
             result = predicted_class.item(), confidence.item(), stage_probs, details
         elif branch == "regression":
             score = float(outputs.squeeze(1).item())
@@ -372,20 +429,34 @@ def run_main_branch_model(model, input_tensor, branch, rounder_path=None):
             else:
                 predicted_class = int(np.clip(round(score), 0, 3))
                 rounder = None
+            alternative_class_1_4 = get_regression_alternative_class(score, predicted_class, rounder)
+            grade_probabilities = regression_grade_probabilities(score)
+            confidence = grade_probabilities[predicted_class]["probability"] if predicted_class < len(grade_probabilities) else None
+            stage_probs = [item["probability"] for item in grade_probabilities]
             details = {
                 "probability_kind": "regression_score",
                 "regression_score": score,
                 "rounder_coef": rounder,
+                "alternative_class_1_4": alternative_class_1_4,
+                "stage2_predicted_grade": predicted_class + 1,
+                "grade_probabilities_1_4": grade_probabilities,
+                "grade_probability_note": "estimare derivata din scorul de regresie",
             }
-            result = predicted_class, None, None, details
+            result = predicted_class, confidence, stage_probs, details
         elif branch == "ordinal":
             sigmoids = torch.sigmoid(outputs)[0]
+            grade_probabilities = coral_grade_probabilities(sigmoids)
             predicted_class = int((sigmoids > 0.5).sum().item())
+            confidence = grade_probabilities[predicted_class]["probability"] if predicted_class < len(grade_probabilities) else None
+            stage_probs = [item["probability"] for item in grade_probabilities]
             details = {
                 "probability_kind": "ordinal_sigmoid",
                 "ordinal_threshold_probabilities": [float(p) for p in sigmoids.cpu().numpy()],
+                "stage2_predicted_grade": predicted_class + 1,
+                "grade_probabilities_1_4": grade_probabilities,
+                "ordinal_grade_probabilities_1_4": grade_probabilities,
             }
-            result = predicted_class, None, None, details
+            result = predicted_class, confidence, stage_probs, details
         else:
             raise ValueError(f"Ramura principala necunoscuta: {branch}")
     inference_time_ms = (time.perf_counter() - start_time) * 1000
@@ -441,32 +512,32 @@ def predict():
             inference_time_ms = detector_time_ms
             parameter_count, trainable_parameter_count = count_parameters(detector)
 
-            stage2_used = False
+            stage2, stage2_load_time_ms = load_main_branch_for_inference(
+                selection["stage2_mode"],
+                selection["stage2_path"],
+            )
+            stage2_class, stage2_confidence, stage2_probs, stage2_details, stage2_time_ms = run_main_branch_model(
+                stage2,
+                input_tensor,
+                selection["stage2_mode"],
+                selection.get("rounder_path"),
+            )
+            model_load_time_ms += stage2_load_time_ms
+            inference_time_ms += stage2_time_ms
+            stage2_used = disease_probability > 0.5
+            stage2_evaluated = True
+
             if disease_probability <= 0.5:
                 predicted_class = 0
                 confidence = healthy_probability
                 raw_probabilities = [healthy_probability, disease_probability]
-                stage2_details = {"probability_kind": "binary_sigmoid"}
             else:
-                stage2, stage2_load_time_ms = load_main_branch_for_inference(
-                    selection["stage2_mode"],
-                    selection["stage2_path"],
-                )
-                stage2_class, stage2_confidence, stage2_probs, stage2_details, stage2_time_ms = run_main_branch_model(
-                    stage2,
-                    input_tensor,
-                    selection["stage2_mode"],
-                    selection.get("rounder_path"),
-                )
                 predicted_class = stage2_class + 1
-                confidence = stage2_confidence if stage2_confidence is not None else disease_probability
+                confidence = stage2_confidence
                 if stage2_probs is not None:
                     raw_probabilities = [healthy_probability] + [disease_probability * prob for prob in stage2_probs]
                 else:
                     raw_probabilities = [healthy_probability, disease_probability]
-                model_load_time_ms += stage2_load_time_ms
-                inference_time_ms += stage2_time_ms
-                stage2_used = True
 
             model_display_name = selection["detector_name"]
             if selection["stage2_name"]:
@@ -477,6 +548,7 @@ def predict():
                 "stage2_model": selection["stage2_name"],
                 "stage2_mode": selection["stage2_mode"],
                 "stage2_used": stage2_used,
+                "stage2_evaluated": stage2_evaluated,
                 "disease_probability": disease_probability,
                 "stage2_details": stage2_details,
             }
@@ -498,7 +570,7 @@ def predict():
         response = {
             "stage": predicted_class,
             "stage_name": rec["name"],
-            "confidence": float(confidence),
+            "confidence": float(confidence) if confidence is not None else None,
             "recommendations": {
                 "patient": rec["patient"],
                 "doctor": rec["doctor"]

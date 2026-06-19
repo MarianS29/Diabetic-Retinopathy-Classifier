@@ -122,11 +122,6 @@ def parse_args():
         help='Multiplicator LR pentru backbone. Ex: 0.1 inseamna backbone LR = lr * 0.1.',
     )
     parser.add_argument(
-        '--tta_eval',
-        action='store_true',
-        help='Activeaza TTA la validare/test pentru multiclass: original + horizontal flip.',
-    )
-    parser.add_argument(
         '--train_augment',
         type=str,
         default='basic',
@@ -506,15 +501,6 @@ class ModelEMA:
         self.backup = {}
 
 
-def get_multiclass_outputs(model, imgs, use_tta=False):
-    outputs = model(imgs)
-    if not use_tta:
-        return outputs
-
-    flipped_outputs = model(torch.flip(imgs, dims=[3]))
-    return (outputs + flipped_outputs) / 2.0
-
-
 def compute_extra_metrics(labels, preds):
     try:
         qwk = cohen_kappa_score(labels, preds, weights='quadratic')
@@ -531,11 +517,10 @@ def compute_extra_metrics(labels, preds):
     return qwk, macro_f1, balanced_acc
 
 
-def evaluate(model, data_loader, criterion, loss_name, device, desc, use_tta=False):
+def evaluate(model, data_loader, criterion, loss_name, device, desc):
     model.eval()
     total_loss, correct, total = 0.0, 0, 0
     all_preds, all_labels, all_probs = [], [], []
-    use_tta = use_tta and loss_name.lower() not in ['bce_ordinal', 'ordinal']
 
     with torch.no_grad():
         progress = tqdm(data_loader, desc=desc, leave=False)
@@ -543,16 +528,15 @@ def evaluate(model, data_loader, criterion, loss_name, device, desc, use_tta=Fal
             imgs, labels = imgs.to(device), labels.to(device)
             outputs = model(imgs)
             loss = compute_loss(criterion, outputs, labels, loss_name, device)
-            metric_outputs = get_multiclass_outputs(model, imgs, use_tta=use_tta)
 
             total_loss += loss.item()
-            preds = get_predictions(metric_outputs, loss_name)
+            preds = get_predictions(outputs, loss_name)
             correct += (preds == labels).sum().item()
             total += labels.size(0)
 
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
-            all_probs.extend(F.softmax(metric_outputs, dim=1).cpu().numpy())
+            all_probs.extend(F.softmax(outputs, dim=1).cpu().numpy())
 
     avg_loss = total_loss / max(len(data_loader), 1)
     acc = correct / max(total, 1)
@@ -630,7 +614,6 @@ def run_final_test(
         args.loss_name,
         device,
         desc=f"Testare model [{test_source}]",
-        use_tta=args.tta_eval,
     )
 
     print("Rezultate testare finala:")
@@ -722,7 +705,7 @@ def main():
     print(f"Experiment: {experiment_name} | TRAIN/VAL={train_source} | TEST={', '.join(test_sources)}")
     print(f"Train augment: {args.train_augment}")
     print(f"Monitor metric: {args.monitor_metric} | Scheduler: {args.scheduler}")
-    print(f"AMP: {args.amp} | Grad clip: {args.grad_clip} | EMA decay: {args.ema_decay} | TTA eval: {args.tta_eval}")
+    print(f"AMP: {args.amp} | Grad clip: {args.grad_clip} | EMA decay: {args.ema_decay}")
     print(
         f"Model dropout: {args.model_dropout} | Freeze backbone epochs: {args.freeze_backbone_epochs} | "
         f"Backbone LR mult: {args.backbone_lr_mult}"
@@ -855,7 +838,6 @@ def main():
             args.loss_name,
             device,
             desc=f"Ep {epoch + 1:02d} [VALID]",
-            use_tta=args.tta_eval,
         )
         if ema is not None:
             ema.restore(model)

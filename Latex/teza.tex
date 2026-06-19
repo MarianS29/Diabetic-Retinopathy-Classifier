@@ -78,7 +78,7 @@
 
 \facultatea{Facultatea de Electronică, Telecomunicații și Tehnologia Informației}
 \tiplucrare{dizertație}
-\domeniu{Calculatoare si Tehnologia Informatiei}
+\domeniu{Calculatoare și Tehnologia Informației}
 \catedra{Telecomunicații}
 \campus{Leu}
 \program{Ingineria Informaţiei}
@@ -105,12 +105,30 @@
 \abbreviations{
   SOTA = State of the Art\\
   DR = Diabetic Retinopathy\\
+  CNN = Convolutional Neural Network\\
+  AUC = Area Under the Curve\\
+  ROC = Receiver Operating Characteristic\\
+  CE = Cross-Entropy\\
+  BCE = Binary Cross-Entropy\\
   Deep DRiD = Deep Diabetic Retinopathy Image Dataset\\
+  APTOS = Asia Pacific Tele-Ophthalmology Society\\
   UoA-DR = University of Auckland Diabetic Retinopathy\\
   IDRiD = Indian Diabetic Retinopathy Image Dataset\\
   DDR = Dataset of Diabetic Retinopathy\\
   DRIVE = Digital Retinal Images for Vessel Extraction\\
+  STARE = Structured Analysis of the Retina\\
   QWK = Quadratic Weighted Kappa \\
+  Grad-CAM = Gradient-weighted Class Activation Mapping\\
+  CAM = Class Activation Mapping\\
+  XAI = Explainable Artificial Intelligence\\
+  CAD = Computer-Aided Diagnosis\\
+  CUDA = Compute Unified Device Architecture\\
+  GPU = Graphics Processing Unit\\
+  CPU = Central Processing Unit\\
+  HTTP = Hypertext Transfer Protocol\\
+  JSON = JavaScript Object Notation\\
+  RGB = Red Green Blue\\
+  CORS = Cross-Origin Resource Sharing\\
 
 }
 %\preface{}
@@ -157,7 +175,7 @@ expertizei umane \cite{9_chetoui2020explainable}, \cite{10_jabbar2022transfer}.
 
 \ \ \ \ Scopul lucrării de față este de a folosi algoritmi de vedere computerizată
 bazați pe rețele convoluționale adânci pentru a crea o metodă de detectare
-si clasificare a retinopatiei diabetice. Metoda se va testa pe seturi de
+și clasificare a retinopatiei diabetice. Metoda se va testa pe seturi de
 date publice. Implementarea se va face în Python folosind biblioteci specifice.
 \bigskip
 
@@ -326,7 +344,7 @@ contextul anatomic corect.
 \centering
 \includegraphics[width=0.7\columnwidth]{Figuri/Fund-de-Ochi.png}
 \captionsetup{justification=centering}
-\caption{Structura anatomica a fundului de ochi \cite{vitreum_fund_de_ochi}}
+\caption{Structura anatomică a fundului de ochi \cite{vitreum_fund_de_ochi}}
 \label{fig:eye-fundus-anatomy}
 \end{figure}
 
@@ -412,12 +430,12 @@ predicție multiclasă.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\columnwidth]{Figuri/neproli_vs_proli_eyes.png}
+\includegraphics[width=0.95\columnwidth]{Figuri/neproli_vs_proli_eyes.png}
 \captionsetup{justification=centering}
-\caption{Reprezentare grafică a diferențelor vizuale între o imagine de fund de ochi fără semne patologice și una cu retinopatie diabetică proliferativă \cite{vitreum_retinopatie_diabetica}}
+\caption{Reprezentare grafică a diferențelor vizuale între imagini cu, respectiv fără retinopatie \cite{vitreum_retinopatie_diabetica}}
 \label{fig:proli-vs-nonproli}
 \end{figure}
-
+ 
 Clasele 0 și 1 sunt de obicei cele mai subtile din punct
 de vedere vizual. Absența semnelor evidente într-o fotografie nu garantează absența completă
 a riscului, deoarece detectabilitatea leziunilor depinde de calitatea imaginii și de câmpul
@@ -744,7 +762,8 @@ care gestionează propagarea informației. Dintre acestea, câteva arhitecturi s
 \begin{itemize}
   \item \textbf{ResNet (Residual Networks)} -- introduce conexiuni reziduale (``skip connections''), care permit transmiterea directă 
   a informației peste unul sau mai multe straturi \cite{21_he2016deep}. Această inovație atenuează problema dispariției gradientului 
-  și previne degradarea performanței în rețelele foarte adânci, facilitând învățarea unor reprezentări vizuale complexe.
+  și previne degradarea 
+  \newline performanței în rețelele foarte adânci, facilitând învățarea unor reprezentări vizuale complexe.
   
   \begin{figure}[H]
   \centering
@@ -1114,7 +1133,7 @@ contribuția pierderilor ``intra-task'', ``segmentation-aware'' și ``classifica
 influenței fiecărei sarcini și stabilizează procesul de optimizare \cite{6_wang2021deep}.
 
 Modelul este antrenat și evaluat pe seturi de date publice de imagini fundus etichetate (DDR
-\cite{15_li2019diagnostic} si EyePACS \cite{9_chetoui2020explainable}) atât cu stadiul retinopatiei diabetice, cât și cu adnotări la nivel de imagine privind
+\cite{15_li2019diagnostic} și EyePACS \cite{9_chetoui2020explainable}) atât cu stadiul retinopatiei diabetice, cât și cu adnotări la nivel de imagine privind
 prezența leziunilor. Imaginile sunt supuse unor etape standard de preprocesare, incluzând decuparea
 regiunii retiniene, redimensionarea și augmentarea datelor, pentru a reduce variațiile de iluminare și
 pentru a îmbunătăți capacitatea de generalizare. Prin includerea sarcinilor auxiliare, modelul beneficiază
@@ -1435,7 +1454,7 @@ Pașii urmăriți în construirea dataset-urilor au fost:
   \item reorganizarea imaginilor într-un format comun \texttt{train}/\texttt{val}/\texttt{test}, fiecare subset fiind împărțit în clasele 0-4;
   \item curățarea imaginilor invalide, foarte neclare sau fără regiune retiniană detectabilă;
   \item aplicarea augmentărilor doar pe subsetul de antrenare;
-  \item generarea variantelor preprocesate prin metoda Ben Graham și, pentru sistemul final, prin CLAHE;
+  \item generarea variantelor preprocesate prin metoda Ben Graham;
   \item verificarea riscului de \textit{data leakage}, mai ales în seturile care conțin augmentări preexistente. 
 \end{itemize}
 \bigskip
@@ -1602,7 +1621,7 @@ devenit util pentru experimente comparative: se poate observa dacă modelul reac
 pe o distribuție diferită sau dacă performanța depinde de sursa imaginilor.
 \bigskip
 
-APTOS a fost, așadar, un dataset experimental potrivit pentru lucrare din trei motive:
+APTOS a fost, așadar, un dataset experimental potrivit pentru lucrare din patru motive:
 
 \begin{itemize}
   \item dimensiunea sa mai redusă, dar totuși în același timp echilibrată și cu imagini curate
@@ -1620,6 +1639,7 @@ creează un split stratificat pe clase.
 \bigskip
 
 Notebook-ul \path{clean_balanced_aug.ipynb} construiește varianta \texttt{balanced\_aug\_cleaned}.
+\newline
 Acesta aplică filtre de calitate asemănătoare cu cele folosite pentru EyePACS: verificarea
 citirii imaginii, redimensionarea pentru analiză, estimarea clarității, segmentarea aproximativă
 a fundului de ochi și validarea conturului principal.
@@ -1662,13 +1682,13 @@ uniformizarea iluminării și accentuarea contrastului local ajută modelele pe 
 \section{Verificarea distribuției imaginilor}
 
 \ \ \ \ Pe lângă generarea efectivă a dataset-urilor, a fost realizată și o etapă de verificare
-a distribuției imaginilor. În notebook-ul \path{Notebooks/testam_chestii.ipynb} au fost incluse
+a distribuției imaginilor. În notebook-ul \path{Notebooks/teste_si_incercari.ipynb} au fost incluse
 funcții pentru numărarea imaginilor pe clase și subseturi, aplicate succesiv pe variantele
 intermediare și finale. Această verificare a fost importantă deoarece o eroare de copiere sau
 o distribuție foarte diferită între \texttt{train}, \texttt{val} și \texttt{test} poate afecta
 direct interpretarea rezultatelor, dând avantaj clasei majoritare.
 \bigskip
-\bigskip
+\bigskip 
 
 Pentru fiecare dataset au fost urmărite următoarele aspecte:
 
@@ -1739,7 +1759,7 @@ pe seturi publice trebuie interpretate împreună cu modul exact de împărțire
 capitolul de rezultate se arată că, după eliminarea acestui risc de \textit{data leakage},
 performanța scade semnificativ, ceea ce confirmă că evaluarea inițială era prea optimistă.
 
-\section{Preprocesarea Ben Graham și CLAHE}
+\section{Preprocesarea Ben Graham}
 
 \ \ \ \ Preprocesarea Ben Graham este folosită pentru reducerea variațiilor de iluminare și pentru
 accentuarea structurilor retiniene. În scripturile de construire a dataset-urilor, metoda aplică
@@ -1748,7 +1768,7 @@ extragerea conturului principal, eroziunea măștii, blur gaussian și combinaț
 imaginea originală și imaginea blurată.
 \bigskip
 
-Pentru a documenta vizual fiecare etapă, în \path{Notebooks/testam_chestii.ipynb} a fost creată
+Pentru a documenta vizual fiecare etapă, în \path{Notebooks/teste_si_incercari.ipynb} a fost creată
 funcția \texttt{procesare\_ben\_graham\_detaliata}. Aceasta afișează secvențial transformările
 aplicate unei imagini de fund de ochi: imaginea originală, conversia în tonuri de gri, masca
 retiniană, blur-ul gaussian folosit pentru estimarea iluminării de fond, filtrul Ben Graham,
@@ -1781,25 +1801,70 @@ intrare și, implicit, performanța modelelor antrenate pe aceste date.
 \label{fig:ben-graham-subprocesari}
 \end{figure}
 
-În modelul principal local CUDA, preprocesarea este realizată offline și este completată cu
-CLAHE. Imaginile sunt redimensionate la 224$\times$224 pixeli, regiunea retiniană este mascată,
-fundalul este uniformizat, apoi contrastul local este ajustat prin
-\texttt{cv2.createCLAHE}. Imaginile procesate sunt salvate pe disc în
-\path{processed_by_me/local_notebook_outputs/processed_bg_224_local}, astfel încât antrenarea
-să nu repete costul de preprocesare la fiecare epocă.
+În modelul principal local CUDA, preprocesarea este realizată prin metoda Ben Graham.
+Imaginile sunt redimensionate, regiunea retiniană este mascată, iar fundalul este uniformizat
+pentru a reduce variațiile de iluminare înainte de utilizarea lor în antrenare.
 \bigskip
 
-Combinarea Ben Graham + CLAHE a fost aleasă pentru sistemul final deoarece urmărește două
-obiective complementare: reducerea variațiilor globale de iluminare și accentuarea contrastului
-local. Totuși, această preprocesare nu a fost presupusă automat ca fiind optimă pentru toate
-seturile. Ea a fost testată experimental pe variantele construite, iar rezultatele sunt discutate
-în capitolele următoare. Această abordare este importantă deoarece literatura arată că modelele
-pot reacționa diferit la schimbări de preprocesare și de domeniu vizual \cite{8_zhang2022multi},
+Preprocesarea Ben Graham a fost aleasă deoarece reduce variațiile globale de iluminare și face
+mai vizibile structurile retiniene relevante, fără a introduce o etapă suplimentară de ajustare
+locală a contrastului. Totuși, această preprocesare nu a fost presupusă automat ca fiind optimă
+pentru toate seturile. Ea a fost testată experimental pe variantele construite, iar rezultatele
+sunt discutate în capitolele următoare. Această abordare este importantă deoarece literatura arată
+că modelele pot reacționa diferit la schimbări de preprocesare și de domeniu vizual \cite{8_zhang2022multi},
 \cite{9_chetoui2020explainable}.
+
+\section{Formarea dataset-urilor EyePACS pentru sistemul principal}
+
+\ \ \ \ Pe lângă variantele EyePACS folosite în experimentele comparative, pentru sistemul principal
+în două etape au fost construite două dataset-uri specializate: \texttt{eyepacs\_binar} și
+\texttt{eyepacs\_1\_4}. Acestea au fost generate separat deoarece pipeline-ul final nu rezolvă
+direct o singură clasificare multiclasă 0--4, ci împarte decizia în două probleme mai controlabile:
+detecția bolii și gradarea severității pentru cazurile patologice.
+\bigskip
+
+Dataset-ul \texttt{eyepacs\_binar} este construit în notebook-ul
+\path{Scripts/EyePACS/create_eyepacs_binar.ipynb}. Scriptul pornește de la fișierul
+\texttt{all\_labels.csv} și de la imaginile originale EyePACS, verifică existența fiecărui fișier și
+transformă etichetele originale 0--4 într-o problemă binară: clasa 0 devine \textit{sănătos}, iar
+clasele 1--4 sunt grupate în clasa \textit{bolnav}. Imaginile sunt preprocesate prin metoda Ben Graham
+în momentul copierii în dataset-ul final. Împărțirea urmărește raportul 70\%/15\%/15\%, iar setul de
+test este construit explicit 50/50 între imagini sănătoase și imagini patologice, pentru evaluarea
+clară a detectorului binar.
+\bigskip
+
+După split, subsetul de antrenare al dataset-ului binar este echilibrat prin augmentare offline.
+Augmentările sunt aplicate doar în \texttt{train}, astfel încât validarea și testarea să rămână
+nealterate. Varianta finală conține 96.664 imagini în train, câte 48.332 pentru fiecare clasă,
+13.304 imagini în validare și 13.304 imagini în test. Setul de test conține 6.652 imagini
+\textit{sănătos} și 6.652 imagini \textit{bolnav}.
+\bigskip
+
+Dataset-ul \texttt{eyepacs\_1\_4} este construit în notebook-ul
+\path{Scripts/EyePACS/create_eyepacs_1-4.ipynb}. În această variantă sunt păstrate doar imaginile cu
+etichete patologice, adică nivelurile 1, 2, 3 și 4. Scopul său este antrenarea celei de-a doua etape
+a sistemului principal, care primește doar cazurile considerate bolnave de detectorul binar și estimează
+gradul de severitate. Split-ul inițial este stratificat pe clasele patologice, cu raport 70\% pentru
+antrenare, 15\% pentru validare și 15\% pentru test.
+\bigskip
+
+Pentru a reduce dezechilibrul puternic dintre stadiile patologice, subsetul de antrenare din
+\texttt{eyepacs\_1\_4} este echilibrat prin augmentare offline până la 10.000 imagini pentru fiecare
+clasă. Rezultatul final are 40.000 imagini în train, distribuite egal între stadiile 1--4, 3.503
+imagini în validare și 3.504 imagini în test. Validarea și testarea păstrează distribuția naturală a
+cazurilor patologice, tocmai pentru ca evaluarea modelului de severitate să rămână realistă.
+\bigskip
+
+Prin separarea acestor două dataset-uri, sistemul principal poate optimiza diferit cele două obiective.
+Primul model este antrenat pentru sensibilitate ridicată în separarea \textit{sănătos}--\textit{bolnav},
+iar al doilea model este antrenat doar pe diferențele mai fine dintre stadiile patologice. Această
+organizare reduce conflictul dintre clasa majoritară 0 și clasele de boală, problemă frecventă în
+clasificarea directă pe scala completă 0--4.
 
 \section{Dataset-urile finale rezultate}
 
-\ \ \ \ În urma acestor pași au rezultat mai multe variante experimentale. Tabelul
+\ \ \ \ În urma acestor pași au rezultat mai multe variante experimentale și două dataset-uri dedicate
+sistemului principal. Tabelul
 \ref{tab:dataseturi-finale} sintetizează rolul fiecăreia.
 
 \begin{table}[H]
@@ -1821,6 +1886,10 @@ pot reacționa diferit la schimbări de preprocesare și de domeniu vizual \cite
 \hline
 \shortstack[l]{\texttt{eyepacs\_augmented}\\\texttt{\_bengraham}} & \shortstack[l]{\path{form_eyepacs_augmented}\\\path{_bengraham.ipynb}} & EyePACS augmentat și preprocesat Ben Graham. \\
 \hline
+\texttt{eyepacs\_binar} & \path{create_eyepacs_binar.ipynb} & Dataset pentru prima etapă a sistemului principal: clasificare \textit{sănătos}--\textit{bolnav}, cu train echilibrat și test 50/50. \\
+\hline
+\texttt{eyepacs\_1\_4} & \path{create_eyepacs_1-4.ipynb} & Dataset pentru a doua etapă a sistemului principal: gradarea cazurilor patologice în clasele 1--4, cu train echilibrat la 10.000 imagini/clasă. \\
+\hline
 \texttt{aptos\_augmented} & \path{form_aptos_augmented.ipynb} & Variantă APTOS construită pentru experimente cu augmentare controlată. \\
 \hline
 \shortstack[l]{\texttt{aptos\_augmented}\\\texttt{\_bengraham}} & \shortstack[l]{\path{form_aptos_augmented}\\\path{+b_g.ipynb}} & APTOS augmentat și preprocesat Ben Graham, folosit pentru comparații între domenii vizuale. \\
@@ -1832,20 +1901,23 @@ pot reacționa diferit la schimbări de preprocesare și de domeniu vizual \cite
 \shortstack[l]{\texttt{balanced\_augmented}\\\texttt{\_bengraham}} & \shortstack[l]{\path{form_balanced_augmented}\\\path{_bengraham.ipynb}} & Variantă augmentată și preprocesată Ben Graham. \\
 \hline
 \shortstack[l]{\texttt{Diabetic\_Balanced\_Data}\\\texttt{\_grouped\_70\_20\_10}} & \shortstack[l]{\path{grouped_split}\\\path{_diabetic_balanced_data.py}} & Split grupat fără leakage între originale și augmentări. \\
-\hline
+\hline 
 \end{tabularx}
 \renewcommand{\arraystretch}{1}
-\end{table} 
+\end{table}  
 
 \chapter{Metodologia propusă}
 
 \section{Fluxul general al sistemului}
 
 \ \ \ \ Metodologia propusă urmărește construirea unui flux complet pentru clasificarea automată a retinopatiei
-diabetice pe baza imaginilor de fund de ochi. Sistemul pornește de la
-setul de date \textit{Diabetic\_Balanced\_Data}, organizat în directoare de antrenare, validare și testare,
-și ajunge la salvarea unor modele antrenate care pot fi folosite ulterior
-într-o aplicație de inferență. Implementarea este realizată în Python, folosind PyTorch pentru
+diabetice pe baza imaginilor de fund de ochi. Sistemul pornește de la seturi de date reorganizate
+în directoare de antrenare, validare și testare. Pentru experimentele comparative sunt folosite
+EyePACS, APTOS și \textit{Diabetic\_Balanced\_Aug}, iar pentru sistemul principal sunt construite
+două seturi EyePACS specializate: \texttt{EyePACS\_binar}, pentru separarea imaginilor bolnave de
+cele sănătoase, și \texttt{EyePACS\_1\_4}, pentru gradarea severității bolii. Fluxul ajunge la
+salvarea unor modele antrenate care pot fi folosite ulterior într-o aplicație de inferență.
+Implementarea este realizată în Python, folosind PyTorch pentru
 antrenarea rețelelor, Torchvision și \texttt{timm} pentru arhitecturi pre-antrenate, iar scikit-learn, Matplotlib și
 Seaborn pentru evaluare și vizualizare.
 \bigskip
@@ -1864,17 +1936,36 @@ fiecare epocă, salvează cea mai bună variantă și generează graficele de ev
 Separarea funcțiilor utilitare într-un fișier dedicat este importantă deoarece menține
 \texttt{train.py} concentrat pe fluxul principal al experimentului. În același timp,
 \texttt{utils.py} permite reutilizarea acelorași funcții de evaluare și vizualizare pentru mai
-multe arhitecturi, surse de date și configurații de antrenare. Astfel, metricile precum QWK,
-Macro F1 și Balanced Accuracy sunt calculate consecvent, iar rezultatele generate pentru
-experimente diferite au aceeași structură și pot fi comparate mai ușor.
+multe arhitecturi, surse de date și configurații de antrenare. În experimentele documentate,
+QWK este folosită ca metrică principală de salvare a celui mai bun model, iar rezultatele
+generate pentru experimente diferite au aceeași structură și pot fi comparate mai ușor.
 \bigskip
 
 Problema este formulată ca o clasificare multiclasă în cinci clase, corespunzătoare stadiilor
 retinopatiei diabetice. Pentru fiecare imagine, modelul produce un vector de cinci scoruri,
 iar clasa finală este obținută prin alegerea valorii maxime în cazul funcțiilor
-de pierdere de tip Cross-Entropy și Focal Loss. Pentru varianta ordinală, ieșirea
-este interpretată prin praguri binare, deoarece clasele au o ordine clinică naturală.
+de pierdere de tip Cross-Entropy și Focal Loss. Pentru varianta ordinală, 
+ieșirea continuă a rețelei este interpretată prin praguri de decizie optimizate, 
+deoarece clasele au o ordine clinică naturală.
 \bigskip
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{Figuri/schema_flux_sistem_complet.png}
+    \captionsetup{justification=centering}
+    \caption{Fluxul general al lucrării, de la imaginea de fund de ochi și preprocesare până la
+    ramura de experimente și ramura sistemului principal.}
+    \label{fig:schema-flux-sistem-complet}
+\end{figure}
+
+\ \ \ \ Figura \ref{fig:schema-flux-sistem-complet} sintetizează organizarea întregului sistem.
+Pornind de la imaginea fundus, datele sunt preprocesate și echilibrate, apoi sunt folosite fie pentru
+experimente comparative, fie pentru construirea pipeline-ului principal. Ramura experimentală include
+evaluarea pe EyePACS, APTOS și \texttt{Diabetic\_Balanced\_Aug}, cu modele preantrenate folosite
+pentru compararea arhitecturilor și a strategiilor de antrenare. Ramura principală folosește
+\texttt{EyePACS\_binar} pentru decizia bolnav/sănătos și \texttt{EyePACS\_1\_4} pentru gradele de boală,
+astfel încât decizia finală să poată fi obținută prin modele în cascadă.
+\bigskip 
 
 Pe lângă această formulare multiclasă, soluția principală a lucrării este organizată ca un
 pipeline în două etape. Prima etapă tratează problema ca detecție binară și decide dacă imaginea
@@ -1884,21 +1975,42 @@ decizia finală rămâne exprimată pe scala completă 0--4, dar modelul nu mai 
 simultan două probleme diferite: separarea imaginilor sănătoase de cele afectate și diferențierea
 gradelor de severitate între cazurile bolnave.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.88\textwidth]{Figuri/schema_flux_sistem_principal_doua_etape.png}
+    \captionsetup{justification=centering}
+    \caption{Fluxul sistemului principal în două etape: detector binar pentru separarea imaginilor
+    sănătoase de cele patologice, urmat de clasificarea severității pentru cazurile trimise mai departe.}
+    \label{fig:schema-flux-sistem-principal-doua-etape}
+\end{figure} 
+
+\ \ \ \ Schema din figura \ref{fig:schema-flux-sistem-principal-doua-etape} detaliază ramura principală a
+lucrării. Imaginea este evaluată inițial de modelul binar antrenat pe \texttt{EyePACS\_binar}. Dacă
+probabilitatea de boală este sub pragul ales pe validare, sistemul returnează direct rezultatul
+\textit{fără boală}. Dacă imaginea este considerată patologică, aceasta este transmisă către modelul
+de severitate antrenat pe \texttt{EyePACS\_1\_4}, unde scorul continuu este transformat în clasele
+1--4 prin praguri optimizate pe validare. Această separare permite tratarea distinctă a obiectivului
+de screening și a obiectivului de gradare a bolii.
+\bigskip
+
 \section{Modelele analizate}
 
 \ \ \ \ În experimente au fost analizate arhitecturi convoluționale moderne, alese deoarece permit transfer
 learning și au fost utilizate frecvent în clasificarea imaginilor medicale \cite{4_pratt2016convolutional}, \cite{10_jabbar2022transfer}.
 Implementarea permite construirea modelelor \texttt{resnet50}, \texttt{efficientnet\_b3}, \texttt{inception\_v3} și
-\texttt{incres\_v2}. Accentul lucrării este pus pe compararea acestor familii arhitecturale, deoarece
-ele oferă perspective complementare asupra problemei: învățare reziduală, scalare eficientă, procesare
-multi-scală și combinația dintre module Inception și conexiuni reziduale.
+\texttt{incres\_v2}. Toate cele patru arhitecturi au fost incluse în implementare, însă în experimentele
+comparative accentul a fost pus pe ResNet50 și Inception-ResNet-v2, deoarece oferă două repere
+complementare: o arhitectură reziduală robustă și o arhitectură hibridă cu procesare multi-scală.
+Pentru sistemul principal în două etape, accentul a fost mutat pe EfficientNet-B3, folosit ca
+backbone pentru detectorul binar și pentru modelul de clasificare a severității.
 \bigskip
 
 Toate modelele sunt adaptate pentru sarcina experimentală curentă. În experimentele inițiale,
 straturile finale, proiectate inițial pentru clasificarea ImageNet, sunt înlocuite sau configurate
 astfel încât ieșirea să corespundă celor cinci stadii ale retinopatiei diabetice. În soluția
 principală în două etape, același principiu este folosit pentru a construi separat un model cu
-ieșire binară pentru detecție și un model cu patru ieșiri pentru clasele patologice 1--4.
+ieșire binară pentru detecție și un model de regresie care produce un scor continuu pentru
+clasele patologice 1--4.
 Folosirea ponderilor pre-antrenate este importantă deoarece permite
 reutilizarea unor trăsături vizuale generale, precum muchii, texturi, forme și tranziții de culoare,
 care sunt apoi ajustate pentru domeniul medical prin fine-tuning. Această strategie este utilă
@@ -2019,7 +2131,9 @@ dezechilibrate sau ordonate clinic.
 \begin{itemize}
   \item \textbf{Cross-Entropy} este funcția de pierdere de bază pentru clasificare multiclasă.
   Aceasta compară distribuția de probabilitate produsă de model cu eticheta reală și oferă
-  un punct de referință stabil pentru celelalte experimente.
+  un punct de referință stabil pentru celelalte experimente. În implementare, această funcție
+  poate folosi și \texttt{label\_smoothing}, care distribuie o mică parte din probabilitate către
+  celelalte clase și reduce încrederea excesivă a modelului în predicții.
 
   \item \textbf{Weighted Cross-Entropy} extinde Cross-Entropy prin introducerea unor ponderi pentru clase.
   Această variantă este utilă atunci când anumite clase trebuie penalizate mai puternic, de
@@ -2030,7 +2144,8 @@ dezechilibrate sau ordonate clinic.
   exemplelor dificile \cite{20_lin2017focal}. Parametrul \texttt{gamma} controlează cât de puternic este
   accentuată această diferență. În experimentele inițiale a fost analizat intervalul 1.5--2.0,
   iar valoarea 1.6 a fost selectată pentru experimentele extinse deoarece a oferit un
-  compromis bun între acuratețe, AUC și distribuția erorilor.
+  compromis bun între acuratețe, AUC și distribuția erorilor. La fel ca în cazul Cross-Entropy,
+  implementarea permite folosirea parametrului \texttt{label\_smoothing}.
 
   \item \textbf{Varianta ordinală bazată pe \texttt{BCEWithLogitsLoss}} exploatează faptul că stadiile
   retinopatiei diabetice au o ordine naturală. În loc ca eticheta să fie tratată doar
@@ -2041,54 +2156,206 @@ dezechilibrate sau ordonate clinic.
   principale, unde modelul trebuie să distingă între imagini sănătoase și imagini cu retinopatie
   diabetică. Această formulare este potrivită deoarece ieșirea modelului este un singur logit,
   interpretat ulterior ca probabilitate de boală.
+
+  \item \textbf{SmoothL1Loss pentru clasificarea 1--4 prin regresie} este folosită în a doua etapă
+  a sistemului principal. În această formulare, modelul produce un scor continuu pentru severitatea
+  bolii, iar scorul este transformat ulterior în clasele 1--4 prin praguri optimizate pe validare.
+  SmoothL1Loss este potrivită aici deoarece combină comportamentul stabil al erorii absolute pentru
+  abateri mari cu penalizarea pătratică pentru abateri mici, reducând sensibilitatea la exemple
+  izolate dificil de încadrat.
 \end{itemize}
 
 \section{Optimizatorul și hiperparametrii de antrenare}
 
-\ \ \ \ Optimizarea parametrilor este realizată prin funcția \texttt{get\_optimizer}, iar hiperparametrii
-sunt transmiși prin linia de comandă în \texttt{train.py}. Această organizare permite rularea
-mai multor configurații fără modificarea manuală a codului.
+\ \ \ \ Hiperparametrii de antrenare au fost organizați diferit pentru cele două direcții de lucru:
+experimentele comparative și sistemul principal în două etape. Experimentele au fost folosite pentru
+a compara arhitecturi, seturi de date și funcții de pierdere, în timp ce soluția principală a fost
+configurată mai strict, cu două modele \texttt{EfficientNet-B3} antrenate pe dataset-urile dedicate
+\texttt{eyepacs\_binar} și \texttt{eyepacs\_1\_4}.
+
+\subsection*{Experimente comparative}
+
+\ \ \ \ Pentru experimente, rulările au fost lansate din notebook-ul
+\texttt{experiments.ipynb}, prin apeluri către scriptul de antrenare. Acest cadru a permis modificarea
+rapidă a arhitecturii, funcției de pierdere, setului de date și metricii monitorizate. Au fost testate
+toate cele patru arhitecturi descrise anterior, respectiv ResNet50, EfficientNet-B3, InceptionV3 și
+Inception-ResNet-v2, însă accentul experimental a fost pus pe ResNet50 și Inception-ResNet-v2,
+deoarece acestea au fost rulate mai extensiv pe combinațiile finale de date.
+\bigskip
+
+\ \ \ \ În aceste rulări au fost comparate \texttt{CrossEntropyLoss},
+\texttt{WeightedCrossEntropy} și \texttt{FocalLoss}. Pentru configurațiile finale cu
+\texttt{FocalLoss} s-a folosit și \texttt{label\_smoothing} 0.05, cu rolul de a reduce supraîncrederea
+modelului și de a evita predicțiile excesiv de rigide pe clasele dominante. În etapa de explorare au
+fost testate și valori diferite pentru parametrul \(\gamma\) al Focal Loss, în special în jurul
+intervalului 1.5--2.0, pentru a observa cât de mult trebuie accentuate exemplele mai greu de clasificat.
+\bigskip
+
+\ \ \ \ Majoritatea configurațiilor comparative recente folosesc \texttt{AdamW}, batch size 32 și
+8 workeri pentru încărcarea datelor. Pentru rulările mai vechi sau pentru încercările inițiale au
+existat și variante cu Adam sau cu setări implicite ale scriptului, însă configurațiile păstrate pentru
+comparațiile finale folosesc în principal \texttt{AdamW}. Acesta este potrivit pentru fine-tuning-ul
+modelelor pre-antrenate deoarece separă regularizarea prin \texttt{weight\_decay} de actualizarea
+adaptivă a gradientului, ceea ce ajută la controlul supraînvățării fără a destabiliza complet
+ponderile deja învățate.
+\bigskip
  
-\begin{itemize}
-  \item \textbf{Optimizatori disponibili:} implementarea permite selectarea între Adam, AdamW și SGD.
-  Configurațiile inițiale folosesc rata de învățare 0.0001, iar experimentele recente folosesc
-  în principal AdamW, deoarece separă mai clar actualizarea gradientului de regularizarea prin
-  \texttt{weight\_decay}. Adam rămâne util pentru comparații, deoarece adaptează rata de actualizare
-  pentru fiecare parametru și oferă o convergență stabilă în multe probleme de clasificare.
+\ \ \ \ Pentru rulările comparative finale cu ResNet50 și Inception-ResNet-v2 a fost folosit un
+scheduler de tip \texttt{cosine}. Acesta reduce rata de învățare gradual pe parcursul antrenării, fără
+scăderi bruște, ceea ce este util în fine-tuning deoarece permite modelului să facă actualizări mai
+mari la început și ajustări mai fine spre final. În acest mod, primele epoci pot adapta rapid capul de
+clasificare și straturile superioare, iar ultimele epoci stabilizează reprezentările fără a modifica
+agresiv ponderile pre-antrenate.
+\bigskip
 
-  \item \textbf{Regularizare prin \texttt{weight\_decay}:} pentru Adam și AdamW este aplicată regularizarea
-  parametrilor, cu rolul de a limita supraînvățarea și de a îmbunătăți generalizarea pe
-  setul de validare și testare. 
+\ \ \ \ Backbone-ul a fost înghețat pentru primele 3 epoci prin
+\texttt{freeze\_backbone\_epochs}. Această alegere a fost folosită pentru a antrena inițial doar capul
+nou de clasificare, care pornește de la ponderi inițializate aleator. Dacă întregul model ar fi fost
+actualizat încă de la început, gradientul produs de un cap încă instabil ar fi putut perturba
+caracteristicile deja învățate pe ImageNet. După această etapă, backbone-ul este dezghețat și antrenat
+cu o rată de învățare mai mică decât capul, prin \texttt{backbone\_lr\_mult} 0.1. Astfel, straturile
+convoluționale pre-antrenate sunt ajustate prudent la imaginile de fund de ochi, în timp ce capul de
+clasificare rămâne suficient de flexibil pentru a învăța separarea dintre clase.
+\bigskip
 
-  \item \textbf{Parametri principali:} argumentele de bază controlează modelul ales, funcția de
-  pierdere, optimizatorul, numărul de epoci, dimensiunea batch-ului, rata de învățare,
-  dimensiunea imaginilor și numărul de procese pentru încărcarea datelor. Alte argumente stabilesc
-  valoarea \texttt{gamma} pentru Focal Loss și sursele de date folosite la antrenare și
-  evaluare.
+\ \ \ \ În plus, s-a folosit \texttt{grad\_clip} 1.0 pentru limitarea normei gradientului. Această
+setare previne actualizările foarte mari ale parametrilor, care pot apărea mai ales când se folosesc
+dataset-uri diferite, clase dezechilibrate sau funcții de pierdere precum \texttt{FocalLoss}. Pentru
+stabilizarea suplimentară a antrenării a fost activată și media mobilă exponențială a ponderilor,
+\texttt{ema\_decay} 0.999. EMA păstrează o versiune netezită a parametrilor modelului, reducând
+influența oscilațiilor de la o epocă la alta și ajutând la obținerea unui checkpoint mai stabil pe
+setul de validare.
+\bigskip
 
-  \item \textbf{Parametri adăugați pentru experimentele recente:} implementarea include argumente pentru
-  metrica de monitorizare, scheduler, mixed precision, gradient clipping, media exponențială a
-  ponderilor, test-time augmentation, dropout configurabil, înghețarea temporară a backbone-ului și
-  controlul augmentărilor de antrenare. Aceștia permit control mai fin asupra criteriului de
-  selecție, stabilității antrenării, evaluării și modului de fine-tuning.
+\ \ \ \ În funcție de arhitectură și dataset, rulările au fost configurate cu aproximativ 30--50 de
+epoci. Pentru comparațiile finale s-a folosit \texttt{early\_stopping\_patience} 15 și \newline
+\texttt{early\_stopping\_min\_delta} 0.001. În rulările inițiale au existat și configurații
+monitorizate după acuratețe, însă pentru experimentele relevante din documentație modelul a fost
+salvat după QWK pe validare, deoarece această metrică respectă caracterul ordinal al claselor de
+retinopatie diabetică.
+\bigskip
 
-  \item \textbf{Configurația soluției principale:} pentru pipeline-ul în două etape, antrenarea este
-  realizată cu batch size 32, rată de învățare 0.0001, optimizer AdamW, \texttt{weight\_decay}
-  0.0001 și maximum 12 epoci pentru fiecare etapă. Regularizarea este susținută prin dropout,
-  scheduler de tip cosine, gradient clipping și augmentări moderate aplicate doar în antrenare.
-  În prima etapă se optimizează detecția sănătos/bolnav, iar în a doua etapă se optimizează
-  clasificarea pe clasele 1--4.
+\ \ \ \ Alegerea metricii de monitorizare este importantă deoarece aceasta decide ce checkpoint este
+păstrat, nu doar cum este raportată performanța la final. Acuratețea poate fi utilă ca indicator
+general, dar în clasificarea retinopatiei diabetice nu surprinde severitatea erorilor: o confuzie între
+clasele 1 și 2 este tratată la fel ca o confuzie între clasele 0 și 4. Din acest motiv, pentru
+experimentele comparative finale s-a folosit QWK pe setul de validare. QWK măsoară acordul dintre
+predicții și etichetele reale, corectând acordul care ar putea apărea întâmplător și penalizând mai
+puternic erorile între clase îndepărtate. Pentru o problemă ordinală precum clasificarea gradelor
+0--4, această proprietate este mai apropiată de interpretarea clinică a rezultatului decât o simplă
+rată de predicții corecte.
 
-  \item \textbf{Scheduler pentru rata de învățare:} scheduler-ul poate fi selectat între
-  \texttt{plateau}, \texttt{cosine} și \texttt{none}. În varianta \texttt{plateau}, rata de
-  învățare este redusă atunci când metrica monitorizată nu se mai îmbunătățește. În varianta
-  \texttt{cosine}, rata de învățare scade gradual pe parcursul antrenării, opțiune folosită în
-  experimentele recente pentru un fine-tuning mai stabil.
+\subsection*{Sistemul principal în două etape}
 
-  \item \textbf{Metrica de monitorizare:} în experimentele recente, metrica monitorizată poate fi
-  aleasă explicit. Modelul poate fi salvat în funcție de AUC, acuratețe, balanced accuracy,
-  macro F1 sau QWK, în funcție de obiectivul experimentului.
-\end{itemize}
+\ \ \ \ Soluția principală nu folosește aceeași configurație generică precum experimentele, ci un
+notebook local dedicat, în care hiperparametrii sunt fixați explicit pentru fiecare dintre cele două
+modele. Ambele etape folosesc \texttt{EfficientNet-B3}, imagini redimensionate la \(300 \times 300\)
+pixeli, batch size 32, 8 workeri și \texttt{Dropout} 0.40 în capul modelului. Alegerea acestei
+arhitecturi pentru sistemul principal a fost motivată de raportul bun dintre performanță și costul de
+antrenare, dar și de rezoluția nativă de 300 de pixeli, potrivită pentru detaliile din imaginile de
+fund de ochi.
+\bigskip
+
+\ \ \ \ Prima etapă este detectorul binar sănătos/bolnav. Acesta este antrenat pe
+\texttt{eyepacs\_binar} și separă imaginile sănătoase de cele patologice. Funcția de pierdere este
+\texttt{BCEWithLogitsLoss}, potrivită pentru o ieșire binară exprimată prin logit. Deoarece dataset-ul
+binar a fost construit echilibrat, configurația finală nu activează \texttt{pos\_weight}. Modelul este
+antrenat timp de cel mult 50 de epoci, cu \texttt{early\_stopping\_patience} 30.
+\bigskip
+
+\ \ \ \ Antrenarea detectorului binar se face în două faze. În primele 10 epoci backbone-ul este
+înghețat, iar optimizerul \texttt{AdamW} actualizează doar capul nou al modelului, cu rată de învățare
+\(10^{-3}\) și \texttt{weight\_decay} \(10^{-4}\). După această etapă, backbone-ul este dezghețat și
+se aplică fine-tuning diferențiat: \(10^{-4}\) pentru backbone și \(3 \cdot 10^{-4}\) pentru capul de
+clasificare. Scheduler-ul este \texttt{ReduceLROnPlateau}, cu \texttt{factor} 0.5 și \texttt{patience}
+2, aplicat pe AUC-ul de validare. Cel mai bun checkpoint este salvat când AUC-ul de validare se
+îmbunătățește cu cel puțin \(10^{-4}\).
+\bigskip
+
+\ \ \ \ Pentru detectorul binar, AUC a fost folosit ca metrică principală de monitorizare deoarece
+evaluează capacitatea modelului de a separa imaginile sănătoase de cele patologice pe întreg intervalul
+de praguri posibile. În această etapă, ieșirea modelului este un scor continuu înainte de aplicarea
+pragului final, iar AUC verifică dacă imaginile bolnave tind să primească scoruri mai mari decât cele
+sănătoase. Această perspectivă este mai robustă decât acuratețea atunci când pragul de decizie poate fi
+ajustat ulterior sau când distribuția setului de validare nu reflectă perfect distribuția reală de
+utilizare. Practic, AUC este potrivit pentru prima etapă deoarece obiectivul ei este trierea: modelul
+trebuie să separe cât mai bine cazurile normale de cele care trebuie trimise către clasificarea de
+severitate. 
+\bigskip  
+
+\ \ \ \ Formal, AUC poate fi interpretat ca aria de sub curba ROC:
+\[
+\mathrm{AUC} = \int_{0}^{1} \mathrm{TPR}(u)\,du,
+\]
+unde \(u\) reprezintă rata de fals pozitive, iar \(\mathrm{TPR}\) este rata de adevărat pozitive
+obținută pentru diferite praguri de decizie. O interpretare echivalentă, mai intuitivă pentru cazul
+binar, este:
+\[
+\mathrm{AUC} = P(s^+ > s^-) + \frac{1}{2}P(s^+ = s^-),
+\]
+unde \(s^+\) este scorul atribuit unei imagini patologice, iar \(s^-\) este scorul atribuit unei
+imagini sănătoase. Astfel, AUC măsoară probabilitatea ca modelul să ordoneze corect o imagine bolnavă
+înaintea uneia sănătoase. Un AUC egal cu 0.5 indică un model fără capacitate reală de separare, similar
+alegerii aleatoare, iar un AUC apropiat de 1 indică o separare foarte bună între cele două clase.
+\bigskip
+
+\ \ \ \ A doua etapă este modelul de severitate 1--4, antrenat doar pe imaginile patologice din
+\texttt{eyepacs\_1\_4}. În varianta finală, problema este formulată ca regresie ordinală: modelul
+produce un scor continuu, iar acesta este transformat în clasele 1--4 prin praguri optimizate pe setul
+de validare. Funcția de pierdere folosită pentru această variantă este \texttt{SmoothL1Loss}. În
+notebook există și configurația cu \texttt{CrossEntropyLoss} și \texttt{label\_smoothing} 0.10, însă
+soluția principală folosește varianta regresivă deoarece se aliniază mai bine cu ordinea naturală a
+gradelor bolii.
+\bigskip
+
+\ \ \ \ Modelul 1--4 este antrenat tot în două faze, dar cu backbone-ul înghețat pentru primele 5
+epoci din totalul maxim de 50. În faza inițială se antrenează doar capul cu \texttt{AdamW}, rată de
+învățare \(10^{-3}\) și \texttt{weight\_decay} \(10^{-4}\). În faza de fine-tuning se folosesc aceleași
+rate diferențiate ca în detectorul binar: \(10^{-4}\) pentru backbone și \(3 \cdot 10^{-4}\) pentru
+cap. Scheduler-ul este \texttt{ReduceLROnPlateau}, cu \texttt{factor} 0.5 și \texttt{patience} 2,
+aplicat pe QWK-ul de validare. Checkpoint-ul final este ales după QWK, cu prag minim de îmbunătățire
+\(10^{-4}\) și \texttt{early\_stopping\_patience} 30.
+\bigskip
+
+\ \ \ \ Pentru modelul de severitate, QWK este metrica de monitorizare principală deoarece clasele
+1--4 reprezintă niveluri ordonate ale aceleiași boli. În acest caz, nu toate erorile au aceeași
+semnificație: o predicție de clasă 2 pentru o imagine de clasă 3 este mai acceptabilă decât o predicție
+de clasă 1 pentru o imagine de clasă 4. QWK introduce această idee direct în criteriul de selecție a
+checkpoint-ului, prin penalizarea pătratică a diferențelor mari dintre clasa reală și clasa prezisă.
+De aceea, modelul nu este ales doar pentru că obține multe predicții exacte, ci pentru că păstrează cât
+mai bine ordinea clinică a severității. Această alegere este cu atât mai importantă în varianta
+regresivă, unde scorul continuu este convertit în clase prin praguri optimizate pe validare.
+\bigskip
+
+\ \ \ \ Formula generală pentru QWK este:
+\[
+\kappa = 1 - \frac{\sum_{i=0}^{K-1}\sum_{j=0}^{K-1} w_{ij} O_{ij}}
+{\sum_{i=0}^{K-1}\sum_{j=0}^{K-1} w_{ij} E_{ij}},
+\]
+unde \(K\) este numărul de clase, \(O_{ij}\) este matricea observată a clasificărilor, adică numărul
+de exemple cu eticheta reală \(i\) și predicția \(j\), iar \(E_{ij}\) este matricea acordului așteptat
+întâmplător, calculată pe baza distribuțiilor marginale ale etichetelor reale și predicțiilor. Pentru
+varianta quadratic weighted, ponderile sunt:
+\[
+w_{ij} = \frac{(i-j)^2}{(K-1)^2}.
+\]
+Această pondere este 0 atunci când predicția coincide cu eticheta reală și crește pătratic pe măsură
+ce distanța dintre clase devine mai mare. În cazul modelului 1--4, o confuzie între clase vecine are
+o penalizare mai mică decât o confuzie între forme ușoare și forme severe. Scorul QWK este apropiat de
+1 atunci când acordul dintre predicții și etichete este foarte bun, apropiat de 0 când acordul nu este
+mai bun decât cel întâmplător și poate deveni negativ dacă modelul este mai slab decât o atribuire
+aleatoare conform distribuțiilor observate.
+\bigskip
+
+\ \ \ \ Motivația antrenării în două faze este comună celor două modele principale. Separarea
+antrenării capului de fine-tuning-ul backbone-ului reduce riscul ca un cap inițializat aleator să
+degradeze rapid reprezentările pre-antrenate. Ratele de învățare diferențiate păstrează stabilitatea
+caracteristicilor extrase de \texttt{EfficientNet-B3}, în timp ce capul nou poate învăța mai rapid
+distribuția dataset-ului curent. În plus, alegerea metricii monitorizate este specifică fiecărei
+etape: AUC pentru detectorul binar, unde contează separarea robustă între sănătos și bolnav, și QWK
+pentru clasificarea severității, unde ordinea claselor este esențială. În ambele cazuri, metrica de
+monitorizare este folosită atât pentru scheduler, cât și pentru salvarea celui mai bun model, astfel
+încât optimizarea să urmărească direct comportamentul dorit al fiecărei ramuri din sistem.
 
 \section{Strategia de evaluare}
 
@@ -2103,10 +2370,9 @@ pentru ca testarea să rămână o evaluare cât mai obiectivă a modelului
 ales.
 \bigskip
 
-Metricile urmărite sunt funcția de pierdere, acuratețea, AUC-ul multiclasă, balanced accuracy,
-macro F1, quadratic weighted kappa, raportul de clasificare, matricea de confuzie și
-curbele ROC. AUC-ul este calculat în regim one-vs-rest și mediat macro,
-astfel încât fiecare clasă să contribuie egal la scorul final. % TODO modificat aici daca nu le mai folosesc pe toate
+Metricile urmărite sunt funcția de pierdere, acuratețea, AUC-ul multiclasă, quadratic weighted
+kappa, raportul de clasificare, matricea de confuzie și curbele ROC. AUC-ul este calculat în
+regim one-vs-rest și mediat macro, astfel încât fiecare clasă să contribuie egal la scorul final.
 \bigskip
 
 Pentru retinopatia diabetică, QWK este relevantă deoarece clasele au
@@ -2153,7 +2419,7 @@ comandă. Fără modificarea codului sursă, se poate selecta arhitectura, func�
 optimizatorul, numărul de epoci, dimensiunea batch-ului, rata de învățare, dimensiunea imaginilor,
 ponderile claselor, valoarea \texttt{gamma} pentru Focal Loss și metrica folosită pentru salvarea
 celui mai bun model. În plus, scriptul permite activarea sau dezactivarea unor tehnici precum
-\texttt{amp}, \texttt{grad\_clip}, \texttt{ema\_decay}, \texttt{tta\_eval},
+\texttt{amp}, \texttt{grad\_clip}, \texttt{ema\_decay},
 \texttt{model\_dropout}, \texttt{freeze\_backbone\_epochs}, \texttt{backbone\_lr\_mult} și
 \texttt{early\_stopping\_patience}. Această organizare a fost utilă în experimentele exploratorii,
 deoarece aceeași implementare putea fi rulată rapid în configurații diferite.
@@ -2169,8 +2435,8 @@ Flexibilitatea este prezentă și la nivelul dataset-urilor. Argumentele importa
   \item \textbf{\texttt{--test\_dataset\_names}} definește numele surselor de test, folosite apoi în sufixele fișierelor, de exemplu \texttt{test\_aptos} sau \texttt{test\_balanced}.
   \item \textbf{\texttt{--train\_augment}} controlează augmentările online, prin valorile \texttt{basic} și \texttt{none}. Această opțiune este utilă atunci când dataset-ul conține deja augmentări sau imagini preprocesate offline.
   \item \textbf{\texttt{--model}, \texttt{--loss\_name}, \texttt{--optimizer}} selectează arhitectura, funcția de pierdere și optimizatorul, permițând compararea rapidă a configurațiilor experimentale.
-  \item \textbf{\texttt{--monitor\_metric}} stabilește criteriul după care este salvat cel mai bun model, de exemplu QWK, Macro F1, Balanced Accuracy, AUC, acuratețe sau loss de validare.
-  \item \textbf{\texttt{--scheduler}, \texttt{--amp}, \texttt{--grad\_clip}, \texttt{--ema\_decay} și \texttt{--tta\_eval}} activează tehnici suplimentare pentru stabilizarea antrenării și evaluării.
+  \item \textbf{\texttt{--monitor\_metric}} stabilește criteriul după care este salvat cel mai bun model; în experimentele documentate a fost folosit QWK.
+  \item \textbf{\texttt{--scheduler}, \texttt{--amp}, \texttt{--grad\_clip} și \texttt{--ema\_decay}} activează tehnici suplimentare pentru stabilizarea antrenării și evaluării.
 \end{itemize}
 \bigskip
 
@@ -2185,37 +2451,6 @@ Pentru seturile care conțin deja imagini augmentate sau preprocesate, scriptul 
 dezactivarea augmentărilor online prin \texttt{train\_augment=none}. Această opțiune evită aplicarea dublă
 a augmentărilor în experimentele recente, păstrând în același timp comportamentul vechi prin
 valoarea implicită \texttt{train\_augment=basic}.
-
-\section{Optimizări recente ale protocolului experimental}
-
-\ \ \ \ Pentru experimentele finale au fost introduse mai multe optimizări care nu modifică
-dataset-urile, ci procesul de antrenare și evaluare. Prima optimizare este folosirea
-"mixed precision" prin \texttt{torch.amp}, care reduce consumul de memorie și poate accelera
-antrenarea pe GPU. A doua este "gradient clipping", folosit pentru a limita
-actualizările foarte mari ale parametrilor și pentru a crește stabilitatea.
-\bigskip
-
-A fost introdusă și media exponențială a ponderilor modelului, prin parametrul
-\texttt{ema\_decay}. Modelul EMA păstrează o versiune netezită a parametrilor și poate produce
-predicții mai stabile la validare și testare. Pentru evaluare a fost adăugat
-\texttt{tta\_eval}, care aplică test-time augmentation prin combinarea predicției pe imaginea originală
-cu predicția pe imaginea oglindită orizontal.
-\bigskip
-
-Pentru ResNet50, aceste optimizări pot fi folosite împreună cu Focal Loss și
-\texttt{gamma=1.6}, configurație analizată în experimentele preliminare. Pentru soluția principală,
-accentul se mută pe stabilitatea pipeline-ului în două etape: detecția binară folosește
-\texttt{BCEWithLogitsLoss}, iar clasificarea 1--4 folosește Cross-Entropy. În ambele cazuri,
-regularizarea este realizată prin AdamW, \texttt{weight\_decay}, dropout, scheduler cosine și
-limitarea normei gradientului.
-\bigskip
-
-Această separare face protocolul mai ușor de controlat. Prima etapă poate fi optimizată pentru
-a reduce riscul de a rata imaginile patologice, iar a doua etapă poate fi concentrată pe diferențele
-mai fine dintre clasele bolnave. În același timp, argumentele din \texttt{train.py} păstrează
-posibilitatea de a reveni rapid la experimente multiclasă directe sau la comparații între
-arhitecturi, fără a schimba structura generală a implementării.
-
 
 \chapter{Rezultate experimentale}
 
@@ -2259,12 +2494,12 @@ ponderată nu aduce un avantaj clar în acest context, deoarece setul este deja 
 iar ponderarea suplimentară nu rezolvă principala problemă a datelor. În schimb, \textit{focal loss}
 este mai potrivită pentru continuarea experimentelor deoarece pune accent pe exemplele dificile și pe
 confuziile care apar între clasele apropiate.
-
+ 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.98\textwidth]{Figuri/cap6_dbd_lossuri_resnet50.png}
     \captionsetup{justification=centering}
-    \caption{Comparația istoricului funcției de pierdere pentru ResNet50 pe \texttt{Diabetic\_Balanced\_Data}.}
+    \caption{Comparația istoricului loss-ului pentru ResNet50 pe \texttt{Diabetic\_Balanced\_Data}.}
     \label{fig:cap6-dbd-lossuri-resnet50}
 \end{figure}
 
@@ -2277,15 +2512,15 @@ imagini sunt clasificate corect, ci și direcția erorilor dintre clase.
 \bigskip
 
 Rezultatele sunt apropiate la nivel global, majoritatea configurațiilor obținând valori în jurul
-intervalului 0,88--0,90 pentru acuratețe și Macro F1. De aceea, interpretarea relevantă nu este doar
+intervalului 0,88--0,90 pentru acuratețe. De aceea, interpretarea relevantă nu este doar
 care model are scorul maxim, ci unde apar confuziile. Clasele 3 și 4 sunt recunoscute bine de toate
 arhitecturile, ceea ce indică faptul că formele severe au trăsături vizuale mai ușor de separat. În
 schimb, clasele 0, 1 și 2 concentrează cele mai importante erori, deoarece diferențele dintre absența
 bolii, formele ușoare și formele moderate sunt mai subtile.
 \bigskip 
 
-EfficientNet-B3 are comportamentul cel mai echilibrat în aceste teste, cu aproximativ 0,90 acuratețe
-și Macro F1, dar diferența față de celelalte arhitecturi nu este suficientă pentru a elimina complet
+EfficientNet-B3 are comportamentul cel mai echilibrat în aceste teste, cu aproximativ 0,90 acuratețe,
+dar diferența față de celelalte arhitecturi nu este suficientă pentru a elimina complet
 ResNet50 din analiză. ResNet50 rămâne un baseline robust, mai simplu de antrenat și util pentru
 comparațiile dintre preprocesări, augmentări și funcții de pierdere. InceptionV3 și InceptionResNet-v2
 confirmă aceeași tendință generală: arhitectura influențează distribuția erorilor, însă calitatea
@@ -2295,7 +2530,7 @@ datelor și protocolul de împărțire rămân decisive.
     \centering
     \includegraphics[width=0.98\textwidth]{Figuri/cap6_dbd_matrici_arhitecturi_absolute.png}
     \captionsetup{justification=centering}
-    \caption{Matrici de confuzie absolute pentru arhitecturile comparate pe \texttt{Diabetic\_Balanced\_Data}.}
+    \caption{Matrici de confuzie pentru arhitecturile comparate pe \texttt{Diabetic\_Balanced\_Data}.}
     \label{fig:cap6-dbd-matrici-arhitecturi}
 \end{figure}
 
@@ -2324,8 +2559,8 @@ comparație între două fluxuri. În varianta incorectă, augmentarea a fost ap
 împărțirea în train, validare și test, ceea ce permite ca transformări ale aceleiași imagini să apară
 în subseturi diferite. În varianta corectă, împărțirea a fost realizată înainte de augmentare, iar
 augmentările au rămas în subsetul imaginii originale. Diferența dintre rezultate este puternică:
-fluxul \textit{augment -\textgreater{} split} obține o acuratețe de 96,20\%, AUC de 0,9982, QWK de 0,9813 și
-Macro F1 de 0,9620, în timp ce fluxul \textit{split -\textgreater{} augment} coboară la o acuratețe de 82,02\%
+fluxul \textit{augment -\textgreater{} split} obține o acuratețe de 96,20\%, AUC de 0,9982 și QWK de 0,9813,
+în timp ce fluxul \textit{split -\textgreater{} augment} coboară la o acuratețe de 82,02\%
 și AUC de 0,9170. Această diferență arată că performanța foarte ridicată nu provenea doar din
 capacitatea modelului, ci și din contaminarea dintre subseturi.
  
@@ -2338,10 +2573,10 @@ capacitatea modelului, ci și din contaminarea dintre subseturi.
 \end{figure}
 
 Al doilea control a urmărit direct setul \texttt{Diabetic\_Balanced\_Data}. În varianta distribuită
-public, rezultatele sunt ridicate: acuratețe de 88,77\%, AUC de 0,9825, QWK de 0,9297 și Macro F1
-de 0,8859. După reorganizarea setului printr-un split grupat, în care imaginea originală și toate
+public, rezultatele sunt ridicate: acuratețe de 88,77\%, AUC de 0,9825 și QWK de 0,9297.
+După reorganizarea setului printr-un split grupat, în care imaginea originală și toate
 augmentările asociate rămân în același subset, performanța scade la o acuratețe de 60,47\%, AUC de
-0,8878, QWK de 0,7641 și Macro F1 de 0,5995. Scăderea nu trebuie interpretată ca o degradare a
+0,8878 și QWK de 0,7641. Scăderea nu trebuie interpretată ca o degradare a
 metodei, ci ca o corectare a protocolului de evaluare: noul rezultat reflectă mai realist capacitatea
 modelului de a generaliza pe imagini independente.
 
@@ -2409,15 +2644,14 @@ denumire ca în cazul ResNet50, a fost folosită varianta curățată disponibil
 date. Astfel se păstrează comparația pe cele trei niveluri de lucru, fără a introduce rezultate
 nesalvate în experimente.
 
-Experimentele incluse în această sinteză folosesc funcția \textit{focal loss} și valoarea
-\(\gamma = 1.5\), conform configurațiilor salvate în notebook. Pentru istoricul funcției de
-pierdere sunt prezentate separat două arhitecturi, ResNet50 și InceptionResNet-v2, iar scorul
-QWK este păstrat pentru ResNet50, ca model de referință în analiza pe cele nouă variante.
-Acuratețea este discutată textual, fără a mai fi păstrat graficul dedicat,
-deoarece scorul global poate masca distribuția erorilor între clase. Pentru scorurile
-precision/recall/F1 pe clase, matricea de confuzie și curbele
-ROC multiclasă este păstrată sinteza pe ResNet50, folosită ca variantă principală în comparația
-finală. Această organizare face vizibilă contribuția muncii depuse asupra seturilor de date:
+Experimentele incluse în această sinteză folosesc funcția \textit{focal loss} cu
+\(\gamma = 1.5\), iar rulările ResNet50 au fost actualizate cu optimizatorul AdamW. Pentru
+istoricul funcției de pierdere sunt prezentate separat două arhitecturi, ResNet50 și
+InceptionResNet-v2, iar scorurile de acuratețe și QWK sunt păstrate pentru ResNet50, ca model de
+referință în analiza pe cele nouă variante. Pentru scorurile precision/recall/F1 pe clase,
+matricea de confuzie și curbele ROC multiclasă este păstrată sinteza pe ResNet50, folosită ca
+variantă principală în comparația finală. Această organizare face vizibilă contribuția muncii
+depuse asupra seturilor de date:
 fiecare rând adaugă o etapă de prelucrare, iar fiecare coloană arată dacă aceeași strategie se
 comportă similar sau diferit pe o altă sursă de imagini.
 \bigskip
@@ -2426,11 +2660,22 @@ comportă similar sau diferit pe o altă sursă de imagini.
 
 \ \ \ \ Figurile \ref{fig:cap6-loss-resnet50-grid} și \ref{fig:cap6-loss-incres-grid} prezintă
 evoluția funcției de pierdere pentru cele nouă experimente, separat pentru ResNet50 și
-InceptionResNet-v2. Curbele evidențiază o diferență constantă între pierderea pe antrenare și
-pierderea pe validare: în multe cazuri, \textit{train loss} scade rapid, în timp ce
-\textit{val loss} rămâne mai instabil sau chiar crește. Acest comportament indică faptul că problema
-nu este doar una de capacitate a modelului, ci și una de generalizare între imaginile de antrenare și
-cele de validare.
+InceptionResNet-v2. Cele două grafice nu reprezintă însă exact același moment al dezvoltării codului.
+Pentru ResNet50 sunt folosite rulările actualizate, după introducerea ultimelor setări de
+fine-tuning, cu AdamW, scheduler, înghețarea inițială a backbone-ului și rată de învățare mai mică
+pentru straturile pre-antrenate. Pentru InceptionResNet-v2 sunt păstrate rezultatele obținute cu
+varianta de cod de dinaintea acestor ajustări finale de fine-tuning. Din acest motiv, comparația este
+utilă pentru a observa comportamentul celor două arhitecturi, dar interpretarea curbelor trebuie să țină
+cont de diferența dintre regimurile de antrenare.
+\bigskip
+
+Curbele evidențiază o diferență constantă între pierderea pe antrenare și pierderea pe validare: în
+multe cazuri, \textit{train loss} scade rapid, în timp ce \textit{val loss} rămâne mai instabil sau
+chiar crește. Acest comportament indică faptul că problema nu este doar una de capacitate a modelului,
+ci și una de generalizare între imaginile de antrenare și cele de validare. În clasificarea
+retinopatiei diabetice, această diferență este de așteptat, deoarece imaginile pot proveni din surse
+diferite, cu iluminare, rezoluție, câmp vizual și calitate variabile, iar clasele vecine sunt greu de
+separat chiar și vizual.
 \bigskip
 
 Compararea pe rânduri arată că augmentările cresc diversitatea setului de antrenare, dar nu produc
@@ -2440,27 +2685,62 @@ controlabilă, însă efectul depinde de dataset. Această observație este impo
 evaluarea separată pentru APTOS, EyePACS și Balanced\_Aug, nu doar raportarea unui singur scor global.
 \bigskip
 
-Graficul din figura \ref{fig:cap6-loss-resnet50-grid} urmărește evoluția pierderii pentru ResNet50. Se observă scăderea rapidă a pierderii pe antrenare
-și diferența față de validare, ceea ce evidențiază riscul de supraînvățare și importanța evaluării 
-separate pe fiecare dataset.
+Graficul din figura \ref{fig:cap6-loss-resnet50-grid} urmărește evoluția pierderii pentru ResNet50 în
+configurațiile actualizate cu fine-tuning. În general, pierderea pe antrenare coboară vizibil în primele
+epoci, semn că modelul reușește să adapteze rapid capul de clasificare și ultimele straturi la
+distribuția fiecărui dataset. Scăderea nu este însă perfect liniară, deoarece \textit{focal loss}
+acordă o importanță mai mare exemplelor dificile, iar acestea pot produce oscilații de la o epocă la
+alta. Pe validare, curbele sunt mai puțin netede și se pot plafona mai repede, ceea ce arată că modelul
+învață relativ ușor datele de antrenare, dar generalizarea depinde mult de sursa imaginilor și de
+preprocesările aplicate.
 \bigskip
 
-Pentru InceptionResNet-v2, istoricul loss-ului arată aceeași tensiune între învățarea pe train și stabilitatea
-pe validare. Comparația cu ResNet50 ajută la separarea efectului arhitecturii de efectul augmentărilor 
-și al preprocesărilor.
+Pentru ResNet50, ultimele setări de fine-tuning ajută la controlul acestei dinamici. Înghețarea
+inițială a backbone-ului permite capului nou să se stabilizeze înainte ca întregul model să fie
+actualizat, iar rata de învățare mai mică pentru backbone reduce riscul de a modifica agresiv
+reprezentările pre-antrenate. Din acest motiv, chiar dacă apare o distanță între \textit{train loss} și
+\textit{val loss}, curbele ResNet50 sunt mai ușor de interpretat: scăderea pierderii pe antrenare arată
+învățarea efectivă, iar stagnarea sau creșterea ușoară pe validare semnalează limita de generalizare
+pentru combinația respectivă de dataset și preprocesare.
 \bigskip
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{Figuri/cap6_loss_resnet50_grid.png}
+    \includegraphics[width=0.9\textwidth]{Figuri/cap6_loss_resnet50_grid.png}
     \captionsetup{justification=centering}
-    \caption{Istoricul loss-ului pentru ResNet50 pe APTOS, EyePACS și Balanced\_Aug.}
+    \caption{Istoricul loss-ului pentru ResNet50 cu AdamW pe APTOS, EyePACS și Balanced\_Aug.}
     \label{fig:cap6-loss-resnet50-grid}
 \end{figure}
 
+Pentru InceptionResNet-v2, istoricul loss-ului arată aceeași tensiune între învățarea pe train și
+stabilitatea pe validare, dar rezultatele trebuie citite ca rezultate anterioare etapei finale de
+fine-tuning. În această variantă, modelul nu beneficiază de aceleași ajustări aplicate ulterior
+rulărilor ResNet50, iar arhitectura este mai complexă și mai sensibilă la alegerea ratei de învățare.
+De aceea, în unele experimente pierderea pe validare crește în loc să scadă, chiar dacă la un moment dat
+se stabilizează.
+\bigskip
+
+Creșterea \textit{val loss}-ului pentru InceptionResNet-v2 poate fi explicată prin mai mulți factori.
+În primul rând, modelul are o capacitate mare și poate începe să se adapteze prea specific la imaginile
+de antrenare, în timp ce validarea rămâne mai dificilă sau mai diferită vizual. În al doilea rând,
+folosirea \textit{focal loss} face ca exemplele grele să aibă o contribuție mai mare la pierdere; dacă
+setul de validare conține cazuri ambigue sau clase greu separabile, loss-ul poate crește chiar și atunci
+când modelul începe să învețe anumite tipare utile. În al treilea rând, lipsa fine-tuning-ului în două
+faze poate face actualizarea backbone-ului mai instabilă la început, deoarece capul de clasificare nu
+este încă suficient de bine adaptat la problema curentă.
+\bigskip
+
+Faptul că loss-ul se stabilizează după o anumită perioadă arată că antrenarea nu este complet
+divergentă, ci ajunge într-un regim relativ constant. Totuși, stabilizarea la o valoare mai ridicată
+decât cea inițial dorită indică faptul că modelul nu reușește să transforme această stabilitate într-o
+generalizare mai bună pe validare. Din acest motiv, InceptionResNet-v2 rămâne util ca experiment
+comparativ, dar concluziile principale sunt formulate pe baza rulărilor ResNet50 actualizate, unde
+fine-tuning-ul final oferă un protocol de antrenare mai controlat.
+\bigskip
+
 \begin{figure}[H] 
     \centering
-    \includegraphics[width=0.95\textwidth]{Figuri/cap6_loss_incres_v2_grid.png}
+    \includegraphics[width=0.9\textwidth]{Figuri/cap6_loss_incres_v2_grid.png}
     \captionsetup{justification=centering}
     \caption{Istoricul loss-ului pentru InceptionResNet-v2 pe APTOS, EyePACS și Balanced\_Aug.}
     \label{fig:cap6-loss-incres-grid}
@@ -2468,12 +2748,12 @@ pe validare. Comparația cu ResNet50 ajută la separarea efectului arhitecturii 
 
 \section{Istoricul acurateții}
 
-\ \ \ \ Acuratețea a fost urmărită în timpul antrenării, dar nu este păstrată ca figură separată în
-această versiune a capitolului. Motivul este că, în gradarea retinopatiei diabetice, un scor global
-poate fi ușor de interpretat greșit: modelul poate obține o acuratețe ridicată prin favorizarea
-claselor mai numeroase, fără să recunoască suficient clasele intermediare sau cazurile severe.
-Acuratețea rămâne utilă ca indicator rapid al progresului antrenării, însă concluziile sunt formulate
-în principal pe baza QWK, F1 pe clase și matrici de confuzie.
+\ \ \ \ Figura \ref{fig:cap6-accuracy-resnet50-grid} prezintă evoluția acurateții pentru rulările
+ResNet50 actualizate. În gradarea retinopatiei diabetice, acest scor global trebuie interpretat cu
+prudență: modelul poate obține o acuratețe ridicată prin favorizarea claselor mai numeroase, fără să
+recunoască suficient clasele intermediare sau cazurile severe. Acuratețea rămâne utilă ca indicator
+rapid al progresului antrenării, însă concluziile sunt formulate în principal pe baza QWK, F1 pe clase
+și matrici de confuzie.
 \bigskip
 
 În experimente, acuratețea de antrenare crește rapid în majoritatea cazurilor, ceea ce arată că
@@ -2482,12 +2762,20 @@ esențială pentru interpretare: un scor ridicat pe antrenare nu este suficient 
 instabilă sau plafonată.
 \bigskip
 
-Rezultatele evidențiază utilitatea augmentărilor ca metodă de regularizare implicită. Prin expunerea
-modelului la rotații, modificări de luminozitate, variații de culoare și alte transformări, modelul
-este forțat să învețe trăsături mai generale, nu doar detalii specifice imaginilor originale. Totuși,
-compararea cu rândul de augmentări + preprocesări arată că augmentarea trebuie corelată cu o
-normalizare atentă a imaginilor, mai ales în fundus photography, unde iluminarea neuniformă și
-marginile negre pot introduce variații artificiale.
+Rezultatele finale confirmă această limitare: pe APTOS se obțin acurateți de \(0.82\), \(0.79\) și
+\(0.81\) pentru baseline, augmentări și augmentări cu Ben Graham, în timp ce pe EyePACS valorile sunt
+\(0.77\), \(0.74\) și \(0.73\). Pentru Balanced\_Aug, acuratețea scade de la \(0.75\) la \(0.72\) și
+\(0.69\), deși macro-F1 crește de la \(0.42\) la \(0.49\), respectiv \(0.51\). Prin urmare,
+augmentările și preprocesarea nu trebuie evaluate doar prin acuratețe, ci prin distribuția erorilor pe
+clase și prin stabilitatea metricilor ordinale.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Figuri/cap6_accuracy_resnet50_grid.png}
+    \captionsetup{justification=centering}
+    \caption{Istoricul acurateții pentru ResNet50 cu AdamW pe cele nouă variante de experimente.}
+    \label{fig:cap6-accuracy-resnet50-grid}
+\end{figure}
 
 \section{Istoricul scorului QWK}
 
@@ -2513,19 +2801,17 @@ QWK este urmărit deoarece clasele au ordine clinică. Pentru ResNet50, acest gr
     \centering
     \includegraphics[width=0.95\textwidth]{Figuri/cap6_qwk_resnet50_grid.png}
     \captionsetup{justification=centering}
-    \caption{Istoricul scorului QWK pentru ResNet50 pe cele cele 9 variante de experimente.}
+    \caption{Istoricul scorului QWK pentru ResNet50 cu AdamW pe cele nouă variante de experimente.}
     \label{fig:cap6-qwk-resnet50-grid}
 \end{figure}
 
 \ \ \ \ Din figura \ref{fig:cap6-qwk-resnet50-grid} se observă că evoluția QWK nu este identică pentru
-toate combinațiile de set de date și strategie de antrenare. În cazul experimentelor pe APTOS,
-curbele tind să fie mai stabile, deoarece setul este mai omogen și are imagini provenite dintr-un
-cadru de achiziție mai controlat. Pentru EyePACS, variațiile sunt mai pronunțate, ceea ce este
-explicabil prin diversitatea mai mare a imaginilor, prin diferențele de iluminare și prin nivelul
-mai ridicat de zgomot din date. În cazul Balanced\_Aug, scorul QWK reflectă mai clar efectul
-augmentărilor și al preprocesărilor: atunci când acestea ajută modelul să vadă mai bine structurile
-retiniene relevante, creșterea este mai coerentă, însă transformările prea agresive pot introduce
-oscilații de la o epocă la alta.
+toate combinațiile de set de date și strategie de antrenare. Pe APTOS, curbele ajung în zona
+\(0.83\)--\(0.87\), semn că modelul păstrează mai bine ordinea severității. Pe EyePACS, QWK se
+stabilizează în jurul intervalului \(0.59\)--\(0.62\), iar pe Balanced\_Aug valorile sunt mai sensibile
+la etapa de pregătire a datelor, cu un comportament mai bun pentru variantele augmentate decât pentru
+baseline. Diferența față de acuratețe arată că o scădere a scorului global nu înseamnă neapărat o
+degradare ordinală uniformă.
 \bigskip
 
 \ \ \ \ Un aspect important este că QWK penalizează mai puternic confuziile între clase îndepărtate.
@@ -2539,11 +2825,11 @@ graficul este util deoarece arată nu doar dacă ResNet50 ajunge la performanțe
 
 \ \ \ \ Figura \ref{fig:cap6-prf1-grid} prezintă valorile precision, recall și F1 pentru fiecare
 clasă. Această analiză este mai informativă decât acuratețea globală deoarece arată unde modelul
-recunoaște bine imaginile și unde apar dificultăți. În general, clasa 0 are scoruri mai ridicate,
-fiind mai ușor de separat vizual de clasele patologice, în timp ce clasele intermediare, în special
-1 și 2, sunt mai vulnerabile la confuzii. Acest lucru este vizibil mai ales în valorile F1, care
-scad atunci când modelul fie pierde exemple reale dintr-o clasă, fie trimite către acea clasă prea
-multe predicții greșite.
+recunoaște bine imaginile și unde apar dificultăți. În noile rulări, APTOS are cele mai bune scoruri
+pe clasele intermediare: F1 pentru clasa 1 este \(0.56\), \(0.51\) și \(0.62\), iar pentru clasa 2 este
+\(0.73\), \(0.73\) și \(0.76\), în ordinea baseline, augmentări și augmentări cu Ben Graham. Pentru
+EyePACS și Balanced\_Aug, clasa 1 rămâne cea mai dificilă, dar varianta Balanced\_Aug cu Ben Graham
+ridică F1-ul clasei 1 la \(0.25\), față de \(0.07\) în baseline.
 \bigskip
 
 Prin raportarea pe clase se observă mai clar efectul augmentărilor. Dacă augmentările îmbunătățesc
@@ -2551,12 +2837,7 @@ recall-ul pentru clasele rare, modelul devine mai util în scenarii în care rat
 patologice este costisitoare. Dacă precision-ul scade, apare riscul de alarme false. Din acest motiv,
 scorurile pe clase trebuie analizate împreună cu matricele de confuzie, nu izolat. În ansamblu,
 graficele F1 arată că principala dificultate nu este separarea extremelor, ci delimitarea fină a
-stadiilor apropiate. Clasele 1 și 2 sunt adesea absorbite de clasa 0 sau confundate între ele,
-deoarece semnele clinice timpurii sunt subtile și pot fi afectate de calitatea imaginii. În schimb,
-confuziile între clasa 0 și clasele marginale severe, mai ales clasa 4, sunt mult mai reduse, ceea ce
-indică faptul că modelul surprinde mai bine diferența dintre absența bolii și formele avansate.
-Valorile precision, recall și F1 pe clase arată unde modelul are performanțe stabile și unde apar
-clase problematice. Clasele 1 și 2 sunt cele mai importante de urmărit, deoarece diferențele vizuale 
+stadiilor apropiate. Clasele 1 și 2 sunt cele mai importante de urmărit, deoarece diferențele vizuale
 dintre absența bolii, formele ușoare și formele moderate pot fi subtile.
 \bigskip
 
@@ -2564,7 +2845,7 @@ dintre absența bolii, formele ușoare și formele moderate pot fi subtile.
     \centering
     \includegraphics[width=0.98\textwidth]{Figuri/cap6_prf1_grid.png}
     \captionsetup{justification=centering}
-    \caption{Precision, recall și F1 pe clase pentru cele nouă experimente principale.}
+    \caption{Precision, recall și F1 pe clase pentru cele nouă experimente ResNet50 cu AdamW.}
     \label{fig:cap6-prf1-grid}
 \end{figure}
 
@@ -2581,7 +2862,7 @@ augmentărilor. Atunci când imaginile augmentate sunt distribuite incorect înt
 preprocesările nu sunt aplicate consecvent, matricea de confuzie poate sugera performanțe artificiale
 sau erori greu de interpretat. De aceea, în această lucrare, pregătirea dataseturilor a fost tratată
 ca o etapă experimentală centrală, nu doar ca un pas auxiliar înainte de antrenare.
-\newline
+\newline 
 
 \ \ \ \ Pentru claritate, figura păstrează doar matricile absolute, nu și variantele normalizate. Valorile
 absolute fac mai ușor de observat unde se concentrează efectiv erorile. Se remarcă un tipar comun:
@@ -2591,14 +2872,18 @@ puternic între ele: imaginile sănătoase nu sunt confundate masiv cu stadiile 
 este trimisă frecvent direct către clasa 0. Această observație este importantă deoarece susține
 trecerea la un sistem în două faze: mai întâi o decizie binară sănătos/patologic, apoi o clasificare
 mai fină doar pentru imaginile patologice.
-Matricele de confuzie indică tipul erorilor, nu doar numărul lor. În această figură sunt păstrate 
+Matricele de confuzie indică tipul erorilor, nu doar numărul lor. În această figură sunt păstrate
 doar valorile absolute, pentru a evidenția direct confuziile dintre clasele reale și cele prezise.
+În rulările actualizate, APTOS rămâne cel mai echilibrat: în varianta cu Ben Graham, clasa 2 are
+\(83\) predicții corecte din \(100\), iar clasa 1 ajunge la \(21\) din \(37\). Pe EyePACS și
+Balanced\_Aug se observă în continuare absorbția claselor 1 și 2 în clasa 0, ceea ce explică diferența
+dintre acuratețea globală și scorul F1.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.92\textwidth]{Figuri/cap6_confusion_grid_abs.png}
     \captionsetup{justification=centering}
-    \caption{Matricele de confuzie pentru cele 3 dataseturi în cele trei configurații.}
+    \caption{Matricele de confuzie absolute pentru ResNet50 cu AdamW pe cele trei dataseturi și cele trei configurații.}
     \label{fig:cap6-confusion-grid}
 \end{figure}
 
@@ -2613,7 +2898,7 @@ modelul produce scoruri probabilistice coerente, chiar și atunci când predicț
 Compararea pe coloane indică diferențe între domeniile vizuale ale seturilor de date. APTOS,
 EyePACS și Balanced\_Aug nu au aceeași distribuție a imaginilor, iar curbele ROC reflectă această
 variație. Compararea pe rânduri arată efectul etapelor de lucru asupra datelor: augmentările și
-preprocesările pot schimba separabilitatea claselor, dar beneficiul trebuie verificat empiric pentru
+preprocesările pot schimba separabilitatea claselor, dar aceste lucruri trebuie verificate pentru
 fiecare dataset.
 \bigskip
 
@@ -2625,7 +2910,7 @@ Ele completează matricele de confuzie deoarece analizează scorurile probabilis
     \centering
     \includegraphics[width=0.98\textwidth]{Figuri/cap6_roc_grid.png}
     \captionsetup{justification=centering}
-    \caption{Curbele ROC multiclasă pentru cele nouă experimente principale din \texttt{experiments.ipynb}.}
+    \caption{Curbele ROC multiclasă pentru cele nouă experimente ResNet50 cu AdamW din \texttt{experiments.ipynb}.}
     \label{fig:cap6-roc-grid}
 \end{figure}
 
@@ -2651,87 +2936,268 @@ patologic, iar a doua etapă poate trata separat diferențele mai dificile dintr
 \section{Integrarea cu sistemul final în două etape}
 
 \ \ \ \ Varianta finală a experimentului este implementată în notebook-ul
-\path{Notebooks/Main/Local/diabetic-retinopathy-classifier-FIXED.ipynb}. Acesta înlocuiește
-varianta de test pe subset și construiește un pipeline local complet, bazat pe \texttt{EfficientNet-B3},
-pentru două sarcini complementare: detecția binară a bolii și gradarea severității pe clasele 1--4.
-Codul complet exportat din notebook este inclus în listarea \ref{lst:cap6-11-fixed}, astfel încât
-configurația experimentală să poată fi reprodusă fără a depinde de interfața Jupyter.
+\path{Notebooks/Main/Local/diabetic-retinopathy-classifier-FIXED-3ramuri.ipynb}, iar rezultatele
+exportate sunt grupate în directorul \path{Notebooks/Main/Local/Rezultate_main}. Spre deosebire de
+experimentele comparative anterioare, această rulare urmărește direct configurația folosită în
+sistemul final: un model \texttt{EfficientNet-B3} pentru decizia binară sănătos--patologic și un al
+doilea model \texttt{EfficientNet-B3} pentru gradarea severității pe clasele 1--4. Separarea celor două
+sarcini reduce dificultatea problemei multiclasă, deoarece clasa sănătoasă nu mai concurează direct cu
+stadiile patologice în același clasificator.
 \bigskip
 
 Prima etapă tratează problema ca o clasificare binară între imaginile \textit{sănătoase} și imaginile
-cu retinopatie diabetică. Setul de date folosit este
-\path{datasets/processed_by_me/eyepacs/eyepacs_binar}, organizat pe directoare de antrenare,
-validare și test. Modelul pornește de la \texttt{EfficientNet-B3} pre-antrenat pe ImageNet, iar
-clasificatorul final este înlocuit cu un strat \texttt{Dropout} urmat de un neuron de ieșire. Funcția
-de pierdere este \texttt{BCEWithLogitsLoss}, iar pragul final de decizie nu este ales arbitrar, ci este
-optimizat pe setul de validare prin scorul \(F_{\beta}\), cu \(\beta=2\). Această alegere favorizează
-reducerea falselor negative, aspect important într-un scenariu de screening, unde ratarea unei imagini
-patologice este mai gravă decât trimiterea unei imagini sănătoase către verificare suplimentară.
+cu retinopatie diabetică. Criteriul de selecție este AUC pe validare, deoarece în această etapă este
+important ca modelul să ordoneze cât mai bine imaginile sănătoase față de cele patologice, înainte de
+alegerea pragului final. În ultima rulare, cel mai bun AUC pe validare este \(0.8634\), iar pe setul de
+test modelul obține un AUC de \(0.8567\). Pragul operațional este ales pe setul de validare prin
+\(F_2\), ceea ce favorizează recall-ul pentru clasa patologică. La pragul \(0.099\), raportul de test
+indică o acuratețe de \(0.763\), precision de \(0.743\) și recall de \(0.805\) pentru clasa
+\textit{Bolnav}. Valoarea redusă a pragului nu urmărește maximizarea acurateții brute, ci reducerea
+fals-negativelor, astfel încât imaginile suspecte să fie trimise mai departe către etapa de gradare.
 \bigskip
 
-Antrenarea este împărțită în două faze. În primele trei epoci, backbone-ul este înghețat și se
-antrenează doar capul nou adăugat, cu rată de învățare mai mare. După această stabilizare inițială,
-backbone-ul este dezghețat și se aplică fine-tuning complet, cu rate de învățare diferențiate pentru
-straturile pre-antrenate și pentru clasificator. În etapa binară, cel mai bun rezultat de validare a
-fost un AUC de \(0.8602\), obținut după trecerea în faza de fine-tuning. Curbele din figura
-\ref{fig:cap6-11-curbe-combinate} arată că îmbunătățirea apare mai ales după dezghețarea modelului,
-ceea ce confirmă utilitatea adaptării întregului extractor de caracteristici la imaginile de fund de
-ochi.
-\bigskip
-
-A doua etapă este activată doar pentru imaginile considerate patologice de primul model și clasifică
-severitatea în clasele 1, 2, 3 și 4. Pentru această etapă a fost folosit setul
-\path{datasets/processed_by_me/eyepacs/eyepacs_1_4}, cu \(40000\) imagini în antrenare și câte
-\(3503\), respectiv \(3504\), imagini în validare și test. Notebook-ul compară trei formulări ale
-aceleiași probleme, toate pe același backbone \texttt{EfficientNet-B3}: clasificare multiclasă cu
-\texttt{CrossEntropyLoss}, regresie cu rotunjire optimizată pe validare și formulare ordinală de tip
-CORAL. Această comparație este relevantă deoarece gradele retinopatiei nu sunt clase nominale
-independente, ci niveluri ordonate de severitate.
+A doua etapă este aplicată imaginilor trimise mai departe de modelul binar și clasifică severitatea în
+stadiile 1--4. Pentru această etapă a fost păstrată formularea de tip \textit{regression}, deoarece
+scorul continuu este transformat în clase prin praguri optimizate pe validare, iar metrica principală
+devine Quadratic Weighted Kappa. Pragurile obținute pe validare sunt aproximativ \(0.580\), \(1.393\)
+și \(2.158\). Modelul atinge un Val QWK de \(0.6575\), iar pe test obține accuracy \(0.6170\) și QWK
+\(0.6576\). Scorurile macro pentru etapa de severitate sunt precision \(0.577\), recall \(0.597\) și
+F1 \(0.572\), ceea ce confirmă că problema rămâne dificilă mai ales pentru stadiile intermediare.
 \bigskip
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.98\textwidth]{Figuri/cap6_11_curbe_combinate_comentate.png}
-    \caption{Curbe combinate pentru experimentul final în două etape. Prima celulă sintetizează etapa
-    binară, iar celelalte trei celule compară formulările multiclasă pentru clasele 1--4.}
-    \label{fig:cap6-11-curbe-combinate}
+    \includegraphics[width=0.98\textwidth]{Figuri/cap6_11_curbe_loss_acc_main.png}
+    \captionsetup{justification=centering}
+    \caption{Curbele de pierdere și acuratețe pentru detectorul binar și pentru modelul de severitate
+    1--4 prin regresie.}
+    \label{fig:cap6-11-curbe-loss-acc-main}
 \end{figure}
 
-\ \ \ \ Rezultatele pe test indică diferențe importante între cele trei formulări multiclasă. Varianta
-cu \texttt{CrossEntropyLoss} obține cea mai bună acuratețe globală, \(0.6618\), însă scorul QWK este
-\(0.6247\). Varianta de regresie obține o acuratețe de \(0.6179\) și un QWK de \(0.6440\), iar pragurile
-de rotunjire sunt învățate exclusiv pe validare, nu pe test. Varianta ordinală obține cea mai bună
-valoare QWK, \(0.6561\), chiar dacă acuratețea este mai mică, \(0.5848\). Această diferență arată că
-modelul ordinal face mai puține greșeli grave din punct de vedere clinic: majoritatea erorilor sunt
-între clase vecine, nu între stadii îndepărtate.
+\ \ \ \ Figura \ref{fig:cap6-11-curbe-loss-acc-main} reunește evoluția pierderii și a acurateții pentru
+cele două componente ale sistemului final. Pentru detectorul binar, pierderea pe validare este cea care
+scade brusc la început, după care se stabilizează și fluctuează în jurul unor valori mai mici. Pierderea
+pe antrenare are o evoluție mai graduală, ceea ce indică faptul că modelul continuă să ajusteze
+separarea dintre imaginile sănătoase și cele patologice. Acest comportament este frecvent în setările
+de screening, unde imaginile din validare pot avea calitate, iluminare și leziuni diferite față de cele
+din antrenare. De aceea, selecția modelului nu se bazează doar pe valoarea
+pierderii, ci pe capacitatea scorurilor de a separa cele două clase.
+\bigskip 
+
+În partea de acuratețe, detectorul binar ajunge relativ repede într-o zonă stabilă pe validare.
+Acuratețea rămâne însă o metrică secundară pentru această componentă, deoarece pragul final este ales
+pentru a favoriza sensibilitatea față de cazurile patologice. Astfel, o acuratețe de test de \(0.763\)
+trebuie interpretată împreună cu recall-ul de \(0.805\) pentru clasa \textit{Bolnav}: modelul acceptă o
+parte dintre falsele pozitive pentru a reduce riscul ca o imagine cu retinopatie diabetică să fie
+respinsă încă din prima etapă.
 \bigskip
 
-Matricele de confuzie din figura \ref{fig:cap6-11-matrici-combinate} confirmă aceeași observație.
-Pentru formularea cu regresie, \(92.5\%\) dintre erori sunt la distanță de un singur grad, iar pentru
-formularea ordinală proporția crește la \(93.2\%\). În schimb, formularea cu cross-entropy are o
-acuratețe mai ridicată, dar păstrează o proporție mai mare de erori la două grade, \(12.8\%\). Din
-perspectiva sistemului final, această comparație susține folosirea QWK ca metrică principală pentru
-alegerea modelului de severitate, deoarece penalizează explicit distanța dintre clasa reală și clasa
-prezisă.
+Pentru modelul de severitate, pierderea pe validare scade mai brusc decât pierderea pe antrenare și se
+stabilizează relativ repede, în jurul epocilor 15--20. Pierderea pe antrenare continuă să scadă mai
+mult timp și se stabilizează mai târziu, aproximativ în jurul epocii 30. Acest lucru arată că modelul
+continuă să ajusteze reprezentările pe setul de antrenare chiar și după ce performanța pe validare a
+ajuns într-o zonă stabilă. Acuratețea de validare se stabilizează în zona
+\(0.64\)--\(0.66\), ceea ce indică faptul că modelul învață reprezentări utile, dar rămâne limitat de
+suprapunerea vizuală dintre stadiile patologice. Diferența dintre stadiile 1 și 2 sau dintre stadiile 3
+și 4 poate fi subtilă, iar imaginile pot conține semne locale care nu domină întreaga fotografie de fund
+de ochi.
 \bigskip
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.98\textwidth]{Figuri/cap6_11_matrici_combinate_comentate.png}
-    \caption{Matrici de confuzie combinate pentru etapa binară și pentru cele trei variante multiclasă.
-    Comentariile evidențiază diferența dintre acuratețe globală și respectarea ordinii clinice a
-    claselor.}
-    \label{fig:cap6-11-matrici-combinate}
+    \includegraphics[width=0.98\textwidth]{Figuri/cap6_11_auc_qwk_main.png}
+    \captionsetup{justification=centering}
+    \caption{Evoluția AUC pentru detectorul binar și a QWK pentru modelul de severitate 1--4 prin
+    regresie.}
+    \label{fig:cap6-11-auc-qwk-main}
 \end{figure}
+
+\ \ \ \ Figura \ref{fig:cap6-11-auc-qwk-main} pune alături metricile principale de monitorizare pentru
+cele două etape. Curba AUC este cea mai relevantă pentru detectorul binar, deoarece nu depinde de un
+prag fix. Valoarea maximă de \(0.8634\) pe validare și valoarea de \(0.8567\) pe test arată că modelul
+păstrează o capacitate bună de separare și în afara setului folosit pentru alegerea checkpoint-ului.
+Diferența mică dintre validare și test sugerează că performanța nu este rezultatul unei ajustări
+accidentale pe validare, deși valorile obținute arată și limitele problemei: există în continuare
+imagini sănătoase cu aspect suspect și imagini patologice cu semne discrete, greu de separat automat.
+\bigskip
+
+Pentru etapa de severitate, QWK este mai informativă decât acuratețea simplă, deoarece ține cont de
+ordinea clinică a claselor. Pe test, modelul obține accuracy \(0.6170\) și QWK \(0.6576\), ceea ce arată
+că o parte dintre erori rămân între clase apropiate și nu reprezintă confuzii complet arbitrare. Această
+interpretare este importantă în formularea prin regresie, unde scorul continuu este transformat în
+clase prin praguri optimizate pe validare.
+\bigskip
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{Figuri/cap6_11_matrici_absolute_main.png}
+    \captionsetup{justification=centering}
+    \caption{Matrici de confuzie absolute pentru detectorul binar și pentru modelul de severitate
+    1--4 prin regresie.}
+    \label{fig:cap6-11-matrici-absolute-main}
+\end{figure}
+
+\ \ \ \ Matricile de confuzie din figura \ref{fig:cap6-11-matrici-absolute-main} evidențiază explicit
+efectul pragului optimizat pentru screening. Modelul binar identifică \(5354\) imagini patologice din
+\(6652\), ceea ce corespunde unui recall de aproximativ \(0.805\) pentru clasa \textit{Bolnav}. În
+același timp, apar \(1850\) false pozitive, adică imagini sănătoase trimise mai departe către modelul
+de severitate. Aceste cazuri nu pot fi corectate automat de etapa a doua, deoarece modelul de
+severitate primește doar clase patologice și va atribui inevitabil o clasă din intervalul 1--4, de
+obicei una joasă dacă imaginea seamănă mai mult cu un caz ușor. Prin urmare, pragul ales reprezintă un
+compromis de screening: acceptă mai multe false pozitive pentru a reduce fals-negativele, deoarece un
+fals negativ în etapa binară ar opri complet analiza unei imagini patologice.
+\bigskip
+
+Pentru etapa 1--4, cele mai multe predicții corecte apar pentru stadiile 1 și 2, unde există și cel mai
+mare suport în test. Confuzia dintre stadiile 1 și 2 rămâne principala sursă de eroare, iar stadiile 3
+și 4 sunt afectate de numărul mai redus de exemple și de proximitatea vizuală a leziunilor. În contextul
+sistemului final, etapa de severitate trebuie interpretată împreună cu decizia binară: ea poate diferenția
+gradele de boală pentru imaginile suspecte, dar nu mai are o clasă 0 prin care să respingă un caz sănătos
+trimis greșit mai departe.
+\bigskip
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{Figuri/cap6_11_prf_main.png}
+    \captionsetup{justification=centering}
+    \caption{Distribuția indicatorilor precision, recall și F1 pentru detectorul binar și pentru
+    modelul de severitate 1--4 prin regresie.}
+    \label{fig:cap6-11-prf-main}
+\end{figure}
+
+\ \ \ \ Distribuția precision--recall--F1 din figura \ref{fig:cap6-11-prf-main} completează interpretarea
+matricilor de confuzie. Pentru clasa patologică din detectorul binar, recall-ul este mai mare decât
+precision-ul, ceea ce confirmă efectul pragului ales prin \(F_2\). Pentru clasa sănătoasă, scorurile
+rămân apropiate, dar sunt influențate de falsele pozitive introduse deliberat de pragul scăzut. În
+ansamblu, modelul binar nu este optimizat pentru o decizie izolată de diagnostic, ci pentru prima
+filtrare a pipeline-ului: să separe suficient de bine imaginile fără boală de cele care trebuie
+analizate mai detaliat.
+\bigskip
+
+Pentru etapa de severitate, indicatorii arată un comportament neuniform între clase. Clasa
+\textit{Stadiul 2} are precision ridicat, dar recall mai redus, deoarece o parte dintre imaginile reale
+de stadiu 2 sunt absorbite de stadiul 1. Clasa \textit{Stadiul 3} rămâne cea mai dificilă, cu F1 de
+aproximativ \(0.404\), în timp ce stadiile extreme au un comportament mai stabil. Această distribuție
+confirmă că dificultatea principală a etapei a doua nu este detectarea bolii, ci delimitarea exactă a
+severității.
+\bigskip
 
 \ \ \ \ Integrarea finală se bazează, așadar, pe o decizie secvențială. Imaginea este preprocesată și
-trimisă mai întâi către modelul binar. Dacă probabilitatea de boală este sub pragul optimizat pe
+trimisă mai întâi către modelul binar. Dacă probabilitatea de boală este sub pragul stabilit pe
 validare, sistemul returnează clasa 0. Dacă probabilitatea depășește pragul, imaginea este transmisă
-către modelul multiclasă, iar predicția finală este translatată în scala completă 1--4. Prin această
-separare, modelul binar poate fi calibrat pentru sensibilitate ridicată, iar modelul de severitate
-poate fi selectat după comportamentul ordinal al erorilor. În forma analizată, varianta ordinală este
-cea mai potrivită pentru a doua etapă atunci când criteriul principal este QWK, în timp ce varianta
-cross-entropy rămâne utilă atunci când se urmărește acuratețea brută.
+către modelul de severitate, iar predicția este mapată în scala 1--4. Această arhitectură permite
+optimizarea separată a sensibilității pentru screening și a respectării ordinii clinice pentru
+stadiile patologice.
+\bigskip
+
+\section{Analiza calitativă a exemplelor de inferență}
+
+\ \ \ \ Înainte de interpretarea exemplelor, este important de precizat cum este calculată valoarea afișată
+în aplicația de inferență ca nivel de încredere, deoarece semnificația ei depinde de modelul selectat.
+Pentru modelele experimentale multiclasă, rețeaua produce cinci scoruri, câte unul pentru fiecare clasă
+0--4. Aceste scoruri sunt transformate în probabilități prin funcția \textit{softmax},
+iar clasa finală este clasa cu probabilitatea maximă:
+\[
+p_i = \frac{e^{z_i}}{\sum_{j=0}^{4} e^{z_j}}, \qquad
+\hat{y} = \arg\max_i p_i.
+\]
+În acest caz, valoarea afișată în interfață este probabilitatea softmax a clasei prezise, iar a doua
+opțiune este următoarea clasă cu probabilitate mare.
+\bigskip
+
+Pentru pipeline-ul principal, valoarea afișată este calculată diferit, deoarece decizia este secvențială.
+Prima etapă este detectorul binar, care produce un scor transformat prin sigmoid în probabilitatea de
+boală:
+\[
+p_{\text{boală}} = \sigma(z), \qquad p_{\text{sănătos}} = 1 - p_{\text{boală}}.
+\]
+Dacă detectorul decide clasa 0, aplicația afișează ca nivel de încredere valoarea
+\(p_{\text{sănătos}}\). Dacă imaginea este trimisă către etapa a doua, modelul de severitate folosit în
+pipeline-ul principal produce un scor de regresie pentru clasele 1--4. Clasa este obținută prin
+compararea scorului cu pragurile salvate în \texttt{rounder\_coef.npy}, iar nivelul de încredere afișat
+este o estimare derivată din apropierea scorului față de cele patru grade:
+\[
+q_k = \frac{e^{-(k-s)^2}}{\sum_{r=0}^{3} e^{-(r-s)^2}}, \qquad k \in \{0,1,2,3\},
+\]
+unde \(s\) este scorul de regresie, iar \(q_k\) este apoi asociat claselor patologice 1--4. Prin urmare,
+pentru pipeline-ul principal, procentul afișat la etapa de severitate nu este o probabilitate softmax
+obținută direct din rețea, ci o estimare construită din scorul de regresie. În cardul \textit{Metadate
+model} din aplicație, lista de probabilități afișată pentru clasele 1--4 este ponderată și cu
+probabilitatea de boală a detectorului binar, pentru a reflecta întregul traseu al pipeline-ului.
+\bigskip
+
+\ \ \ \ Pentru a completa evaluarea cantitativă, au fost analizate și câteva exemple calitative generate prin
+aplicația de inferență. Aceste exemple sunt utile deoarece arată nu doar clasa finală, ci și distribuția
+scorurilor între clasele vecine, respectiv situațiile în care modelul este sigur sau ambiguu. În
+continuare sunt prezentate patru cazuri reprezentative: trei rulări ale pipeline-ului principal și o
+rulare a unui model experimental multiclasă.
+\bigskip
+
+\begin{figure}[H]
+    \centering
+    \captionsetup{justification=centering}
+    \includegraphics[width=0.95\textwidth]{Figuri/comentat_fig_model_exp_clasa2_fake0.png}
+    \caption{Model experimental: imagine de clasa 2, cu al doilea scor ca mărime la clasa 0.}
+    \label{fig:cap6-11-exp-fake0}
+\end{figure} 
+
+\ \ \ \ Exemplul din figura \ref{fig:cap6-11-exp-fake0} arată o limită importantă a clasificatoarelor
+multiclasă antrenate direct pe toate clasele: deși imaginea aparține clasei 2, următorul scor ca mărime
+este atribuit clasei 0. Predicția principală rămâne astfel corectă, dar distribuția scorurilor arată că
+modelul păstrează o incertitudine importantă între un caz moderat și absența bolii. Această apropiere
+este relevantă deoarece o mică modificare a scorurilor sau o imagine cu o calitate mai slabă ar putea
+împinge decizia către clasa 0, generând un fals negativ. Exemplul evidențiază de ce un clasificator
+multiclasă direct poate confunda uneori trăsăturile moderate cu aspectul normal al fundului de ochi și
+de ce este utilă separarea explicită dintre detecția bolii și gradarea severității.
+\bigskip 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Figuri/comentat_fig_model_principal_clasa4_but3.png}
+    \caption{Pipeline principal: caz sever, cu scoruri apropiate între stadiile 3 și 4.}
+    \label{fig:cap6-11-main-clasa4-but3}
+\end{figure}
+
+\ \ \ \ Figura \ref{fig:cap6-11-main-clasa4-but3} arată o limită a sistemului final: în cazurile severe,
+scorurile pentru stadiile 3 și 4 pot fi foarte apropiate. Această ambiguitate este așteptată, deoarece
+trecerea dintre retinopatia severă și cea proliferativă depinde de semne vizuale fine, de calitatea
+imaginii și de prezența unor leziuni care pot fi localizate doar într-o regiune redusă a fundului de
+ochi. Totuși, confuzia rămâne între clase vecine și nu schimbă concluzia principală că imaginea este
+patologică și necesită evaluare medicală. Modelul semnalează corect severitatea ridicată, chiar dacă
+granularitatea exactă între stadiile 3 și 4 rămâne dificilă.
+\bigskip
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Figuri/comentat_fig_model_principal_clasa0.png}
+    \caption{Pipeline principal: decizie binară corectă pentru clasa 0.}
+    \label{fig:cap6-11-main-clasa0}
+\end{figure}
+
+\ \ \ \ Exemplul din figura \ref{fig:cap6-11-main-clasa0} evidențiază avantajul sistemului principal.
+Pentru imaginea normală, detectorul binar returnează clasa 0 cu încredere ridicată, iar distribuția
+estimată pentru gradele 1--4 rămâne doar o informație secundară a clasificatorului de severitate.
+Decizia finală nu este
+lăsată să fie dominată de o confuzie între grade patologice, deoarece prima etapă filtrează cazul ca
+nepatologic. Acesta este exact rolul sistemului în două etape: separarea robustă a imaginilor sănătoase
+înainte de problema mai dificilă a gradării.
+\bigskip   
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Figuri/comentat_fig_model_principal_clasa2_true.png}
+    \caption{Pipeline principal: exemplu patologic încadrat în stadiul 2.}
+    \label{fig:cap6-11-main-clasa2-true}
+\end{figure}
+
+\ \ \ \ În figura \ref{fig:cap6-11-main-clasa2-true}, modelul principal indică un maxim clar pe gradul 2,
+iar următoarea opțiune este gradul 3, adică o clasă vecină. Acest comportament este util clinic,
+deoarece sistemul identifică imaginea ca patologică și păstrează incertitudinea în interiorul
+stadiilor apropiate. O astfel de eroare potențială este mai acceptabilă decât o confuzie între sănătos
+și boală, deoarece păstrează ordinea clinică a severității. Din acest motiv, sistemul în două etape este
+preferabil unui singur clasificator cu cinci clase: prima etapă optimizează detecția bolii și reduce
+fals-negativele, iar a doua etapă se concentrează pe gradarea cazurilor deja suspecte, unde erorile pot
+fi interpretate în termeni de severitate ordinală.
 \bigskip
 
 \chapter{Aplicația de inferență}
@@ -2740,20 +3206,20 @@ cross-entropy rămâne utilă atunci când se urmărește acuratețea brută.
 
 \ \ \ \ Pentru a demonstra utilizarea practică a modelelor antrenate, a fost dezvoltată o
 aplicație web de inferență. Scopul aplicației este de a permite încărcarea unei
-imagini de fund de ochi, selectarea unui model salvat și obținerea unei
+imagini de fund de ochi, selectarea unui model salvat sau a pipeline-ului principal și obținerea unei
 predicții privind stadiul retinopatiei diabetice. Aplicația are rol experimental și nu înlocuiește
 diagnosticul medical, deoarece sistemele automate pentru retinopatia diabetică necesită validare
 clinică riguroasă înainte de utilizare în screening sau decizie medicală \cite{3_gulshan2016development},
 \cite{15_li2019diagnostic}.
 \bigskip
 
-Rezultatul afișat include clasa prezisă, denumirea stadiului, nivelul de încredere, probabilitățile pentru
-fiecare clasă, timpul de inferență și recomandări orientative pentru medic și pacient.
-Interfața include și un set restrâns de metadate tehnice, păstrate la nivelul informațiilor utile
-pentru utilizator: fișierul folosit, arhitectura, dimensiunea de intrare, dimensiunea imaginii
-originale, dimensiunea imaginii analizate, timpul de execuție și metoda de preprocesare. Detalii
-interne precum dispozitivul de calcul, numărul de parametri, normalizarea sau indicatorii intermediari
-ai preprocesării nu sunt afișați în interfață, pentru a evita încărcarea inutilă a rezultatului.
+Rezultatul afișat include clasa prezisă, denumirea stadiului, nivelul de încredere, a doua opțiune
+atunci când aceasta poate fi calculată, separarea dintre primele două clase, timpul de execuție și
+recomandări orientative pentru medic și pacient. Interfața include și metadate tehnice păstrate la
+nivelul informațiilor utile pentru interpretare: fișierul folosit, arhitectura, dimensiunea de intrare,
+dimensiunea imaginii originale, dimensiunea imaginii folosite efectiv la inferență, metoda de
+preprocesare și, pentru pipeline-ul principal, detectorul binar, modelul de severitate și ramura
+utilizată.
 
 \section{Arhitectura aplicației}
 
@@ -2767,7 +3233,11 @@ selecția modelului, încărcarea imaginii, vizualizarea imaginii preprocesate �
 Cele două componente comunică prin cereri HTTP. Backend-ul expune endpoint-uri sub forma
 \texttt{/api/models} și \texttt{/api/predict}, iar frontend-ul trimite cereri către acestea folosind biblioteca Axios
 \cite{axios_docs}. Pentru comunicarea între porturi diferite, backend-ul folosește
-\texttt{flask\_cors}, care permite configurarea politicilor CORS pentru aplicații Flask \cite{flask_cors_docs}.
+\texttt{flask\_cors}, care permite configurarea politicilor CORS pentru aplicații Flask
+\cite{flask_cors_docs}. Endpoint-ul \texttt{/api/models} returnează atât lista modelelor, cât și
+grupurile folosite în selectorul din interfață, iar endpoint-ul \texttt{/api/predict} primește imaginea,
+identificatorul modelului și opțiunea prin care utilizatorul precizează dacă imaginea este deja
+preprocesată.
 
 \section{Componenta backend}
 
@@ -2778,119 +3248,147 @@ modelului, backend-ul importă funcția \texttt{get\_model} din \texttt{builder.
 \bigskip
 
 Endpoint-ul \texttt{/api/models} returnează un catalog de modele, nu doar o listă simplă de fișiere.
-Catalogul este împărțit în două grupuri: modelele principale, folosite pentru soluția finală, și
-modelele experimentale salvate în directorul \texttt{Notebooks/Rezultate/New/modele}. Endpoint-ul
-\texttt{/api/predict} primește imaginea și identificatorul modelului selectat, verifică existența
-fișierului sau a configurației de pipeline, aplică transformările necesare și rulează inferența.
-Imaginea este convertită în RGB, preprocesată printr-o variantă Ben Graham cu mască de retină,
-redimensionată la dimensiunea așteptată de model, transformată în tensor și normalizată cu valorile
-ImageNet. Predicția este calculată cu \texttt{torch.no\_grad()}, pentru a dezactiva calculul
-gradientului în timpul inferenței, iar probabilitățile modelelor multiclasă sunt obținute prin
-softmax \cite{pytorch_docs}.
+Catalogul este împărțit în două grupuri: \textit{Modele principale}, care conține pipeline-ul final
+\texttt{binar + clasificare 1--4 regression}, și \textit{Experimente}, care conține modelele salvate în
+directorul \path{Notebooks/Rezultate/New/modele}. Pentru soluția principală sunt folosite ponderile
+detectorului binar din
+\path{Notebooks/Main/Local/Rezultate_main/binar/efficientnet_b3_binar_best.pth} și ponderile modelului
+de severitate din \path{Notebooks/Main/Local/Rezultate_main/clasificare_regression/model_best.pth},
+împreună cu pragurile de rotunjire salvate în \texttt{rounder\_coef.npy}. Dacă unul dintre aceste fișiere
+lipsește, opțiunea principală este păstrată în catalog, dar este marcată ca indisponibilă.
 \bigskip
 
-Pentru opțiunea principală, backend-ul poate rula un pipeline în două etape. Prima etapă folosește
-modelul binar \texttt{efficientnet\_b3\_binar\_best.pth}, salvat în
-\texttt{Notebooks/Main/Local}, pentru detecția imaginilor sănătoase față de cele patologice. Dacă
-este disponibil și un model pentru etapa a doua, acesta este folosit pentru clasificarea severității
-în clasele 1--4. În acest fel, aplicația poate fi utilizată atât pentru testarea modelelor
-experimentale individuale, cât și pentru scenariul final propus în lucrare.
+Endpoint-ul \texttt{/api/predict} primește imaginea, identificatorul modelului selectat și câmpul
+\texttt{image\_preprocessed}. Dacă utilizatorul marchează imaginea ca fiind deja preprocesată, backend-ul
+o folosește direct pentru inferență și reține acest lucru în răspunsul JSON. În caz contrar, imaginea
+este convertită în RGB și trecută printr-o preprocesare de tip Ben Graham cu mască de retină, la
+rezoluția \(512 \times 512\). Imaginea finală este apoi redimensionată la dimensiunea așteptată de
+model: \(300 \times 300\) pentru pipeline-ul principal EfficientNet-B3, respectiv \(224 \times 224\) sau
+\(299 \times 299\) pentru modelele experimentale, în funcție de arhitectură. Tensorul rezultat este
+normalizat cu valorile ImageNet, iar predicția este calculată cu \texttt{torch.no\_grad()}, pentru a
+dezactiva calculul gradientului în timpul inferenței \cite{pytorch_docs}.
+\bigskip
+
+Pentru opțiunea principală, backend-ul rulează o decizie secvențială. Prima etapă încarcă detectorul
+binar \texttt{EfficientNet-B3} și calculează probabilitatea ca imaginea să fie patologică. Dacă această
+probabilitate nu depășește pragul operațional al aplicației, sistemul returnează clasa 0. Dacă imaginea
+este considerată patologică, rezultatul final este dat de modelul de regresie pentru clasele 1--4:
+scorul continuu este mapat prin pragurile învățate pe validare, iar clasa rezultată este translatată în
+scala finală 1--4. În implementarea curentă, etapa a doua este evaluată și pentru a putea furniza
+metadate despre scorul de severitate, însă predicția finală folosește ramura 1--4 doar atunci când
+detectorul binar trece pragul. Răspunsul JSON include detectorul folosit, modelul de etapă a doua,
+probabilitatea de boală, scorul de regresie și detaliile de preprocesare.
 
 \section{Componenta frontend}
 
 \ \ \ \ Componenta frontend este implementată în \texttt{Inference\_site/App.jsx}. La pornire, aceasta solicită catalogul de
 modele disponibile și selectează automat prima opțiune validă. Selectorul este organizat pe grupuri,
-astfel încât utilizatorul poate alege între modelul sau pipeline-ul principal și modelele
-experimentale din directorul de rezultate. După alegerea modelului, utilizatorul poate încărca o
-imagine și poate vizualiza o previzualizare înainte de trimiterea către backend.
+astfel încât utilizatorul poate alege între pipeline-ul principal și modelele experimentale din
+directorul de rezultate. În versiunea actuală, opțiunea principală este afișată explicit ca
+\texttt{Pipeline principal: binar + clasificare 1-4 regression}, iar modelele experimentale sunt
+listate separat, cu numele fișierelor \texttt{.pth} generate în etapa de antrenare. Dacă pipeline-ul
+principal nu poate fi încărcat din cauza unui fișier lipsă, opțiunea apare ca indisponibilă în selector.
 \bigskip
 
-După apăsarea butonului de analiză, frontend-ul construiește un obiect \texttt{FormData} care conține
-imaginea și identificatorul modelului selectat. Răspunsul primit de la backend este afișat
-în zone distincte pentru rezultat, recomandări și metadate tehnice. Cardul de metadate a fost
-simplificat pentru a păstra doar informațiile relevante pentru interpretarea rezultatului, fără
-detalii interne precum CUDA, dimensiunea modelului, numărul de parametri, valorile de normalizare sau
-indicatorii intermediari ai preprocesării.
-\bigskip 
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\textwidth]{Figuri/recommendations_website.png}
-\captionsetup{justification=centering}
-\caption{Zona de recomandări afișată în aplicația de inferență după obținerea predicției}
-\label{fig:recommendations-website}
-\end{figure}
-
-Interfața a fost adaptată pentru utilizare responsive și include un comutator pentru
-modul light/dark. De asemenea, aplicația conține o zonă dedicată imaginii preprocesate, astfel încât
-utilizatorul poate vedea forma exactă a imaginii trimise către model. Vizualizarea permite zoom și
-deplasare în imagine, ceea ce ajută la inspectarea detaliilor retiniene după aplicarea preprocesării.
+După alegerea modelului, utilizatorul poate încărca imaginea prin apăsare sau drag-and-drop. Interfața
+afișează previzualizarea imaginii originale și oferă un comutator numit \textit{Imagine deja
+preprocesată}. Acest comutator controlează dacă backend-ul aplică sau nu preprocesarea Ben Graham
+înainte de inferență. În partea dreaptă, aplicația afișează imaginea folosită efectiv de model; aceasta
+poate fi mărită cu rotița mouse-ului, deplasată prin drag și resetată prin dublu click. Pentru
+compararea ergonomiei vizuale, aplicația include și un comutator pentru modul light/dark.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth]{Figuri/web_inference_interface.png}
 \captionsetup{justification=centering}
-\caption{Interfața aplicației de inferență dezvoltate pentru clasificarea retinopatiei diabetice}
+\caption{Interfața aplicației de inferență în modurile dark și light, cu selectorul de model, previzualizarea imaginii și imaginea folosită la inferență}
 \label{fig:app-frontend}
+\end{figure}
+
+\ \ \ \ După apăsarea butonului de analiză, frontend-ul construiește un obiect \texttt{FormData} care
+conține imaginea, identificatorul modelului și starea comutatorului de preprocesare. Răspunsul primit
+de la backend este afișat în trei carduri: rezultatul, recomandările și metadatele modelului. Cardul de
+rezultat conține clasa detectată, denumirea clinică a stadiului, nivelul de încredere, a doua opțiune
+și diferența procentuală dintre primele două opțiuni atunci când acestea sunt disponibile. Pentru
+pipeline-ul principal, cardul poate afișa și distribuția estimată pe gradele 1--4, derivată din scorul
+de regresie. Cardul de recomandări separă mesajul pentru medic de mesajul pentru pacient și include o
+observație tehnică despre aplicarea preprocesării. Cardul de metadate arată probabilitățile sau
+scorurile pipeline-ului, fișierele folosite, arhitectura, dimensiunile imaginilor, timpul de execuție,
+metoda de preprocesare și ramura de clasificare.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{Figuri/recommendations_website.png}
+\captionsetup{justification=centering}
+\caption{Cardurile de rezultat, recomandări și metadate tehnice afișate după rularea pipeline-ului principal}
+\label{fig:recommendations-website}
 \end{figure}
 
 \section{Fluxul de utilizare}
 
 \ \ \ \ Fluxul de utilizare este simplu. Utilizatorul pornește backend-ul, deschide frontend-ul, selectează modelul
-dorit, încarcă o imagine de fund de ochi și apasă butonul de
-analiză. Imaginea este trimisă către server, unde este preprocesată și analizată de
-modelul ales. Rezultatul este apoi returnat în format JSON și afișat în
-interfața web.
+dorit, încarcă o imagine de fund de ochi, stabilește dacă imaginea este deja preprocesată și apasă
+butonul de analiză. Imaginea este trimisă către server, unde este analizată conform opțiunii selectate.
+Rezultatul este apoi returnat în format JSON și afișat în interfața web.
 \bigskip
 
 Această structură permite testarea rapidă a mai multor modele pe aceeași imagine.
-De exemplu, o imagine poate fi analizată cu pipeline-ul principal, apoi cu modele experimentale
-ResNet50, EfficientNet-B3, InceptionV3 sau Inception-ResNet-V2. Diferențele dintre probabilități pot
-oferi indicii despre stabilitatea predicției și despre sensibilitatea arhitecturilor la aceeași
-intrare.
+De exemplu, o imagine poate fi analizată mai întâi cu pipeline-ul principal în două etape, apoi cu
+modele experimentale ResNet50, EfficientNet-B3, InceptionV3 sau Inception-ResNet-V2. Diferențele
+dintre scoruri pot oferi indicii despre stabilitatea predicției și despre sensibilitatea arhitecturilor
+la aceeași intrare. Compararea trebuie însă făcută cu prudență, deoarece modelele experimentale
+afișează probabilități softmax multiclasă, în timp ce pipeline-ul principal combină probabilitatea
+detectorului binar cu o estimare derivată din scorul de regresie al modelului 1--4. Selectorul de
+modele păstrează modelele principale separate de experimente, astfel încât scenariul final al lucrării
+rămâne ușor de identificat.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth]{Figuri/dropdown_menu_modele_website.png}
 \captionsetup{justification=centering}
-\caption{Meniul dropdown pentru selecția modelului în aplicația de inferență}
+\caption{Meniul dropdown pentru selecția pipeline-ului principal și a modelelor experimentale}
 \label{fig:dropdown-models}
 \end{figure}
 
 \section{Integrarea modelului antrenat}
 
-\ \ \ \ Integrarea modelului antrenat se bazează pe reutilizarea aceleiași funcții \texttt{get\_model} folosite în
-etapa experimentală. Fișierul \texttt{.pth} salvează ponderile, nu întreaga logică a arhitecturii, deci
-modelul trebuie reconstruit înainte de încărcarea parametrilor. Backend-ul identifică arhitectura prin funcția
-\texttt{get\_base\_model\_name}, analizând numele fișierului selectat pentru modelele experimentale sau
-folosind configurația explicită pentru modelul principal.
+\ \ \ \ Integrarea modelului antrenat diferă pentru cele două categorii din catalog. Pentru modelele
+experimentale, backend-ul reutilizează funcția \texttt{get\_model} folosită în etapa de antrenare.
+Fișierul \texttt{.pth} salvează ponderile, nu întreaga logică a arhitecturii, deci modelul trebuie
+reconstruit înainte de încărcarea parametrilor. Backend-ul identifică arhitectura prin funcția
+\texttt{get\_base\_model\_name}, analizând numele fișierului selectat.
 \bigskip
 
-Dacă numele conține \texttt{resnet50}, se construiește un ResNet50; dacă numele conține \texttt{inception\_v3},
-se construiește InceptionV3; iar pentru \texttt{incres\_v2}, se construiește Inception-ResNet-V2.
-Pentru EfficientNet-B3 este reconstruit același classifier folosit la antrenare, cu strat de dropout
-și strat liniar final. Ponderile sunt încărcate cu \texttt{torch.load}, folosind \texttt{map\_location}
-pentru compatibilitate cu dispozitivul disponibil. Această abordare păstrează coerența între
-antrenare și inferență.
+Pentru pipeline-ul principal, arhitectura este reconstruită explicit în backend. Detectorul binar este
+un \texttt{EfficientNet-B3} cu un singur neuron de ieșire și funcție sigmoid, iar clasificatorul de
+severitate este un \texttt{EfficientNet-B3} cu ieșire scalară pentru regresie. Ponderile sunt încărcate
+cu \texttt{torch.load}, folosind \texttt{map\_location} pentru compatibilitate cu dispozitivul disponibil.
+Detectorul binar este încărcat din directorul \path{Rezultate_main/binar}, iar etapa de severitate din
+\path{Rezultate_main/clasificare_regression}.
+Pentru ramura de regresie, scorul continuu este transformat în clase prin \texttt{numpy.digitize} și
+pragurile salvate în \texttt{rounder\_coef.npy}. În acest fel, aplicația poate rula atât scenariul final
+al lucrării, cât și modelele multiclasă experimentale.
 
 \section{Limitări practice ale aplicației}
 
 \ \ \ \ Aplicația are rol demonstrativ și prezintă mai multe limitări. În primul rând,
 verificarea preprocesării nu este echivalentă cu validarea medicală a imaginii și nu
 garantează că imaginea are o calitate suficientă pentru diagnostic. În al doilea
-rând, modelul este încărcat la fiecare cerere, ceea ce este simplu pentru
-testare, dar ineficient pentru producție. Controlul calității imaginilor este o etapă importantă
+rând, modelele sunt încărcate la fiecare cerere, ceea ce este simplu pentru
+testare, dar ineficient pentru producție. În cazul pipeline-ului principal, încărcarea poate implica
+două modele pentru a obține atât decizia binară, cât și informațiile despre severitate. Controlul calității imaginilor este o etapă importantă
 în evaluarea sistemelor pentru retinopatie diabetică, deoarece imaginile neclare, slab iluminate sau
 incorect centrate pot afecta predicția modelului \cite{14_liu2022deepdrid}.
 \bigskip
 
 Recomandările afișate sunt statice și orientative. Ele nu țin cont de istoricul
 pacientului, de acuitatea vizuală, de edemul macular, de tratamente existente sau de
-alte informații clinice. Într-o versiune reală, aplicația ar trebui să includă validare
-medicală, control al calității imaginilor, autentificare, audit și un mecanism de marcare
-a predicțiilor incerte. În plus, integrarea într-un flux clinic ar trebui însoțită de
-explicabilitate și analiză a erorilor, astfel încât deciziile modelului să poată fi interpretate
-de utilizatori umani \cite{9_chetoui2020explainable}.
+alte informații clinice. În plus, pragul operațional al detectorului binar din aplicație este o alegere
+tehnică pentru prototip și ar trebui calibrat riguros înainte de orice utilizare clinică. Într-o
+versiune reală, aplicația ar trebui să includă validare medicală, control al calității imaginilor,
+autentificare, audit, stocare securizată și un mecanism de marcare a predicțiilor incerte. Integrarea
+într-un flux clinic ar trebui însoțită și de explicabilitate și analiză a erorilor, astfel încât
+deciziile modelului să poată fi interpretate de utilizatori umani \cite{9_chetoui2020explainable}.
 
 
 \chapter{Concluzii și direcții viitoare}
@@ -2924,52 +3422,114 @@ bazată pe rețele convoluționale și transfer learning, adaptată într-un sis
 Codul permite testarea mai multor arhitecturi, funcții de pierdere și optimizatori. Au fost
 generate modele salvate, grafice de evaluare și rapoarte de clasificare. O contribuție
 importantă a lucrării este identificarea riscului de \textit{data leakage} în utilizarea
-dataset-ului \texttt{Diabetic\_Balanced\_Data} și construirea unui split grupat care păstrează
+dataset-ului \newline \texttt{Diabetic\_Balanced\_Data} și construirea unui split grupat care păstrează
 imaginea originală și augmentările ei în același subset. În plus, aplicația de inferență arată
 că rezultatele experimentale pot fi integrate într-un flux software accesibil, în care
 utilizatorul încarcă o imagine și primește o predicție.
 
 \section{Limitările lucrării}
 
-\ \ \ \ Principala limitare este faptul că modelele au fost evaluate pe seturi de date publice,
-care nu reflectă complet variabilitatea clinică reală. În practică, imaginile provin din
-camere diferite, centre medicale diferite și populații diferite, iar distribuția claselor este
-de obicei dezechilibrată. Din acest motiv, performanța obținută pe un dataset public nu
-garantează automat aceeași performanță într-un program real de screening.
+\ \ \ \ Principala limitare a sistemului propus este legată de propagarea erorilor în pipeline-ul în
+două etape. Prima etapă decide dacă imaginea este sănătoasă sau patologică, iar această decizie
+influențează direct interpretarea rezultatului final. Un fals negativ în etapa binară este critic,
+deoarece o imagine cu retinopatie diabetică poate fi oprită înainte de gradarea severității și poate fi
+raportată ca fiind fără boală. În sens invers, un fals pozitiv trimite o imagine sănătoasă către etapa
+de clasificare 1--4, unde aceasta poate primi un grad scăzut de boală. Acest compromis este acceptabil
+într-un context experimental orientat spre screening, deoarece reducerea fals-negativelor este prioritară,
+dar ar necesita calibrare riguroasă și validare clinică înainte de utilizarea într-un scenariu real.
+\bigskip 
+
+O altă limitare importantă este faptul că modelele au fost evaluate pe seturi de date publice, care nu
+reflectă complet variabilitatea clinică reală. În practică, imaginile pot proveni din camere diferite,
+centre medicale diferite, populații diferite și protocoale diferite de achiziție, iar distribuția
+claselor este de obicei dezechilibrată. Din acest motiv, performanța obținută pe un dataset public nu
+garantează automat aceeași performanță într-un program real de screening. De asemenea, generalizarea
+între dataset-uri rămâne dificilă, deoarece modelul poate învăța particularități ale sursei imaginilor,
+nu doar semnele patologice ale retinopatiei diabetice.
 \bigskip
 
 O altă limitare este faptul că unele seturi publice conțin imagini augmentate sau foarte
 asemănătoare între ele. În această lucrare, problema a fost investigată explicit pentru
-\texttt{Diabetic\_Balanced\_Data}, iar split-ul grupat reduce riscul ca originale și augmentări
+\newline \texttt{Diabetic\_Balanced\_Data}, iar split-ul grupat reduce riscul ca originale și augmentări
 să ajungă în subseturi diferite. Totuși, pentru o validare și mai strictă, ar fi utilă o
 împărțire la nivel de pacient, astfel încât imagini apropiate provenite de la același pacient
 să nu apară simultan în antrenare și testare.
 \bigskip
 
-Lucrarea nu include validare clinică realizată de medici oftalmologi și nu testează
-sistemul pe imagini provenite din mai multe centre medicale. De asemenea, aplicația
-de inferență este un prototip tehnic, fără autentificare, audit, stocare securizată a
-datelor sau certificare medicală.
+Calitatea imaginilor reprezintă, la rândul ei, o limitare. Preprocesarea Ben Graham reduce variațiile
+de iluminare și uniformizează parțial aspectul imaginilor, însă nu înlocuiește un modul clinic de
+control al calității. Imaginile neclare, prost centrate, supraexpuse, subexpuse sau afectate de
+artefacte pot influența predicția, mai ales în clasele apropiate vizual. Separarea dintre clasele 1, 2
+și 3 rămâne dificilă, deoarece diferențele dintre stadii sunt uneori subtile chiar și pentru evaluarea
+umană.
+\bigskip 
+
+Lucrarea nu include validare clinică realizată de medici oftalmologi și nu testează sistemul pe imagini
+provenite strict din mai multe centre medicale. Prin urmare, aplicația de inferență are rol
+demonstrativ și nu poate fi considerată un instrument medical. În forma actuală, aplicația este un
+prototip tehnic, fără autentificare, audit, stocare securizată a datelor, integrare cu sisteme clinice
+sau certificare medicală. În plus, explicațiile vizuale nu sunt integrate direct în fluxul aplicației,
+ceea ce limitează interpretabilitatea fiecărei predicții pentru un utilizator medical.
 
 \section{Direcții viitoare}
 
-\ \ \ \ O primă direcție viitoare este validarea sistemului pe seturi de date externe,
-provenite din surse diferite. Această etapă ar permite evaluarea capacității de generalizare
-la camere, populații și protocoale de achiziție diferite. De asemenea, ar fi
-utilă testarea pe distribuții de date mai apropiate de practica clinică.
+\ \ \ \ O primă direcție viitoare este calibrarea explicită a pragului detectorului binar și analiza
+separată a fals-negativelor și fals-pozitivelor produse de pipeline-ul în două etape. Într-o versiune
+mai avansată, pragul nu ar trebui ales doar ca valoare operațională fixă, ci optimizat în funcție de
+scopul aplicației: sensibilitate ridicată pentru screening, specificitate mai mare pentru reducerea
+alarmelor false sau un compromis stabilit împreună cu specialiști clinici. De asemenea, cazurile cu
+probabilitate apropiată de prag ar putea fi marcate ca incerte și trimise automat către revizuire
+umană.
+\bigskip
+ 
+O direcție de modelare ar fi înlocuirea etapei de clasificare 1--4 cu un model multiclasă 0--4,
+dar păstrând detectorul binar ca filtru inițial. În această variantă, imaginile pentru care detectorul
+binar indică foarte sigur clasa 0 ar putea fi eliminate din analiza suplimentară, iar restul imaginilor
+ar fi trimise către un clasificator complet 0--4. Această soluție ar permite modelului de severitate să
+învețe explicit și clasa sănătoasă, reducând riscul ca un fals pozitiv al detectorului binar să fie
+forțat automat într-una dintre clasele 1--4. În același timp, filtrarea cazurilor sigur sănătoase ar
+păstra avantajul sistemului în două etape, deoarece etapa multiclasă s-ar concentra mai ales pe
+imaginile ambigue sau suspecte.
 \bigskip
 
-O altă direcție este introducerea unui modul de control al calității imaginii.
-Înainte de clasificare, sistemul ar putea verifica dacă fotografia este clară, bine
-iluminată și centrată. Cazurile neconforme ar putea fi respinse sau marcate pentru
-recapturare.
+Pentru îmbunătățirea generalizării, modelele ar trebui antrenate și pe seturi externe de date, nu doar
+validate pe acestea. Integrarea unor imagini provenite din surse diferite ar expune rețeaua la camere,
+rezoluții, niveluri de iluminare și distribuții de clase mai variate. O astfel de strategie ar putea
+reduce dependența de particularitățile unui singur dataset și ar apropia procesul de antrenare de
+condițiile întâlnite într-un scenariu real.
 \bigskip
 
-Pe partea de modelare, clasificarea globală poate fi completată cu detecția sau
-segmentarea leziunilor. Un sistem care indică nu doar stadiul bolii, ci și
-regiunile suspecte, ar fi mai ușor de interpretat. Aplicația de inferență poate
-fi extinsă prin păstrarea modelelor în memorie, calibrarea probabilităților, definirea unor praguri
-de incertitudine și generarea unor rapoarte exportabile.
+O altă direcție este îmbunătățirea augmentărilor, astfel încât acestea să reproducă mai potrivit
+diversitatea imaginilor fundus. Pe lângă transformările geometrice și cromatice uzuale, ar putea fi
+introduse variații controlate de iluminare, contrast, claritate, câmp vizual, artefacte de achiziție și
+diferențe între camere. Scopul nu ar fi doar creșterea artificială a numărului de imagini, ci simularea
+unor condiții realiste care să ajute modelul să devină mai robust.
+\bigskip
+
+În aceeași direcție, poate fi explorată și generarea de imagini sintetice de fund de ochi pentru
+diferite grade de retinopatie diabetică, folosind modele generative de imagini. Această abordare ar
+putea fi utilă mai ales pentru clasele mai slab reprezentate, unde numărul de exemple reale este redus.
+Totuși, imaginile sintetice ar trebui folosite cu prudență și validate din punct de vedere vizual și
+medical, deoarece un generator poate introduce artefacte nerealiste sau leziuni care nu respectă
+distribuția clinică reală. Prin urmare, datele sintetice ar trebui privite ca o completare a
+dataset-urilor reale, nu ca un înlocuitor al acestora.
+\bigskip
+
+Pe partea de arhitecturi, pot fi explorate modele de ultimă generație, precum Vision Transformers
+(ViT) sau variante hibride CNN-Transformer. Acestea pot surprinde relații globale între regiuni
+îndepărtate ale imaginii, ceea ce poate fi util în analiza retinei, unde severitatea nu depinde
+întotdeauna de o singură leziune locală, ci de distribuția mai multor semne patologice. Compararea lor
+cu EfficientNet-B3, ResNet50 și Inception-ResNet-V2 ar permite evaluarea beneficiului real al acestor
+arhitecturi în raport cu costul computațional mai ridicat.
+\bigskip
+
+În completare, sistemul poate fi extins cu un modul de control al calității imaginii și cu metode de
+explicabilitate vizuală. Înainte de clasificare, aplicația ar putea verifica dacă fotografia este clară,
+bine iluminată și centrată, iar cazurile neconforme ar putea fi respinse sau marcate pentru
+recapturare. După predicție, integrarea unor hărți de activare sau a unei segmentări de leziuni ar face
+rezultatul mai ușor de interpretat. Aplicația de inferență poate fi, de asemenea, îmbunătățită prin
+păstrarea modelelor în memorie, definirea unor praguri de incertitudine și generarea unor rapoarte
+exportabile.
 
 \newpage
 \mbox{}

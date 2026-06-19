@@ -186,13 +186,32 @@ function App() {
 
   const processedPreview = result?.processed_image;
   const probabilities = result?.model_data?.raw_probabilities || [];
+  const probabilityKind = result?.model_data?.pipeline?.stage2_details?.probability_kind;
+  const hasConfidence = typeof result?.confidence === 'number';
+  const hasClassProbabilities = probabilities.length >= 5 || probabilityKind === 'softmax';
   const probabilityTitle = result?.model_data?.pipeline?.enabled
-    ? (result.model_data.pipeline.stage2_details?.probability_kind === 'softmax' ? 'Probabilitati softmax pipeline' : 'Probabilitati / scoruri pipeline')
+    ? (probabilityKind === 'softmax' ? 'Probabilitati softmax pipeline' : 'Probabilitate detector binar')
     : 'Probabilitati softmax';
-  const sortedProbabilities = probabilities
+  const pipelineStage2Used = result?.model_data?.pipeline?.enabled && result.model_data.pipeline.stage2_used;
+  const classProbabilityRows = probabilities
     .map((prob, idx) => ({ prob, idx }))
+    .filter(({ idx }) => !pipelineStage2Used || idx > 0);
+  const sortedProbabilities = [...classProbabilityRows]
     .sort((a, b) => b.prob - a.prob);
-  const secondChoice = sortedProbabilities[1];
+  const predictedProbability = classProbabilityRows.find(({ idx }) => idx === result?.stage);
+  const secondChoice = hasClassProbabilities
+    ? sortedProbabilities.find(({ idx }) => idx !== result?.stage) || null
+    : null;
+  const regressionAlternativeClass = result?.model_data?.pipeline?.stage2_details?.alternative_class_1_4;
+  const mainGradeProbabilities = result?.model_data?.pipeline?.stage2_details?.grade_probabilities_1_4 || [];
+  const stage2PredictedGrade = result?.model_data?.pipeline?.stage2_details?.stage2_predicted_grade;
+  const showMainGradeProbabilities = result?.model_data?.model_id === 'main:pipeline'
+    && result?.model_data?.pipeline?.stage2_evaluated
+    && mainGradeProbabilities.length > 0;
+  const renderProbabilityBlocks = (probability) => {
+    const filled = Math.max(0, Math.min(20, Math.round(probability * 20)));
+    return `${'█'.repeat(filled)}${'░'.repeat(20 - filled)}`;
+  };
   const groupedModels = modelGroups
     .map((group) => ({
       ...group,
@@ -320,16 +339,38 @@ function App() {
               </div>
               <div className="stage-badge">{result.stage_name}</div>
               <div className="confidence-row">
-                <span>Nivel de incredere</span>
-                <strong>{(result.confidence * 100).toFixed(1)}%</strong>
+                <span>{hasConfidence ? 'Nivel de incredere' : 'Scor regresie'}</span>
+                <strong>
+                  {hasConfidence
+                    ? `${(result.confidence * 100).toFixed(1)}%`
+                    : result.model_data.pipeline?.stage2_details?.regression_score?.toFixed(3) || 'n/a'}
+                </strong>
               </div>
-              <div className="confidence-bar-bg">
-                <div className="confidence-bar-fill" style={{ width: `${result.confidence * 100}%` }} />
-              </div>
+              {hasConfidence ? (
+                <div className="confidence-bar-bg">
+                  <div className="confidence-bar-fill" style={{ width: `${result.confidence * 100}%` }} />
+                </div>
+              ) : null}
+              {showMainGradeProbabilities ? (
+                <div className="grade-probabilities">
+                  {mainGradeProbabilities.map(({ grade, probability }) => (
+                    <div className="grade-probability-row" key={grade}>
+                      <div className="grade-probability-label">
+                        <span>Gradul {grade}</span>
+                        <span className="grade-probability-blocks">{renderProbabilityBlocks(probability)}</span>
+                        <strong>{Math.round(probability * 100)}%</strong>
+                        {stage2PredictedGrade === grade ? <em>◄ predictie</em> : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
               {secondChoice ? (
                 <div className="result-extra">
                   <p><span>A doua optiune</span><strong>Clasa {secondChoice.idx} ({(secondChoice.prob * 100).toFixed(1)}%)</strong></p>
-                  <p><span>Separare top-2</span><strong>{((result.confidence - secondChoice.prob) * 100).toFixed(1)} pp</strong></p>
+                  {predictedProbability ? (
+                    <p><span>Separare top-2</span><strong>{((predictedProbability.prob - secondChoice.prob) * 100).toFixed(1)} pp</strong></p>
+                  ) : null}
                 </div>
               ) : null}
             </article>
@@ -357,13 +398,19 @@ function App() {
                   {probabilityTitle}
                 </div>
                 <ul>
-                  {result.model_data.raw_probabilities.map((prob, idx) => (
+                  {classProbabilityRows.map(({ prob, idx }) => (
                     <li key={idx}>
                       <span>{result.model_data.pipeline?.enabled && idx === 1 && result.model_data.raw_probabilities.length === 2 ? 'Prob. boala' : `Clasa ${idx}`}</span>
                       <strong>{(prob * 100).toFixed(2)}%</strong>
                     </li>
                   ))}
                 </ul>
+                {pipelineStage2Used && secondChoice ? (
+                  <p><span>Urmatoarea clasa 1-4</span><strong>Clasa {secondChoice.idx} ({(secondChoice.prob * 100).toFixed(2)}%)</strong></p>
+                ) : null}
+                {pipelineStage2Used && !secondChoice && regressionAlternativeClass ? (
+                  <p><span>Urmatoarea clasa 1-4</span><strong>Clasa {regressionAlternativeClass} (dupa scor regresie)</strong></p>
+                ) : null}
                 <p><span>Fisier</span><strong>{result.model_data.model_name}</strong></p>
                 <p><span>Arhitectura</span><strong>{result.model_data.architecture || 'n/a'}</strong></p>
                 <p><span>Input</span><strong>{result.model_data.input_size ? `${result.model_data.input_size} px` : 'n/a'}</strong></p>
