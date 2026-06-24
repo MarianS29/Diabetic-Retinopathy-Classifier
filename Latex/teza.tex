@@ -1,5 +1,5 @@
 
-\documentclass[12pt, a4paper, oneside, romanian]{teza-upb}
+\documentclass[12pt, a4paper, twoside, romanian]{teza-upb}
 \setcounter{secnumdepth}{3}
 \setcounter{tocdepth}{3}
 \usepackage{babel}
@@ -17,15 +17,18 @@
 \usepackage{mathtools}
 \usepackage{enumitem}
 \usepackage{float}
-\usepackage{fontenc}
+\usepackage{fontenc} 
 \usepackage{afterpage}
 \usepackage{pdfpages}
-\usepackage[
+\usepackage[ 
   bookmarks,
   bookmarksopen=true,
   pdftitle={Licenta},
   linktocpage]{hyperref}
 \usepackage{url}
+\pretocmd{\chapter}{\cleardoublepage}{}{}
+
+\raggedbottom
 
 \singlespacing 
 
@@ -71,17 +74,17 @@
 
 \begin{document}
 
-\author{Stancovici Marian}
+\author{Ing. Stancovici Marian}
 
 \title{Analiza imaginilor cu fund de ochi pentru ajutor în diagnosticul retinopatiei diabetice}
 
 
 \facultatea{Facultatea de Electronică, Telecomunicații și Tehnologia Informației}
 \tiplucrare{dizertație}
-\domeniu{Calculatoare și Tehnologia Informației}
+\domeniu{Electronică, Telecomunicații și Tehnologia Informației}
 \catedra{Telecomunicații}
 \campus{Leu}
-\program{Ingineria Informaţiei}
+\program{Tehnici Avansate de Imagistică Digitală}
 \titlulobtinut{Master}
 \director{Conf. dr. ing. Laura Maria FLOREA}
 
@@ -90,18 +93,10 @@
 
 \beforepreface
 
-\newpage
-\mbox{}
-\newpage
-
 \listoffigures
 
 \listoftables
-
-\newpage
-\mbox{}
-\newpage
-
+ 
 \abbreviations{
   SOTA = State of the Art\\
   DR = Diabetic Retinopathy\\
@@ -232,11 +227,6 @@ aplicația de inferență dezvoltată.
   \item \textbf{Capitolul 8 -- Concluzii și direcții viitoare:} Se sintetizează rezultatele obținute, contribuțiile lucrării,
     limitările identificate și posibilele direcții de dezvoltare ulterioară.
 \end{itemize}
-
-\newpage
-\mbox{}
-\newpage
-
 
 \chapter{Fundamente teoretice}
 
@@ -1923,7 +1913,7 @@ Seaborn pentru evaluare și vizualizare.
 \bigskip
 
 Fluxul de lucru este împărțit în mai multe componente principale. Fișierul
-\texttt{my\_dataset.py} se ocupă de încărcarea imaginilor și de aplicarea transformărilor.
+\texttt{my\_dataset.py}, regăsit în anexa \ref{anexa_cod} se ocupă de încărcarea imaginilor și de aplicarea transformărilor.
 Fișierul \texttt{builder.py} definește modelele, funcțiile de pierdere, modul de calcul al
 predicțiilor și optimizatorii. Fișierul \texttt{utils.py} grupează funcțiile auxiliare necesare
 pentru rularea experimentelor: crearea directoarelor de rezultate, generarea numelor de fișiere,
@@ -1977,7 +1967,7 @@ gradelor de severitate între cazurile bolnave.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.88\textwidth]{Figuri/schema_flux_sistem_principal_doua_etape.png}
+    \includegraphics[width=0.98\textwidth]{Figuri/schema_flux_sistem_principal_doua_etape.png}
     \captionsetup{justification=centering}
     \caption{Fluxul sistemului principal în două etape: detector binar pentru separarea imaginilor
     sănătoase de cele patologice, urmat de clasificarea severității pentru cazurile trimise mai departe.}
@@ -2281,7 +2271,7 @@ ajustat ulterior sau când distribuția setului de validare nu reflectă perfect
 utilizare. Practic, AUC este potrivit pentru prima etapă deoarece obiectivul ei este trierea: modelul
 trebuie să separe cât mai bine cazurile normale de cele care trebuie trimise către clasificarea de
 severitate. 
-\bigskip  
+\bigskip 
 
 \ \ \ \ Formal, AUC poate fi interpretat ca aria de sub curba ROC:
 \[
@@ -2950,10 +2940,11 @@ cu retinopatie diabetică. Criteriul de selecție este AUC pe validare, deoarece
 important ca modelul să ordoneze cât mai bine imaginile sănătoase față de cele patologice, înainte de
 alegerea pragului final. În ultima rulare, cel mai bun AUC pe validare este \(0.8634\), iar pe setul de
 test modelul obține un AUC de \(0.8567\). Pragul operațional este ales pe setul de validare prin
-\(F_2\), ceea ce favorizează recall-ul pentru clasa patologică. La pragul \(0.099\), raportul de test
-indică o acuratețe de \(0.763\), precision de \(0.743\) și recall de \(0.805\) pentru clasa
-\textit{Bolnav}. Valoarea redusă a pragului nu urmărește maximizarea acurateții brute, ci reducerea
-fals-negativelor, astfel încât imaginile suspecte să fie trimise mai departe către etapa de gradare.
+\(F_2\), ceea ce păstrează accentul pe sensibilitatea față de clasa patologică. Pe setul de test,
+raportul actualizat indică o acuratețe de aproximativ \(0.771\), precision de \(0.764\) și recall de
+\(0.784\) pentru clasa \textit{Bolnav}. Față de rularea anterioară, modelul binar devine mai echilibrat:
+reduce numărul de false pozitive, dar menține suficient de multe cazuri patologice trimise către etapa
+de gradare.
 \bigskip
 
 A doua etapă este aplicată imaginilor trimise mai departe de modelul binar și clasifică severitatea în
@@ -2986,10 +2977,10 @@ pierderii, ci pe capacitatea scorurilor de a separa cele două clase.
 
 În partea de acuratețe, detectorul binar ajunge relativ repede într-o zonă stabilă pe validare.
 Acuratețea rămâne însă o metrică secundară pentru această componentă, deoarece pragul final este ales
-pentru a favoriza sensibilitatea față de cazurile patologice. Astfel, o acuratețe de test de \(0.763\)
-trebuie interpretată împreună cu recall-ul de \(0.805\) pentru clasa \textit{Bolnav}: modelul acceptă o
-parte dintre falsele pozitive pentru a reduce riscul ca o imagine cu retinopatie diabetică să fie
-respinsă încă din prima etapă.
+pentru a favoriza sensibilitatea față de cazurile patologice. Astfel, o acuratețe de test de
+aproximativ \(0.771\) trebuie interpretată împreună cu recall-ul de \(0.784\) pentru clasa
+\textit{Bolnav}: modelul acceptă în continuare o parte dintre falsele pozitive, dar separarea este mai
+echilibrată decât în rularea precedentă.
 \bigskip
 
 Pentru modelul de severitate, pierderea pe validare scade mai brusc decât pierderea pe antrenare și se
@@ -3038,14 +3029,14 @@ clase prin praguri optimizate pe validare.
 \end{figure}
 
 \ \ \ \ Matricile de confuzie din figura \ref{fig:cap6-11-matrici-absolute-main} evidențiază explicit
-efectul pragului optimizat pentru screening. Modelul binar identifică \(5354\) imagini patologice din
-\(6652\), ceea ce corespunde unui recall de aproximativ \(0.805\) pentru clasa \textit{Bolnav}. În
-același timp, apar \(1850\) false pozitive, adică imagini sănătoase trimise mai departe către modelul
-de severitate. Aceste cazuri nu pot fi corectate automat de etapa a doua, deoarece modelul de
-severitate primește doar clase patologice și va atribui inevitabil o clasă din intervalul 1--4, de
-obicei una joasă dacă imaginea seamănă mai mult cu un caz ușor. Prin urmare, pragul ales reprezintă un
-compromis de screening: acceptă mai multe false pozitive pentru a reduce fals-negativele, deoarece un
-fals negativ în etapa binară ar opri complet analiza unei imagini patologice.
+comportamentul actualizat al detectorului binar. Modelul identifică \(5217\) imagini patologice din
+\(6652\), ceea ce corespunde unui recall de aproximativ \(0.784\) pentru clasa \textit{Bolnav}. În
+același timp, apar \(1616\) false pozitive, adică imagini sănătoase trimise mai departe către modelul
+de severitate. Comparativ cu varianta anterioară, matricea indică un compromis mai bun între
+sensibilitate și specificitate: numărul de imagini sănătoase direcționate greșit către etapa a doua
+scade, iar detectorul păstrează o capacitate bună de a reține cazurile patologice. Falsele pozitive nu
+pot fi corectate automat de etapa a doua, deoarece modelul de severitate primește doar clase patologice
+și va atribui inevitabil o clasă din intervalul 1--4.
 \bigskip
 
 Pentru etapa 1--4, cele mai multe predicții corecte apar pentru stadiile 1 și 2, unde există și cel mai
@@ -3066,12 +3057,11 @@ trimis greșit mai departe.
 \end{figure}
 
 \ \ \ \ Distribuția precision--recall--F1 din figura \ref{fig:cap6-11-prf-main} completează interpretarea
-matricilor de confuzie. Pentru clasa patologică din detectorul binar, recall-ul este mai mare decât
-precision-ul, ceea ce confirmă efectul pragului ales prin \(F_2\). Pentru clasa sănătoasă, scorurile
-rămân apropiate, dar sunt influențate de falsele pozitive introduse deliberat de pragul scăzut. În
-ansamblu, modelul binar nu este optimizat pentru o decizie izolată de diagnostic, ci pentru prima
-filtrare a pipeline-ului: să separe suficient de bine imaginile fără boală de cele care trebuie
-analizate mai detaliat.
+matricilor de confuzie. Pentru detectorul binar, scorurile celor două clase sunt apropiate, cu valori
+F1 în jurul lui \(0.77\). Clasa patologică păstrează un recall ușor mai mare decât precision-ul, ceea ce
+este potrivit pentru rolul de prim filtru al pipeline-ului. În ansamblu, modelul binar nu este optimizat
+pentru o decizie izolată de diagnostic, ci pentru separarea inițială a imaginilor fără boală de cele care
+trebuie analizate mai detaliat de clasificatorul 1--4.
 \bigskip
 
 Pentru etapa de severitate, indicatorii arată un comportament neuniform între clase. Clasa
@@ -3539,16 +3529,22 @@ exportabile.
 \bibliographystyle{unsrt}
 \bibliography{referinte}
 
-\chapter {Cod}
+\chapter {Cod\label{anexa_cod}}
 
-% \lstinputlisting[language=python, caption={builder.py -- construirea modelelor, funcțiilor de pierdere și optimizatorilor}]{../Notebooks/Main/builder.py}
-% \vspace{1cm}
+\lstinputlisting[language=python, caption=codul de antrenare pentru sistemul principal]{Cod/diabetic-retinopathy-classifier-FIXED-3ramuri.py}
+\vspace{1cm}
+ 
+\lstinputlisting[language=python, caption=my\_dataset.py -- \^{i}ncărcarea setului de date echilibrat pentru experimente]{Cod/my_dataset.py}
+\vspace{1cm}
 
-% \lstinputlisting[language=python, caption=my\_dataset.py -- \^{i}nc\u0103rcarea setului de date echilibrat]{../Notebooks/Main/my_dataset.py}
-% \vspace{1cm}
+\lstinputlisting[language=python, caption={builder.py -- construirea modelelor, funcțiilor de pierdere și optimizatorilor}]{Cod/builder.py}
+\vspace{1cm}
 
-% \lstinputlisting[language=python, caption=train.py -- antrenarea, evaluarea \c{s}i generarea graficelor]{../Notebooks/Main/train.py}
-% \vspace{1cm}
+\lstinputlisting[language=python, caption={utils.py -- funcții de vizualizare și pentru antrenare}]{Cod/utils.py}
+\vspace{1cm} 
+
+\lstinputlisting[language=python, caption={train.py -- antrenarea, evaluarea și generarea graficelor}]{Cod/train.py}
+\vspace{1cm}
 
 \end{document}
 

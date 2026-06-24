@@ -49,7 +49,7 @@ MAIN_MODELS_DIR = os.path.join(BASE_DIR, "Notebooks", "Main", "Local")
 MAIN_RESULTS_DIR = os.path.join(MAIN_MODELS_DIR, "Rezultate_main")
 MAIN_BINAR_DIR = os.path.join(MAIN_RESULTS_DIR, "binar")
 MAIN_DETECTOR_FILENAME = "efficientnet_b3_binar_best.pth"
-MAIN_DETECTOR_PATH = os.path.join(MAIN_BINAR_DIR, MAIN_DETECTOR_FILENAME)
+MAIN_DETECTOR_PATH = os.path.join(MAIN_MODELS_DIR, MAIN_DETECTOR_FILENAME)
 MAIN_CLASSIFIER_PREFERRED_MODE = "regression"
 
 def get_main_classifier_path(mode):
@@ -384,11 +384,20 @@ def normalize_grade_probabilities(values):
         for grade, probability in enumerate(clipped.tolist(), start=1)
     ]
 
-def regression_grade_probabilities(score):
+def regression_grade_probabilities(score, predicted_class=None):
     grade_scores = -np.square(np.arange(4, dtype=np.float64) - float(score))
     grade_scores = grade_scores - np.max(grade_scores)
     probabilities = np.exp(grade_scores)
     probabilities = probabilities / max(float(probabilities.sum()), 1e-12)
+
+    if predicted_class is not None and 0 <= predicted_class < len(probabilities):
+        max_other_probability = max(
+            (probability for idx, probability in enumerate(probabilities) if idx != predicted_class),
+            default=0.0,
+        )
+        if probabilities[predicted_class] <= max_other_probability:
+            probabilities[predicted_class] = min(1.0, max_other_probability + 0.02)
+
     return normalize_grade_probabilities(probabilities)
 
 def coral_grade_probabilities(sigmoids):
@@ -430,7 +439,7 @@ def run_main_branch_model(model, input_tensor, branch, rounder_path=None):
                 predicted_class = int(np.clip(round(score), 0, 3))
                 rounder = None
             alternative_class_1_4 = get_regression_alternative_class(score, predicted_class, rounder)
-            grade_probabilities = regression_grade_probabilities(score)
+            grade_probabilities = regression_grade_probabilities(score, predicted_class)
             confidence = grade_probabilities[predicted_class]["probability"] if predicted_class < len(grade_probabilities) else None
             stage_probs = [item["probability"] for item in grade_probabilities]
             details = {
@@ -440,7 +449,7 @@ def run_main_branch_model(model, input_tensor, branch, rounder_path=None):
                 "alternative_class_1_4": alternative_class_1_4,
                 "stage2_predicted_grade": predicted_class + 1,
                 "grade_probabilities_1_4": grade_probabilities,
-                "grade_probability_note": "estimare derivata din scorul de regresie",
+                "grade_probability_note": "estimare derivata din scorul de regresie, aliniata cu clasa prezisa",
             }
             result = predicted_class, confidence, stage_probs, details
         elif branch == "ordinal":

@@ -417,11 +417,12 @@
 
         \vfil
 
+             {\raggedright\noindent
              \begin{tabular}
-               {>{\raggedright}p{0.7\textwidth}r}
+               {@{}>{\raggedright\arraybackslash}p{0.65\textwidth}@{}r@{}}
                \Large{Conducător științific} & \Large{Absolvent}\\
                {\@director} & {\@author}\\
-             \end{tabular}
+             \end{tabular}\par}
  \vfil
        
         Anul \@year\\
@@ -536,6 +537,26 @@ Absolvent: {\@author}
         \titlep
         % \inscrierep
         % \declaratiep
+
+        \newpage
+        \thispagestyle{empty}
+        \mbox{}
+        \newpage
+        
+        \includepdf[pages=-]{Docs/etti.pub.ro_absolvire_vizualizeaza_.php.pdf}
+
+        \newpage
+        \thispagestyle{empty}
+        \mbox{}
+        \newpage
+        
+        \includepdf[pages=-]{Docs/Declaratie_onestitate_Stancovici_Marian_master.pdf}
+        
+        \newpage
+        \thispagestyle{empty}
+        \mbox{}
+        \newpage
+
         \tableofcontents
         %\ifcopyright\copyrightp\fi  
         \c@page2 % set page counter so that next is 2

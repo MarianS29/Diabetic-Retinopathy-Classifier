@@ -1,0 +1,85 @@
+Slideuri cu text: 4, 6, 7, 9, 11, 12, 14, 16, 17, 18, 19, 20, 22 (13 slideuri)
+
+
+Slideurile 1-4 (45 secunde): DONE
+
+(Slideul1): Buna ziua, ma numesc Stancovici Marian si am sa va prezint lucrarea mea de disertatie intitulata "Analiza imaginilor cu fund de ochi pentru ajutor în
+	    diagnosticul retinopatiei diabetice"
+
+
+(Slideul 4): Pentru inceput sa vorbim de aceasta boala. Ea apare la persoanele cu diabet zaharat, boala care este din ce in ce mai raspandita si prezinta 4 grade de boala: usoara, moderata
+, severa si proliferativa. De asemenea ea se caracterizeaza prin microanevrisme, hemoragii, exsudate si in cazuri mai avansate ale bolii, neovascularizatie, iar cu ajutorul clasificarii
+automate putem veni in ajutorul medicilor pentru un diacnostic mai rapid sau o opinie incipienta.
+
+Slideul 6 (30 secunde): DONE
+In experimentele mele am utilizat 3 dataseturi: APTOS, care chiar daca este mic este cel mai echilibrat din punct de vedere al compozitiei si al iluminarii,
+EyePACS care este cei mai mare dataset public doar ca este destul de zgomotos (pe acesta l-am folosit si in sistemul principal),
+si Diabetic Retinopathy Resized pe care l-am denumit Balanced_Aug in experimente si care este o varianta intermediara ca si dimensiune intre celelalte 2.
+De asemenea, dupa cate puteti observa toate 3 sunt foarte dezechilibrate si confera mult mai multe exemple clasei sanatoase, un neajung pe care am incercat sa il rezolv prin PREPROCESARI SI AUGMENTARI.
+
+Slideul 7 (30 secunde): DONE
+Ca sa obtin consistenta in imagini, preprocesarile au constat din urmatoarele transformari: convertirea acestora in grayscale, aplicarea filtrului ben-graham pentru
+normalizarea iluminarii si maximizarae contrastului local, si nu in ultimul rand adaugarea unui efect de halo negru in jurul ochiului ca sa fortez modelul sa
+invete ce e in interior. Ca si augmentari, acestea au avut rol dublu: pe de o parte am aplicat augmentari offline pentru echilibrarea dataseturilor, iar pe de alta
+parte am aplicat augmentari online pentru mai multa diversitate. Acestea au fost flip-uiri, rotatii, augmentari de culoare, blur si adaugare de zgomot.
+
+Slideul 9 (1 minut): - DONE
+Pentru sistemul folosit in acest proiect am luat imaginile cu fund de ochi din dataseturi diferite si prin procesari si augmentari am creat dataseturile echilibrate si preprocesate.
+Apoi pe partea de experimente am folosit cele 3 dataseturi despre care am povestit mai devreme sub 3 forme (baseline, cu augmentari si cu augmentari+preprocesari), care au trecut fiecare
+print-un model preantrenat de clasificare multiclasa si au dat la iesire o predictie
+Pe partea de sistem principal am folosit 2 dataseturi derivate din EyePACS: unul binar cu 2 clase, bolnav vs sanatos si unul doar pentru clasele 1-4. Acestea au fost folosite la intrarea unui sistem cu modele
+in cascada, mai intai unul de detectie binara bolnav vs sanatos apoi daca pacientul este detectat bolnav imaginea se duce intr-un model de clasificare multiclasa 1-4 pentru
+a vedea stadiul bolii si a scoate predictia. Despre acesta voi vorbi mai multe in slideurile viitoare.
+
+Slideul 11 (45 secunde): - DONE
+Ca si arhitecturi, pentru experimente am folosit Resnet50, arhitectura foarte populara pentru compromisul pe care il ofera intre complexitatea de calcul, rezultate si rapiditate. Aceasta este preantrenata pe setul de date
+ImageNet, prezinta aproximativ 25.6 milioane de parametrii antrenabili, 50 de straturi avand intre ele asa numitele skip connections care ajuta la stabilizarea antrenarii, iar la aceasta arhitectura pentru experimente am adaugat si un
+strat de dropout la final pentru a evita suprainvatarea. Am incercat sa folosesc si arhitectura Inception care utilizeaza convolutii la diverite scale, dar si Inception-Resnet care combina pe aceasta cu straturile reziduale specifice
+Resnetului, dar pentru ca timpul de antrenare era considerabil mai mare si rezultatele asemanatoare am decis sa raman cu Resnet.
+
+Slideul 12 (45 secunde): - DONE
+Acum pe partea arhitecturii pentru sistemul principal, am folosit un EfficientNet-b3. Aceasta are 12.2 milioane de parametrii si are in principiu 2 elemente care imbunatatesc extragerea de trasaturi fine din imagini:
+-blocuri MBConv care aplica convolutii pe fiecare canal spatial separat astfel detectand sangerari mici sau microanevrisme, iar in interiorul blocului de MBConv avem blocurile Squeeze-and-Excitation care actioneaza ca un mecanism de atentie, ponderand automat canalele de informatie in functie de importanta, adica volum mai mare la leziuni patologice si volum mai mic la zone sanatoase sau zgomot. De asemenea i-am adaugat si acestuia un strat de dropout la final.
+
+Slideul 14 (1 minut): - DONE
+Dupa cum am observat la inceput multe dintre imagini apartin persoanelor sanatoase, asa ca am decis sa le separ pe acestea de cele bolnave. In acest scop am construit modelul
+principal format dintr-un sistem in cascada. Prima oara imagea intra intr-un model binar care spune daca pacientul este sanatos sau nu, iar daca acesta este detectat ca fiind bolnav atunci imaginea se duce mai departe intr-un model
+de clasificare multiclasa care spune gradul bolii. Detectia binara se realizeaza folosind un prag de decizie optimizat pentru maximizarea scorului F2, adica minimizarea fals-negativelor deoarece in domeniul
+medical acestea sunt mult mai grave decat erorile de tip fals-pozitiv. Pe de alta parte tinand cont de caracterul evolutiv al bolii intre stadii, modelul multiclasa l-am tratat ca o regresie ordinala ce da la iesire un scor, acestea fiind mai departe comparat cu 3 praguri optimizate pe setul de validare, dand astfel la final predictia bolii pe cele 4 stadii.
+
+Slideul 16 (1 minut): - DONE
+Si acum pentru rezultate, in acest slide avem distributia preciziei, recall-ului si a scorului F1 pentru experimentele pe care le-am realizat.
+Pe coloane avem seturile de date folosite, iar pe linii avem configuratiile: baseline, cu augmentari respectiv cu augmentari + preprocesari.
+Se poate observa ca pentru toate variantele este favorizata foarte mult clasa 0, ceea ce este de asteptat deoarece dataseturile brute contin imagini sanatoase multe si diversificate, mai putin pentru APTOS care este un dataset deja destul de echilibrat. Clasa 1 este cea mai problematica, unde recall-ul este scăzut. Asta indică faptul că stadiile incipiente sunt cel mai greu de separat, din cauza semnelor vizuale subtile și a confuziei cu imaginile sanatoase sau cu stadiul 2, iar clasele patologice mai avansate si anume 3 si 4 sunt detectate mai variabil. De asemenea agumentarile si preprocesarile pot imbunatati anumite clase, de exemplu clasa 2 sau uneori clasa 4, dar nu rezolvă problema clasei 1, care rămâne cea mai dificilă.
+
+Slideul 17 (1 minut): - DONE
+Pe de alta parte, privind matricile de confuzie 3 lucruri ies in evidenta:
+-exista foarte putine erori intre clase marginale (de exemplu intre clasele 1 si 4 sau 0 si 4), iar acestea sunt mai diminuate cu adaugarea augmentarilor si preprocesarilor
+-majoritatea erorilor apar la stadiile de tranzitie (clasele 0,1,2 si clasele 3,4 sunt puternic confundate deoarece granita dintre ele este foarte fina)
+-acuratete mare pe clasa 0 deoarece este clasa majoritara, ceea ce nu am putut rezolva pe deplin nici cu augmentari si preprocesari, acesta fiind si principalul motiv pentru care am decis sa recurg la o structura in cascada
+Pentru cele 2 dataseturi mai mari am incercat si o curatare unde am eliminat pozele blurate, prea iluminate sau cu contururi neregulate dar rezultatele au fost proportional asemanatoare.
+
+Slideul 18 (1.5 minute): - DONE
+Acum hai sa vorbim desprea antrenarea si fine-tuningurile folosite pentru modelele in cascada. Pentru modelul binar care este folosit prima oara antrenarea s-a facut in 2 faze:
+-faza 1: primele 10 epoci cu rata de invatare 10^-3 in care backbone-ul a fost inghetat si am antrenat doar capul de clasificare
+-faza 2: de la epoca 11 la 50 unde am facut antrenare completa cu rata de invatare pe backbone 10^-4 si pe capul de clasificare 3x10^-4
+Pentru regularizare am folosit optimizatorul AdamW cu weight_decay de 10^-4 pentru a reduce supraînvățarea, iar rata de învățare a fost ajustată cu ReduceLROnPlateau, astfel încât să scadă automat atunci când performanța pe validare nu se mai îmbunătățește. De asemenea am folosit BCEWithLogitsLoss, deoarece acesta produce un singur logit, transformat ulterior prin sigmoid în probabilitatea de boală.
+Am folosit scorul AUC (Area Under the ROC Curve) ca metrică principală deoarece nu măsoară doar performanța la un prag fix, ci capacitatea generală a modelului de a separa imaginile sănătoase de cele bolnave.
+Se poate observa ca modelul converge dupa primele 25-30 epoci, dupa care loss-ul si scorul AUC se plafoneaza.
+Ca si rezultate avem valori apropiate pentru precision, recall și F1 cu recall-ul putin mai mare pentru bolnavi. Matricea de confuzie arată că majoritatea imaginilor sunt clasificate corect insa punctul slab ramane tot pe partea de
+fals negativi unde un pacient este clasificat ca si sanatos dar este de fapt bolnav, acest lucru am incercat sa il minimizez prin maximizarea scorului F2, cum am spus in slide-urile anterioare.
+
+Slideul 19 (1.5 minute): - DONE
+Trecând la a doua etapă a cascadei, modelul pentru clasificarea severității (stadiile 1-4), am menținut o strategie similară de antrenare în două faze, singura diferenta fiind ca am lasat backbone-ul inghetat 5 epoci in loc de 10.
+Pentru regularizare am păstrat optimizatorul AdamW cu weight_decay de 10^-4 și ReduceLROnPlateau. Schimbarea majoră intervine la funcția de pierdere: Am folosit SmoothL1Loss deoarece modelul prezice un scor continuu de severitate, iar această funcție penalizează proporțional distanța față de stadiul real, respectând ordinea clinică a claselor 1-4. Spre deosebire de modelul binar, metrica principală pentru evaluare a fost scorul Quadratic Weighted Kappa. Am ales această metrică pentru că penalizează pătratic erorile grave – de exemplu, a confunda stadiul 1 cu 4 este o greșeală mult mai aspră decât a confunda stadiul 1 cu 2. Pentru a obține diagnosticul final, predicțiile continue ale rețelei au fost transformate în cele 4 clase folosind praguri optimizate direct pe setul de validare.
+Rezultatele acestei abordări se regasesc în matricea de confuzie. Se poate observa că modelul a învățat conceptul de evoluție a bolii: erorile sunt concentrate langa diagonala principala, de exemplu intre 1 si 2 sau 3 si 4. Cel mai des se observa ca sunt confundate clasele 1 cu 2 deoarece sunt cele mai apropiate din punct de vedere clinic si aici intra si fals negativele care ajung din modelul binar anterior. Stadiul 3 are cele mai slabe scoruri, cu precision si F1 scazute, ceea ce indică o clasă dificilă, frecvent confundată cu stadiile vecine.
+
+Slideul 20 (45 secunde): - DONE
+Acestea fiind spuse, o descoperire  de-a mea in timp ce cautam un dataset echilibrat a fost faptul ca am descoperit unul care dadea rezultate neesteptat de bune dupa cate se poate observa din prima matrice de confuzie, acesta fiind
+citat in articole de review. Dar s-a dovedit ca ce faceau era de fapt data leakage unde puneau de exemplu augmentarile unei imagini din setul de antrenare in setul de validare sau testare, pacalind modelul ca sunt imagini diferite cand de fapt erau foarte asemanatoare. Am rearanjat datasetul printr-un script ca sa nu mai am augmentari intercalate, iar rezultatele reale se pot observa in a doua figura unde se vede clar ca modelul tot incurca primele 3 clase intre ele, si la fel si clasele 3 si 4, care prima oara pareau ca sunt detectate aproape perfect.
+
+Slideul 21 (45 secunde) - DONE
+Prin urmare, proiectul meu a avut ca scop dezvoltarea unui sistem in cascada in 2 etape, evidentierea eficienta a leziunilor prin preprocesari, eliminarea dezechilibrului intre clase, minimizarea erorilor medicale dar si validarea eficientei tehnicii de trasnsfer learning pe diferite arhitecturi. Principalele limitari ale sistemului ar fi, cum am spus: tratarea fals-pozitivelor si fals-negativelor, generalizare limitată pe date clinice reale, lipsa split-ului strict la nivel de pacient si separarea stadiilor apropiate.
+Ceea ce ne duce la directii viitoare, cum ar fi sa incerc un model de clasificare pe toate clasele in loc de 1-4 dar sa elimin imaginile de clasa 0 care sunt detectate cu certitudine de catre modelul binar, sa antrenez modelul pe alte seturi de date externe pentru o mai buna generalizare, sa imbunatatesc augmentarile si sa explorez si alte tipuri de arhitecturi mai noi precum Visual Transformere care retin informatia globala a imaginii si a vaselor de sange.
+
+MULTUMESC FRUMOS!
